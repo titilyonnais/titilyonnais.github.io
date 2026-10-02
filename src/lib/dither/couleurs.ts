@@ -5,7 +5,7 @@ export function token(name: '--ink' | '--paper'): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-export function rgb(name: '--ink' | '--paper'): RGB {
+export function versGL(name: '--ink' | '--paper'): RGB {
   const hex = token(name).replace('#', '');
   const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex;
   const n = parseInt(full, 16);

@@ -1,0 +1,218 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SceneProjet from './SceneProjet.astro';
+
+interface Props {
+  projet: CollectionEntry<'projets'>;
+}
+const { projet } = Astro.props;
+
+const groupes = ['Préparer Lisbonne', 'Apprendre Rust', 'Factures'];
+// [groupe, titre, domaine] — huit pages par intention.
+const pages: [number, string, string][] = [
+  [0, 'Vols Paris – Lisbonne', 'vols.exemple'],
+  [0, 'Alfama, le quartier', 'wiki.exemple'],
+  [0, 'Tram 28 : horaires', 'carris.pt'],
+  [0, 'Météo à Lisbonne', 'meteo.exemple'],
+  [0, 'Musée des Azulejos', 'museu.pt'],
+  [0, 'LX Factory', 'lxfactory.com'],
+  [0, 'Hôtel, Bairro Alto', 'hotel.exemple'],
+  [0, 'Les miradouros', 'blog.exemple'],
+  [1, 'The Rust Book', 'doc.rust-lang.org'],
+  [1, 'Ownership', 'doc.rust-lang.org'],
+  [1, 'Le borrow checker', 'blog.exemple'],
+  [1, 'Tauri 2 : premiers pas', 'tauri.app'],
+  [1, 'Cargo', 'doc.rust-lang.org'],
+  [1, 'Rustlings', 'github.com'],
+  [1, 'Clippy : les lints', 'rust-lang.github.io'],
+  [1, 'async et tokio', 'tokio.rs'],
+  [2, 'Facture n° 2026-118', 'compta.exemple'],
+  [2, 'Relevé bancaire', 'banque.exemple'],
+  [2, 'Devis 2026-07', 'drive.exemple'],
+  [2, 'Note de frais', 'compta.exemple'],
+  [2, 'Paiements Stripe', 'dashboard.stripe.com'],
+  [2, 'Déclaration URSSAF', 'urssaf.fr'],
+  [2, 'Export comptable', 'compta.exemple'],
+  [2, 'Contrat client', 'drive.exemple'],
+];
+// Ordre d'ouverture des onglets : mélangé, comme dans la vraie vie.
+const ordre = [0, 8, 16, 1, 2, 17, 9, 3, 18, 10, 11, 4, 19, 5, 12, 20, 21, 13, 6, 14, 22, 7, 15, 23];
+---
+<SceneProjet
+  projet={projet}
+  fond="ink"
+  numero="03"
+  pin={3.4}
+  temps={["Trop d'onglets", 'Des cartes', 'Une toile']}
+  resume="Démonstration : une barre de navigateur se remplit de vingt-quatre onglets jusqu'à les rendre illisibles. Les onglets se détachent et deviennent des cartes, qui se rangent sur une toile en trois intentions : préparer Lisbonne, apprendre Rust, factures. À la fin, les cartes peuvent être déplacées à la souris, au doigt ou aux flèches du clavier."
+>
+  <div class="ae">
+    <div class="chrome">
+      <div class="onglets"></div>
+      <p class="adresse mono"><span class="adr"></span></p>
+    </div>
+    <div class="toile">
+      <svg class="points" aria-hidden="true">
+        <defs>
+          <pattern id="ae-points" width="18" height="18" patternUnits="userSpaceOnUse">
+            <circle cx="9" cy="9" r="0.9" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#ae-points)" />
+      </svg>
+      {groupes.map((g, i) => <p class="groupe mono" data-g={i}><span>intention</span> {g}</p>)}
+      <p class="indice mono">glissez les cartes</p>
+    </div>
+    <div class="cartes">
+      {
+        ordre.map((k, i) => {
+          const [g, titre, dom] = pages[k]!;
+          return (
+            <div class="carte" data-g={g} data-i={i} data-mobile={pages.filter((p, j) => p[0] === g && j <= k).length <= 4 ? '1' : '0'} aria-label={`${titre}, ${groupes[g]}`}>
+              <span class="t">{titre}</span>
+              <span class="d mono">{dom}</span>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</SceneProjet>
+
+<style>
+  .ae {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    border: 1px solid var(--fg);
+  }
+  .chrome {
+    border-bottom: 1px solid var(--fg);
+  }
+  .onglets {
+    height: 2.4rem;
+    margin: 0.6rem 0.6rem 0;
+  }
+  .adresse {
+    margin: 0 0.6rem 0.6rem;
+    border: 1px solid var(--fg);
+    padding: 0.35rem 0.6rem;
+    max-width: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .toile {
+    position: relative;
+    overflow: hidden;
+  }
+  .points {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+    visibility: hidden;
+  }
+  .ae:global(.posee) .points {
+    visibility: visible;
+  }
+  .groupe {
+    position: absolute;
+    left: var(--x, 0px);
+    top: var(--y, 0px);
+    text-transform: uppercase;
+    white-space: nowrap;
+    clip-path: inset(0 calc(100% - var(--r, 0) * 100%) 0 0);
+    max-width: none;
+  }
+  .groupe span {
+    background: var(--fg);
+    color: var(--bg);
+    padding: 0 0.3em;
+    margin-right: 0.4em;
+  }
+  .indice {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.6rem;
+    visibility: hidden;
+    max-width: none;
+  }
+  .ae:global(.libre) .indice {
+    visibility: visible;
+  }
+  .cartes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .carte {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.25rem;
+    padding: 0.45rem 0.55rem;
+    background: var(--bg);
+    border: 1px solid var(--fg);
+    overflow: hidden;
+    will-change: transform;
+    visibility: hidden;
+  }
+  .carte:global(.vue) {
+    visibility: visible;
+  }
+  .carte:global(.onglet) {
+    padding: 0.5rem 0.45rem;
+    justify-content: center;
+  }
+  .carte:global(.onglet) .d {
+    display: none;
+  }
+  .carte:global(.active) {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .t {
+    font-size: 0.875rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .carte:not(:global(.onglet)) .t {
+    white-space: normal;
+  }
+  .d {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ae:global(.libre) .carte {
+    pointer-events: auto;
+    cursor: grab;
+  }
+  .ae:global(.libre) .carte:active {
+    cursor: grabbing;
+  }
+  .carte:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+  }
+  @media (max-width: 1023px) {
+    .carte[data-mobile='0'] {
+      display: none;
+    }
+    .t {
+      font-size: 0.75rem;
+    }
+    .onglets {
+      height: 2rem;
+    }
+  }
+</style>

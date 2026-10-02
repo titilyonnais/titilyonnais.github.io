@@ -1,0 +1,370 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SceneProjet from './SceneProjet.astro';
+
+interface Props {
+  projet: CollectionEntry<'projets'>;
+}
+const { projet } = Astro.props;
+const verifs = ['HTTP', 'Ressources', 'Indexabilité', 'Carte sociale', 'Sitemap', 'Certificat', 'Parcours de paiement'];
+const etapes = ['commit', 'build', 'en ligne', 'postship'];
+---
+<SceneProjet
+  projet={projet}
+  fond="ink"
+  numero="01"
+  pin={4}
+  temps={['Mise en ligne', 'Vérification', "L'angle mort", 'Le verdict']}
+  resume="Démonstration : un git push met une boutique en ligne. PostShip ouvre la page comme un visiteur et coche ses vérifications. Un moniteur classique affiche 200 OK alors que le bouton de paiement a disparu ; PostShip le voit, note le déploiement 71 sur 100, puis revient au dernier déploiement vérifié bon, noté 100."
+>
+  <div class="ps">
+    <div class="term mono">
+      <p><span class="invite">$</span> <span class="cmd" data-texte="git push origin main"></span><span class="curseur"></span></p>
+      <p class="retour"><span class="invite">ps</span> <span class="cmd2" data-texte="retour arrière vers le dernier déploiement vérifié bon"></span></p>
+    </div>
+
+    <ol class="pipe mono">
+      {
+        etapes.map((e, i) => (
+          <li class="etape" data-etape={i}>
+            {i > 0 && <span class="filet" />}
+            <span class="lab">{e}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="main">
+      <div class="classique">
+        <div class="cl-in">
+          <p class="mono">Monitoring classique</p>
+          <p class="mono">GET /paiement</p>
+          <p class="ok200">200 OK</p>
+          <p class="mono">Tout va bien.</p>
+        </div>
+      </div>
+
+      <div class="page">
+        <p class="barre mono">boutique.exemple/paiement</p>
+        <div class="corps">
+          <span class="b b-nav"></span>
+          <span class="b b-titre"></span>
+          <span class="b b-img"><svg viewBox="0 0 100 60" preserveAspectRatio="none"><path d="M0 60L100 0M0 0l100 60" /></svg></span>
+          <span class="b b-txt"></span>
+          <span class="b b-txt court"></span>
+          <span class="b b-txt"></span>
+          <div class="b b-pay">
+            <span class="bouton mono">Payer 49 €</span>
+            <canvas class="bruit"></canvas>
+            <span class="absent mono">aucun bouton « Payer »</span>
+          </div>
+        </div>
+        <span class="scan"></span>
+      </div>
+
+      <ul class="verifs mono">
+        {
+          verifs.map((v) => (
+            <li class="verif">
+              <span>{v}</span>
+              <span class="st">…</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="verdict">
+      <div class="score-bloc">
+        <p class="mono">Ship Score</p>
+        <p class="score"></p>
+      </div>
+      <p class="msg mono"></p>
+    </div>
+  </div>
+</SceneProjet>
+
+<style>
+  .ps {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 1rem;
+    border: 1px solid var(--fg);
+    padding: 1rem;
+  }
+
+  /* Terminal */
+  .ps p {
+    max-width: none;
+  }
+  .term {
+    font-size: var(--t-s);
+    min-height: 3.2em;
+  }
+  .score:empty::before {
+    content: 'en attente';
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-stretch: 100%;
+    letter-spacing: var(--track-mono);
+  }
+  .invite {
+    display: inline-block;
+    min-width: 1.6em;
+  }
+  .curseur {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    vertical-align: -0.2em;
+    background: var(--fg);
+    animation: clignote 1s steps(1) infinite;
+  }
+  @keyframes clignote {
+    50% { visibility: hidden; }
+  }
+  .retour,
+  .curseur:global(.cache) {
+    visibility: hidden;
+  }
+  .ps:global(.rollback) .retour {
+    visibility: visible;
+  }
+
+  /* Pipeline */
+  .pipe {
+    list-style: none;
+    display: flex;
+  }
+  .etape {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  .etape:first-child {
+    flex: none;
+  }
+  .filet {
+    flex: 1;
+    height: 1px;
+    background: var(--fg);
+    margin-inline: 0.5rem;
+    transform: scaleX(var(--s, 0));
+    transform-origin: left;
+  }
+  .lab {
+    white-space: nowrap;
+    border: 1px solid var(--fg);
+    padding: 0.15rem 0.5rem;
+    text-transform: uppercase;
+    visibility: hidden;
+  }
+  .etape:first-child .lab,
+  .etape:global(.vu) .lab {
+    visibility: visible;
+  }
+  .etape:global(.actif) .lab {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  /* Corps : moniteur classique | page | vérifications */
+  .main {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: calc(var(--cl, 0) * 30%) minmax(0, 1fr) minmax(0, 15rem);
+    gap: 0 calc(0.6rem + var(--cl, 0) * 0.4rem);
+  }
+  .classique {
+    overflow: hidden;
+    border: 1px solid var(--fg);
+    border-width: calc(var(--cl, 0) * 1px);
+  }
+  .cl-in {
+    width: max(13rem, 100%);
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+  }
+  .ok200 {
+    font-size: var(--t-l);
+    letter-spacing: var(--track-title);
+    line-height: 1;
+    margin-block: auto;
+  }
+
+  .page {
+    position: relative;
+    border: 1px solid var(--fg);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .barre {
+    border-bottom: 1px solid var(--fg);
+    padding: 0.35rem 0.6rem;
+  }
+  .corps {
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto auto minmax(3rem, 1fr) auto auto auto auto;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    min-height: 0;
+  }
+  .b {
+    display: block;
+    clip-path: inset(0 calc(100% - var(--r, 0) * 100%) 0 0);
+  }
+  .b-nav { height: 6px; width: 30%; background: var(--fg); }
+  .b-titre { height: 1.4rem; width: 70%; background: var(--fg); }
+  .b-img { border: 1px solid var(--fg); min-height: 0; }
+  .b-img svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 0.5; fill: none; vector-effect: non-scaling-stroke; }
+  .b-txt { height: 4px; width: 92%; background: var(--fg); }
+  .b-txt.court { width: 64%; }
+  .b-pay {
+    position: relative;
+    border: 1px solid var(--fg);
+    height: 3.2rem;
+    display: grid;
+    place-items: center;
+    margin-top: 0.4rem;
+  }
+  .bouton {
+    background: var(--fg);
+    color: var(--bg);
+    padding: 0.4rem 1.2rem;
+    text-transform: uppercase;
+  }
+  .bruit {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+  .absent {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--fg);
+    color: var(--bg);
+    visibility: hidden;
+  }
+  .ps:global(.panne) .absent {
+    visibility: visible;
+  }
+  .scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    background: var(--fg);
+    transform: translateY(var(--y, 0px));
+    visibility: hidden;
+  }
+  .ps:global(.scanne) .scan {
+    visibility: visible;
+  }
+
+  .verifs {
+    list-style: none;
+    align-self: start;
+    border-top: 1px solid var(--fg);
+  }
+  .verif {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.32rem 0.4rem;
+    border-bottom: 1px solid var(--fg);
+  }
+  .verif:global(.echec) {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .st {
+    text-transform: uppercase;
+  }
+
+  /* Verdict */
+  .verdict {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem;
+    border-top: 1px solid var(--fg);
+    padding-top: 0.6rem;
+  }
+  .score {
+    font-size: var(--t-xl);
+    letter-spacing: var(--track-title);
+    line-height: 0.85;
+    min-height: 0.85em;
+    font-stretch: 125%;
+    font-weight: 500;
+  }
+  .msg {
+    max-width: 36ch;
+    text-align: right;
+    font-size: var(--t-s);
+  }
+
+  @media (max-width: 1023px) {
+    .ps {
+      padding: 0.6rem;
+      gap: 0.6rem;
+    }
+    .term {
+      font-size: var(--t-xs);
+    }
+    .main {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: calc(var(--cl, 0) * 4.2rem) minmax(0, 1fr);
+      gap: calc(var(--cl, 0) * 0.5rem) 0.5rem;
+    }
+    .classique {
+      grid-column: 1 / -1;
+    }
+    .cl-in {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 0 1rem;
+    }
+    .cl-in p:nth-child(2),
+    .cl-in p:nth-child(4) {
+      display: none;
+    }
+    .ok200 {
+      font-size: var(--t-m);
+      margin: 0;
+    }
+    .verif {
+      padding: 0.2rem 0.3rem;
+      font-size: 0.6875rem;
+    }
+    .score {
+      font-size: var(--t-l);
+    }
+    .lab {
+      font-size: 0.625rem;
+      white-space: nowrap;
+      padding-inline: 0.3rem;
+    }
+    .filet {
+      margin-inline: 0.25rem;
+    }
+    .msg {
+      font-size: var(--t-xs);
+    }
+  }
+</style>

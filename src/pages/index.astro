@@ -5,6 +5,14 @@ import Couture from '../components/Couture.astro';
 import Methode from '../components/Methode.astro';
 import APropos from '../components/APropos.astro';
 import Contact from '../components/Contact.astro';
+import PostShip from '../components/scenes/PostShip.astro';
+import Clipper from '../components/scenes/Clipper.astro';
+import Aether from '../components/scenes/Aether.astro';
+import { getEntry } from 'astro:content';
+
+const postship = (await getEntry('projets', 'postship'))!;
+const clipper = (await getEntry('projets', 'clipper'))!;
+const aether = (await getEntry('projets', 'aether'))!;
 ---
 <Base
   title="Thibault Morretton — créateur de logiciels"
@@ -14,11 +22,11 @@ import Contact from '../components/Contact.astro';
   <Couture de="ink" vers="paper" graine={1} />
   <Methode />
   <Couture de="paper" vers="ink" graine={2} />
-  <section id="postship" class="ink" style="height:100svh"></section>
+  <PostShip projet={postship} />
   <Couture de="ink" vers="paper" graine={3} />
-  <section id="clipper" class="paper" style="height:100svh"></section>
+  <Clipper projet={clipper} />
   <Couture de="paper" vers="ink" graine={4} />
-  <section id="aether" class="ink" style="height:100svh"></section>
+  <Aether projet={aether} />
   <Couture de="ink" vers="paper" graine={5} />
   <APropos />
   <Couture de="paper" vers="ink" graine={6} />

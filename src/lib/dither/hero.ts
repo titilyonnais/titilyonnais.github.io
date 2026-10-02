@@ -1,5 +1,5 @@
 import { VERT, FRAG } from './shader';
-import { rgb, token } from './couleurs';
+import { versGL, token } from './couleurs';
 import { calm, coarse } from '../motion';
 
 declare global {
@@ -92,8 +92,8 @@ export function bootHero(): void {
     res: u('u_res'), dpr: u('u_dpr'), time: u('u_time'), expo: u('u_expo'), mouse: u('u_mouse'),
     radius: u('u_radius'), cell: u('u_cell'), mask: u('u_mask'), ink: u('u_ink'), paper: u('u_paper'),
   };
-  gl.uniform3fv(U.ink, rgb('--ink'));
-  gl.uniform3fv(U.paper, rgb('--paper'));
+  gl.uniform3fv(U.ink, versGL('--ink'));
+  gl.uniform3fv(U.paper, versGL('--paper'));
 
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
