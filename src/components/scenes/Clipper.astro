@@ -25,7 +25,7 @@ function surligne(texte: string): string {
   return out + esc(texte.slice(i));
 }
 
-// Vignette tramée d'une capture d'écran : une page de facture, en demi-teinte.
+// Vignette tramée d’une capture d’écran : une page de facture, en demi-teinte.
 const vignette = (() => {
   const W = 30;
   const H = 20;
@@ -47,7 +47,7 @@ type El = { type: string; html: string; meta: string; cherche: string; arrivee: 
 const elements: El[] = [
   { type: 'secret', classe: 'secret', html: '<span class="cle" data-cle="sk-live-4f9a2c71e0b8"></span>', meta: 'Terminal · 10:03', cherche: '', arrivee: 5 },
   { type: 'fichier', html: `${surligne('facture-septembre.pdf')}<span class="poids">184 Ko</span>`, meta: 'Explorateur · 09:52', cherche: 'facture-septembre.pdf', arrivee: 4 },
-  { type: 'image', html: `<span class="img-row">${vignette}<span class="img-txt"><span>capture-2026-10-01.png</span><span class="ocr">texte lu : « ${surligne('Facture')} n° 2026-118 »</span></span></span>`, meta: 'Capture · 09:40', cherche: 'capture facture n° 2026-118', arrivee: 3 },
+  { type: 'image', html: `<span class="img-row">${vignette}<span class="img-txt"><span>capture-2026-10-01.png</span><span class="ocr">texte lu : « ${surligne('Facture')} n° 2026-118 »</span></span></span>`, meta: 'Capture · 09:40', cherche: 'capture facture n° 2026-118', arrivee: 3 },
   { type: 'lien', html: 'https://postship.fr/docs/cli', meta: 'Firefox · 09:31', cherche: 'https://postship.fr/docs/cli', arrivee: 2 },
   { type: 'code', html: '<u>const</u> total = lignes.reduce((s, l) =&gt; s + l.prix, 0);', meta: 'VS Code · 09:20', cherche: 'const total = lignes.reduce((s, l) => s + l.prix, 0);', arrivee: 1 },
   { type: 'texte', html: `${surligne('Facture')} n° 2026-118, à régler avant le 15.`, meta: 'Outlook · 09:12', cherche: 'facture n° 2026-118, à régler avant le 15.', arrivee: 0 },
@@ -59,7 +59,7 @@ const elements: El[] = [
   numero="02"
   pin={3}
   temps={['Copier', 'Chercher', 'Protéger']}
-  resume="Démonstration : dans Clipper, les éléments copiés s'empilent (texte, code, lien, capture d'écran, fichier). La recherche « facture » filtre la liste lettre par lettre, y compris le texte lu dans la capture. Une clé d'API copiée est détectée, masquée et exclue de la recherche."
+  resume="Démonstration : dans Clipper, les éléments copiés s’empilent (texte, code, lien, capture d’écran, fichier). La recherche « facture » filtre la liste lettre par lettre, y compris le texte lu dans la capture. Une clé d’API copiée est détectée, masquée et exclue de la recherche."
 >
   <div class="cl">
     <div class="fen">

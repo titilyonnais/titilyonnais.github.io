@@ -119,13 +119,20 @@ export const mount: SceneModule['mount'] = (root, { mobile }) => {
     const d = pas[e.key];
     if (!d) return;
     e.preventDefault();
+    // On part de la cible précédente, pas de la position à mi-course : deux appuis rapides font 32 px.
+    const avant = cibles.get(c) ?? { x: Number(gsap.getProperty(c, 'x')), y: Number(gsap.getProperty(c, 'y')) };
     const r = c.getBoundingClientRect();
     const t = toile.getBoundingClientRect();
-    const dx = clamp(d[0], t.left - r.left, t.right - r.right);
-    const dy = clamp(d[1], t.top - r.top, t.bottom - r.bottom);
-    gsap.to(c, { x: `+=${dx}`, y: `+=${dy}`, duration: 0.18, ease: 'power2.out' });
+    const ex = avant.x - Number(gsap.getProperty(c, 'x'));
+    const ey = avant.y - Number(gsap.getProperty(c, 'y'));
+    const dx = clamp(d[0], t.left - r.left - ex, t.right - r.right - ex);
+    const dy = clamp(d[1], t.top - r.top - ey, t.bottom - r.bottom - ey);
+    const cible = { x: avant.x + dx, y: avant.y + dy };
+    cibles.set(c, cible);
+    gsap.to(c, { ...cible, duration: 0.18, ease: 'power2.out', overwrite: true, onComplete: () => cibles.delete(c) });
     deplacees.add(c);
   };
+  const cibles = new WeakMap<HTMLElement, { x: number; y: number }>();
   ae.addEventListener('keydown', clavier);
 
   let derniereT = 0;

@@ -1,6 +1,10 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import Couture from '../../components/Couture.astro';
+import Fleche from '../../components/Fleche.astro';
+import Figure from '../../components/cas/Figure.astro';
+import Schema from '../../components/cas/Schema.astro';
 
 export async function getStaticPaths() {
   const projets = await getCollection('projets');
@@ -8,11 +12,298 @@ export async function getStaticPaths() {
 }
 const { projet } = Astro.props;
 const { Content } = await render(projet);
+const d = projet.data;
+const suivant = (await getEntry('projets', d.suivant))!;
+const n = String(d.ordre).padStart(2, '0');
 ---
-<Base title={`${projet.data.nom} — Thibault Morretton`} description={projet.data.phrase}>
-  <article class="ink wrap">
-    <h1>{projet.data.nom}</h1>
-    <p>{projet.data.phrase}</p>
-    <Content />
-  </article>
+<Base title={`${d.nom}, étude de cas — Thibault Morretton`} description={d.phrase}>
+  <header class="tete ink">
+    <h1 class="titre">{d.nom}</h1>
+    <div class="plaque" data-hero data-lignes={d.nom.toUpperCase()} style={`view-transition-name: visuel-${projet.id}`} aria-hidden="true">
+      <canvas></canvas>
+    </div>
+    <div class="wrap grid intro">
+      <div class="etiquette mono"><span>{n}</span><span>Étude de cas</span></div>
+      <p class="phrase">{d.phrase}</p>
+      <dl class="meta mono">
+        <div><dt>État</dt><dd>{d.etat}</dd></div>
+        <div><dt>Période</dt><dd>{d.periode}</dd></div>
+        <div><dt>Stack</dt><dd>{d.stack.join(' · ')}</dd></div>
+        <div>
+          <dt>Liens</dt>
+          <dd class="liens">
+            {d.liens.map((l) => <a href={l.href}>{l.label} <Fleche sens="diag" /></a>)}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <Couture de="ink" vers="paper" graine={11} />
+
+  <section class="bloc paper" aria-labelledby="probleme">
+    <div class="wrap grid">
+      <div class="etiquette mono"><span>01</span><span id="probleme">Le problème</span></div>
+      <p class="grand">{d.probleme}</p>
+    </div>
+    <div class="wrap grid fonctions">
+      <div class="etiquette mono"><span>02</span><span id="fonctions">Ce que ça fait</span></div>
+      {
+        d.fonctions.map((f, i) => (
+          <article class="fonction">
+            <div class="f-texte">
+              <span class="mono">{String(i + 1).padStart(2, '0')}</span>
+              <h2>{f.titre}</h2>
+              <p>{f.texte}</p>
+            </div>
+            <Figure figure={f.figure} />
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <Couture de="paper" vers="ink" graine={12} />
+
+  <section class="bloc ink" aria-labelledby="construit">
+    <div class="wrap grid">
+      <div class="etiquette mono"><span>03</span><span id="construit">Comment c’est construit</span></div>
+      <div class="schema-zone"><Schema architecture={d.architecture} /></div>
+      <div class="prose"><Content /></div>
+    </div>
+    <div class="wrap grid">
+      <div class="etiquette mono"><span>04</span><span>Les chiffres</span></div>
+      <dl class="faits">
+        {
+          d.faits.map((f) => (
+            <div>
+              <dt>{f.valeur}</dt>
+              <dd class="mono">{f.libelle}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <Couture de="ink" vers="paper" graine={13} />
+
+  <section class="bloc paper fin" aria-labelledby="appris">
+    <div class="wrap grid">
+      <div class="etiquette mono"><span>05</span><span id="appris">Ce que j’en ai appris</span></div>
+      <p class="grand">{d.appris}</p>
+    </div>
+    <nav class="wrap suite" aria-label="Étude de cas suivante">
+      <a class="suivant" href={`/projets/${suivant.id}/`}>
+        <span class="mono">Suivant</span>
+        <span class="nom-suivant" data-etire>{suivant.data.nom} <Fleche /></span>
+      </a>
+      <a class="retour mono" href={`/#${projet.id}`}><Fleche sens="gauche" /> Retour à l’accueil</a>
+    </nav>
+  </section>
 </Base>
+
+<style>
+  .tete {
+    position: relative;
+    display: grid;
+  }
+  .titre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .plaque {
+    position: relative;
+    height: 62svh;
+    min-height: 340px;
+    margin-top: var(--nav-h);
+  }
+  .plaque canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+  :global(html[data-dither='off']) .titre {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    padding: calc(var(--nav-h) + 2rem) var(--gutter) 1rem;
+    font-size: var(--t-mega);
+    font-stretch: 125%;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  :global(html[data-dither='off']) .plaque {
+    display: none;
+  }
+  .intro {
+    border-top: 1px solid var(--fg);
+    padding-block: 1.5rem 4rem;
+    row-gap: 2.5rem;
+  }
+  .etiquette {
+    grid-column: 1 / -1;
+  }
+  .phrase {
+    grid-column: 1 / span 7;
+    font-size: var(--t-l);
+    letter-spacing: var(--track-title);
+    line-height: 1.05;
+    font-weight: 450;
+    max-width: none;
+  }
+  .meta {
+    grid-column: 9 / -1;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .meta div {
+    border-top: 1px solid var(--fg);
+    padding-top: 0.4rem;
+  }
+  dt {
+    text-transform: uppercase;
+  }
+  .liens {
+    display: grid;
+  }
+
+  .bloc {
+    padding-block: 6rem 8rem;
+  }
+  .bloc .wrap + .wrap {
+    margin-top: 8rem;
+  }
+  .bloc .etiquette {
+    margin-bottom: 2.5rem;
+  }
+  .grand {
+    grid-column: 1 / span 10;
+    font-size: var(--t-l);
+    letter-spacing: var(--track-title);
+    line-height: 1.08;
+    font-weight: 450;
+    max-width: none;
+  }
+  .fonctions {
+    row-gap: 0;
+  }
+  .fonction {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--col-gap) calc(var(--col-gap) * 3);
+    padding-block: 2.5rem;
+    border-top: 1px solid var(--fg);
+    align-items: center;
+  }
+  .fonction:last-child {
+    border-bottom: 1px solid var(--fg);
+  }
+  .f-texte {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .f-texte h2 {
+    font-size: var(--t-l);
+  }
+  .schema-zone {
+    grid-column: 1 / -1;
+    margin-bottom: 4rem;
+  }
+  .prose {
+    grid-column: 1 / span 8;
+    display: grid;
+    gap: 1.2em;
+    font-size: var(--t-m);
+    line-height: 1.45;
+  }
+  .prose :global(code) {
+    font-family: var(--mono);
+    font-size: 0.8em;
+    border: 1px solid currentColor;
+    padding: 0 0.25em;
+    white-space: nowrap;
+  }
+  .prose :global(strong) {
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+  .faits {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--col-gap);
+  }
+  .faits div {
+    border-top: 1px solid var(--fg);
+    padding-top: 0.75rem;
+  }
+  .faits dt {
+    text-transform: none;
+    font-size: var(--t-xl);
+    letter-spacing: var(--track-title);
+    line-height: 1;
+    margin-bottom: 0.75rem;
+  }
+  .suite {
+    margin-top: 8rem;
+    display: grid;
+    gap: 2rem;
+  }
+  .suivant {
+    display: grid;
+    gap: 0.5rem;
+    text-decoration: none;
+    border-top: 1px solid var(--fg);
+    padding-top: 1rem;
+  }
+  .nom-suivant {
+    font-size: var(--t-mega);
+    letter-spacing: var(--track-title);
+    line-height: 0.9;
+    font-weight: 450;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    transition: font-stretch 0.6s var(--ease-out);
+  }
+  .suivant:hover .nom-suivant {
+    font-stretch: 125%;
+  }
+  .retour {
+    text-decoration: none;
+    display: inline-flex;
+    gap: 0.6em;
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .phrase,
+    .meta,
+    .grand,
+    .prose {
+      grid-column: 1 / -1;
+    }
+    .fonction {
+      grid-template-columns: 1fr;
+    }
+    .faits {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 2rem;
+    }
+    .plaque {
+      height: 42svh;
+      min-height: 240px;
+    }
+  }
+</style>

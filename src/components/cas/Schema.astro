@@ -1,0 +1,139 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  architecture: CollectionEntry<'projets'>['data']['architecture'];
+}
+const { architecture } = Astro.props;
+const { noeuds, liens } = architecture;
+
+// Grille : 4 colonnes de 265 unités, rangées de 150 ; un nœud fait 228 × 80.
+const W = 228;
+const H = 80;
+const pos = (n: (typeof noeuds)[number]) => ({ x: 20 + n.col * 265, y: 20 + n.rang * 150 });
+const byId = new Map(noeuds.map((n) => [n.id, n]));
+const rangs = Math.max(...noeuds.map((n) => n.rang)) + 1;
+const VH = 20 + (rangs - 1) * 150 + H + 20;
+
+const chemins = liens.map(([a, b]) => {
+  const A = pos(byId.get(a)!);
+  const B = pos(byId.get(b)!);
+  if (A.y === B.y) {
+    const [g, d] = A.x < B.x ? [A, B] : [B, A];
+    return `M${g.x + W} ${g.y + H / 2} H${d.x}`;
+  }
+  const [h, b2] = A.y < B.y ? [A, B] : [B, A];
+  const xh = h.x + W / 2;
+  const xb = b2.x + W / 2;
+  const ym = h.y + H + (b2.y - h.y - H) / 2;
+  return xh === xb ? `M${xh} ${h.y + H} V${b2.y}` : `M${xh} ${h.y + H} V${ym} H${xb} V${b2.y}`;
+});
+---
+<figure class="schema" data-schema>
+  <svg viewBox={`0 0 1070 ${VH}`} role="img" aria-label="Schéma d’architecture">
+    {chemins.map((d, i) => <path class="lien" d={d} pathLength="1" style={`--i:${i}`} />)}
+    {
+      noeuds.map((n, i) => {
+        const p = pos(n);
+        return (
+          <g class="noeud" style={`--i:${i}`}>
+            <rect x={p.x} y={p.y} width={W} height={H} />
+            <text class="lab" x={p.x + 14} y={p.y + 32}>{n.label}</text>
+            {n.detail && <text class="det" x={p.x + 14} y={p.y + 58}>{n.detail}</text>}
+          </g>
+        );
+      })
+    }
+  </svg>
+  <ul class="liste mono">
+    {
+      noeuds.map((n) => (
+        <li>
+          <strong>{n.label}</strong>
+          {n.detail && <span>{n.detail}</span>}
+          <span class="vers">
+            {liens
+              .filter(([a]) => a === n.id)
+              .map(([, b]) => byId.get(b)!.label)
+              .join(', ') || ''}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</figure>
+
+<style>
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .lien {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.9s var(--ease) calc(0.25s + var(--i) * 0.08s);
+  }
+  .noeud rect {
+    fill: var(--bg);
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+  .noeud {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.6s var(--ease) calc(var(--i) * 0.06s);
+  }
+  .lab {
+    font-family: var(--sans);
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    fill: currentColor;
+  }
+  .det {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    fill: currentColor;
+  }
+  [data-trace='1'] .lien {
+    stroke-dashoffset: 0;
+  }
+  [data-trace='1'] .noeud {
+    clip-path: inset(0 0 0 0);
+  }
+  .liste {
+    display: none;
+    list-style: none;
+    border-top: 1px solid var(--fg);
+  }
+  .liste li {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--fg);
+  }
+  .liste strong {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: var(--t-base);
+  }
+  .vers:not(:empty)::before {
+    content: 'relié à : ';
+  }
+  @media (max-width: 700px) {
+    svg {
+      display: none;
+    }
+    .liste {
+      display: block;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lien,
+    .noeud {
+      transition: none;
+    }
+  }
+</style>

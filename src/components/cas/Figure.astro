@@ -1,0 +1,137 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+type Fig = CollectionEntry<'projets'>['data']['fonctions'][number]['figure'];
+interface Props {
+  figure: Fig;
+}
+const { figure } = Astro.props;
+---
+<div class={`fig fig-${figure.type}`} data-figure={figure.type} aria-hidden="true">
+  {
+    figure.type === 'terminal' && (
+      <div class="term mono">
+        {figure.lignes.map((l) => (
+          <p>
+            <span class="l" data-texte={l}>{l}</span>
+          </p>
+        ))}
+      </div>
+    )
+  }
+  {
+    figure.type === 'touches' && (
+      <>
+        <div class="touches">
+          {figure.touches.map((k, i) => (
+            <>
+              <kbd>{k}</kbd>
+              {i < figure.touches.length - 1 && <span class="plus mono">+</span>}
+            </>
+          ))}
+        </div>
+        <p class="leg mono">{figure.legende}</p>
+      </>
+    )
+  }
+  {
+    figure.type === 'liste' && (
+      <ol class="liste mono">
+        {figure.elements.map((e) => (
+          <li>{e}</li>
+        ))}
+      </ol>
+    )
+  }
+  {
+    figure.type === 'bascule' && (
+      <p class="bascule mono" data-avant={figure.avant} data-apres={figure.apres}>
+        {figure.apres}
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .fig {
+    border: 1px solid var(--fg);
+    padding: 1.25rem;
+    min-height: 11rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .fig p {
+    max-width: none;
+  }
+  .term {
+    font-size: var(--t-s);
+    display: grid;
+    gap: 0.35rem;
+  }
+  .term p {
+    min-height: 1.6em;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .touches {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  kbd {
+    font-family: var(--sans);
+    font-size: var(--t-l);
+    letter-spacing: var(--track-title);
+    border: 1px solid var(--fg);
+    padding: 0.2em 0.45em 0.25em;
+    min-width: 2.2em;
+    text-align: center;
+    line-height: 1;
+    transition: transform 0.12s var(--ease);
+  }
+  kbd:global(.presse) {
+    background: var(--fg);
+    color: var(--bg);
+    transform: translateY(3px);
+  }
+  .leg {
+    clip-path: inset(0 calc(100% - var(--r, 1) * 100%) 0 0);
+  }
+  .liste {
+    list-style: none;
+    border-top: 1px solid var(--fg);
+  }
+  .liste li {
+    padding: 0.45rem 0.5rem;
+    border-bottom: 1px solid var(--fg);
+  }
+  .liste li:global(.cache) {
+    visibility: hidden;
+  }
+  .liste li:global(.actif) {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .bascule {
+    font-size: var(--t-m);
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--fg);
+    align-self: flex-start;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bascule:global(.inverse) {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  @media (max-width: 640px) {
+    .bascule {
+      font-size: var(--t-s);
+    }
+  }
+</style>

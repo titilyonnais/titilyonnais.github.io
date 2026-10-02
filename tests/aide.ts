@@ -1,0 +1,38 @@
+import type { Page } from '@playwright/test';
+
+/** Collecte les erreurs JS et console d'une page. */
+export function erreurs(page: Page): string[] {
+  const liste: string[] = [];
+  // Chrome abandonne une View Transition si la fenêtre change de taille en route
+  // (barre d'adresse mobile) : la navigation a lieu quand même, sans animation.
+  const benin = (t: string) => t.includes('Transition was aborted');
+  page.on('pageerror', (e) => !benin(e.message) && liste.push(e.message));
+  page.on('console', (m) => {
+    if (m.type() === 'error' && !benin(m.text())) liste.push(m.text());
+  });
+  return liste;
+}
+
+/** Fait défiler toute la page par pas d'un écran : les scènes paresseuses se montent. */
+export async function parcourir(page: Page): Promise<void> {
+  const h = await page.evaluate(() => document.documentElement.scrollHeight);
+  const vh = await page.evaluate(() => innerHeight);
+  for (let y = 0; y <= h; y += vh) {
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), y);
+    await page.waitForTimeout(60);
+  }
+  await page.waitForTimeout(400);
+}
+
+/** Va directement à une position dans la piste d'une scène (t ∈ [0, 1]). */
+export async function allerA(page: Page, scene: string, t: number): Promise<void> {
+  await page.evaluate(
+    ({ scene, t }) => {
+      const p = document.querySelector<HTMLElement>(`#${scene} .piste`)!;
+      const top = p.getBoundingClientRect().top + scrollY;
+      window.scrollTo({ top: top + t * (p.offsetHeight - innerHeight), behavior: 'instant' });
+    },
+    { scene, t },
+  );
+  await page.waitForTimeout(700);
+}

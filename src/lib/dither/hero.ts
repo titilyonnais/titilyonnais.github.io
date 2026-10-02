@@ -61,7 +61,7 @@ export function bootHero(): void {
   const canvas = el?.querySelector<HTMLCanvasElement>('canvas');
   if (!el || !canvas) return;
 
-  const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: true });
+  const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false });
   if (!gl) {
     document.documentElement.dataset.dither = 'off';
     return;

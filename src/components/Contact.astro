@@ -6,9 +6,9 @@ const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', ye
 <section id="contact" class="contact ink" aria-labelledby="contact-titre">
   <div class="wrap">
     <div class="etiquette mono"><span>05</span><span id="contact-titre">Contact</span></div>
-    <p class="invite">Une question sur un produit, une idée de logiciel ? Écrivez-moi.</p>
+    <p class="invite">Une question sur un produit, une idée de logiciel ? Écrivez-moi.</p>
     <div data-scene="contact">
-      <button class="email" type="button" data-copier={email} aria-label={`Copier l'adresse ${email}`}>
+      <button class="email" type="button" data-copier={email} aria-label={`Copier l’adresse ${email}`}>
         {[...email].map((c) => <span class="l">{c}</span>)}
       </button>
     </div>
