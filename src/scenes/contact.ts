@@ -57,8 +57,8 @@ export const mount: SceneModule['mount'] = (root, { calm }) => {
 
   const anime = !calm && !coarse();
   if (anime) {
-    // Au repos, les lettres sont condensées : le curseur les ouvre.
-    lettres.forEach((l, i) => { largeurs[i] = 75; l.style.setProperty('--w', '75%'); });
+    // Au repos, les lettres sont condensées (75 %, dans le CSS) : le curseur les ouvre.
+    lettres.forEach((_, i) => (largeurs[i] = 75));
     zone.addEventListener('pointermove', move);
     zone.addEventListener('pointerleave', leave);
   }
@@ -70,6 +70,7 @@ export const mount: SceneModule['mount'] = (root, { calm }) => {
       zone.removeEventListener('pointermove', move);
       zone.removeEventListener('pointerleave', leave);
       cancelAnimationFrame(raf);
+      clearTimeout(timer);
       lettres.forEach((l) => l.style.removeProperty('--w'));
     },
   };

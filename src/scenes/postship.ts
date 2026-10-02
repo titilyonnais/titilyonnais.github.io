@@ -12,7 +12,7 @@ import { $, $$, etat, hasard, seg, taper, temps, easeInOut } from './outils';
 const BORNES = [0, 0.12, 0.5, 0.7];
 
 const MSG_PANNE = 'La page répond, mais le bouton de paiement a disparu.';
-const MSG_RETOUR = 'Production revenue au déploiement vérifié bon. Alerte envoyée.';
+const MSG_RETOUR = 'Bouton de paiement disparu : 71. Retour au déploiement vérifié bon : 100. Alerte envoyée.';
 
 export const mount: SceneModule['mount'] = (root) => {
   const ps = $(root, '.ps');
@@ -92,7 +92,7 @@ export const mount: SceneModule['mount'] = (root) => {
       const dernier = i === verifs.length - 1;
       let txt = '…';
       if (!dernier && t >= 0.26 + i * 0.033) txt = 'ok';
-      if (dernier) txt = t >= 0.86 ? 'ok' : panne ? 'échec' : '…';
+      if (dernier) txt = t >= 0.86 ? 'rétabli' : panne ? 'échec' : '…';
       if (st.textContent !== txt) st.textContent = txt;
       etat(v, 'echec', dernier && panne);
     });

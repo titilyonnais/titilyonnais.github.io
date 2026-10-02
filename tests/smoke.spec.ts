@@ -15,6 +15,15 @@ for (const url of pages) {
   });
 }
 
+test('la page ne défile jamais à l’horizontale', async ({ page }) => {
+  for (const url of pages) {
+    await page.goto(url);
+    await parcourir(page);
+    const [sw, iw] = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+    expect(sw, url).toBeLessThanOrEqual(iw);
+  }
+});
+
 test('chaque scène mène à son étude de cas', async ({ page }) => {
   await page.goto('/');
   for (const id of ['postship', 'clipper', 'aether']) {

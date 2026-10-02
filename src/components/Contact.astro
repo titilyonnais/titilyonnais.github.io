@@ -39,7 +39,8 @@ const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', ye
   .email {
     display: block;
     margin-block: 2rem 1.5rem;
-    font-size: 12.6vw;
+    /* Calibré pour la largeur condensée (75 %), avec la marge de quelques lettres élargies au survol. */
+    font-size: 11vw;
     font-weight: 450;
     letter-spacing: -0.045em;
     line-height: 1;
@@ -48,7 +49,7 @@ const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', ye
     width: 100%;
   }
   .l {
-    font-stretch: var(--w, 100%);
+    font-stretch: var(--w, 75%);
   }
   .email:hover {
     text-decoration: none;
@@ -78,8 +79,7 @@ const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', ye
   }
   @media (max-width: 640px) {
     .email {
-      white-space: normal;
-      font-size: 12.4vw;
+      font-size: 13vw;
     }
   }
 </style>

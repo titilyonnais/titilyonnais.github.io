@@ -161,7 +161,9 @@ export function bootHero(): void {
     if (!isCalm && visible && !document.hidden) raf = requestAnimationFrame(frame);
     state.running = raf !== 0;
   };
+  let pret = false;
   const wake = () => {
+    if (!pret) return;
     if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame);
     state.running = raf !== 0;
   };
@@ -176,8 +178,17 @@ export function bootHero(): void {
     else state.running = false;
   });
 
+  canvas.addEventListener('webglcontextlost', () => {
+    cancelAnimationFrame(raf);
+    raf = 0;
+    pret = false;
+    state.running = false;
+    document.documentElement.dataset.dither = 'off';
+  });
+
   let width = innerWidth;
   addEventListener('resize', () => {
+    if (!pret) return;
     if (innerWidth === width && Math.abs(canvas.clientHeight * dpr - h) < 2) return;
     width = innerWidth;
     resize();
@@ -186,6 +197,8 @@ export function bootHero(): void {
 
   // Le masque a besoin de Mona Sans : on attend la police avant le premier tirage.
   const go = () => {
+    pret = true;
+    start = 0;
     resize();
     canvas.dataset.maskReady = '1';
     wake();

@@ -44,14 +44,15 @@ const ordre = [0, 8, 16, 1, 2, 17, 9, 3, 18, 10, 11, 4, 19, 5, 12, 20, 21, 13, 6
   numero="03"
   pin={3.4}
   temps={["Trop d’onglets", 'Des cartes', 'Une toile']}
+  decor={false}
   resume="Démonstration : une barre de navigateur se remplit de vingt-quatre onglets jusqu’à les rendre illisibles. Les onglets se détachent et deviennent des cartes, qui se rangent sur une toile en trois intentions : préparer Lisbonne, apprendre Rust, factures. À la fin, les cartes peuvent être déplacées à la souris, au doigt ou aux flèches du clavier."
 >
   <div class="ae">
-    <div class="chrome">
+    <div class="chrome" aria-hidden="true">
       <div class="onglets"></div>
       <p class="adresse mono"><span class="adr"></span></p>
     </div>
-    <div class="toile">
+    <div class="toile" aria-hidden="true">
       <svg class="points" aria-hidden="true">
         <defs>
           <pattern id="ae-points" width="18" height="18" patternUnits="userSpaceOnUse">
@@ -63,12 +64,13 @@ const ordre = [0, 8, 16, 1, 2, 17, 9, 3, 18, 10, 11, 4, 19, 5, 12, 20, 21, 13, 6
       {groupes.map((g, i) => <p class="groupe mono" data-g={i}><span>intention</span> {g}</p>)}
       <p class="indice mono">glissez les cartes</p>
     </div>
-    <div class="cartes">
+    <p id="ae-aide" class="sr-only">Une fois la scène finie, chaque carte se déplace aux flèches du clavier.</p>
+    <div class="cartes" role="group" aria-label="Cartes posées sur la toile" aria-describedby="ae-aide">
       {
         ordre.map((k, i) => {
           const [g, titre, dom] = pages[k]!;
           return (
-            <div class="carte" data-g={g} data-i={i} data-mobile={pages.filter((p, j) => p[0] === g && j <= k).length <= 4 ? '1' : '0'} aria-label={`${titre}, ${groupes[g]}`}>
+            <div class="carte" role="button" aria-roledescription="carte déplaçable" data-g={g} data-i={i} data-mobile={pages.filter((p, j) => p[0] === g && j <= k).length <= 4 ? '1' : '0'} aria-label={`${titre}, ${groupes[g]}`}>
               <span class="t">{titre}</span>
               <span class="d mono">{dom}</span>
             </div>

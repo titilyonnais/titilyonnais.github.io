@@ -36,6 +36,17 @@ const og = new URL('/og.png', Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
+    <noscript>
+      <style is:inline>
+        .mot { color: var(--fg) !important; }
+        .el { grid-template-rows: 1fr !important; }
+        .b { --r: 1 !important; }
+        .filet { --s: 1 !important; }
+        .lab { visibility: visible !important; }
+        [data-schema] .lien { stroke-dashoffset: 0 !important; }
+        [data-schema] .noeud { clip-path: none !important; }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip" href="#contenu">Aller au contenu</a>

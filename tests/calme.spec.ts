@@ -13,6 +13,12 @@ test.describe('version calme (réduire les animations)', () => {
     }
     const positions = await page.locator('.scene').evaluateAll((els) => els.map((e) => getComputedStyle(e).position));
     expect(positions.every((p) => p !== 'sticky')).toBe(true);
+    // L'adresse e-mail tient dans l'écran sans animation.
+    const [sw, iw] = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+    expect(sw).toBeLessThanOrEqual(iw);
+    const email = (await page.locator('#contact .email').boundingBox())!;
+    const lettres = await page.locator('#contact .email .l').last().boundingBox();
+    expect(lettres!.x + lettres!.width).toBeLessThanOrEqual(email.x + email.width + 1);
     expect(errs).toEqual([]);
   });
 
@@ -21,7 +27,8 @@ test.describe('version calme (réduire les animations)', () => {
     await page.locator('#postship').scrollIntoViewIfNeeded();
     await expect(page.locator('#postship .score')).toHaveText('100');
     await expect(page.locator('#postship .verif')).toHaveCount(7);
-    await expect(page.locator('#postship .verif .st').last()).toHaveText('ok');
+    await expect(page.locator('#postship .verif .st').last()).toHaveText('rétabli');
+    await expect(page.locator('#postship .msg')).toContainText('71');
   });
 
   test('Clipper : la clé est masquée et marquée comme secret', async ({ page }) => {

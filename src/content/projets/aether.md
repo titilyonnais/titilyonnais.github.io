@@ -2,7 +2,7 @@
 ordre: 3
 nom: ÆTHER
 phrase: Un navigateur pour Windows sans onglets. On exprime une intention, on range des cartes sur une toile, et une IA locale suit le contexte.
-etat: v0.98.0
+etat: v0.99.0
 periode: juillet – août 2026
 liens:
   - label: Télécharger (Releases)
@@ -10,8 +10,8 @@ liens:
   - label: Code source
     href: https://github.com/titilyonnais/aether-browser
 faits:
-  - valeur: "100"
-    libelle: versions publiées en cinq semaines
+  - valeur: "111"
+    libelle: versions numérotées entre le 15 juillet et le 19 août 2026
   - valeur: "122"
     libelle: commits
   - valeur: "6"
@@ -37,13 +37,13 @@ fonctions:
   - titre: La barre d’Intention
     texte: >-
       Ctrl+K : une adresse, une recherche ou une pensée. La classification
-      d’intention décide quoi en faire : ouvrir, chercher, comparer, résumer.
+      d’intention l’envoie vers la navigation, la recherche, une vue scindée ou Muse.
     figure:
       type: terminal
       lignes:
         - "> compare rust et zig"
         - "intention · comparer"
-        - "2 cartes posées sur la toile"
+        - "vue scindée · deux pages côte à côte"
   - titre: Focus ou toile
     texte: >-
       Une page en grand pour lire, ou la toile spatiale pour voir toutes les
@@ -72,8 +72,8 @@ fonctions:
       publie la release.
     figure:
       type: bascule
-      avant: "v0.97.0 · installée"
-      apres: "v0.98.0 · prête au redémarrage"
+      avant: "v0.98.0 · installée"
+      apres: "v0.99.0 · prête au redémarrage"
 architecture:
   noeuds:
     - { id: ui, label: Interface React, detail: "toile, espaces, intention, Muse", col: 0, rang: 0 }
@@ -93,7 +93,7 @@ architecture:
 appris: >-
   Changer de paradigme coûte plus cher qu’ajouter une fonction : chaque
   réflexe hérité des onglets a dû trouver sa traduction, de la navigation
-  privée aux téléchargements. Et cent versions en cinq semaines ne sont
+  privée aux téléchargements. Et cent onze versions en cinq semaines ne sont
   possibles que si publier ne coûte rien.
 ---
 

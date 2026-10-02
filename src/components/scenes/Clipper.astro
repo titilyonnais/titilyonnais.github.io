@@ -86,7 +86,7 @@ const elements: El[] = [
       </ul>
       <div class="statut mono">
         <span class="compte"></span>
-        <span>local · rien ne quitte le PC</span>
+        <span>local · IA facultative</span>
       </div>
     </div>
   </div>
@@ -276,6 +276,14 @@ const elements: El[] = [
     }
     .tag {
       font-size: 0.625rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .curseur {
+      animation: none;
+    }
+    .el {
+      transition: none;
     }
   }
 </style>

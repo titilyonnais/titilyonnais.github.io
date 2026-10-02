@@ -30,7 +30,7 @@ const chemins = liens.map(([a, b]) => {
 });
 ---
 <figure class="schema" data-schema>
-  <svg viewBox={`0 0 1070 ${VH}`} role="img" aria-label="Schéma d’architecture">
+  <svg viewBox={`0 0 1070 ${VH}`} aria-hidden="true">
     {chemins.map((d, i) => <path class="lien" d={d} pathLength="1" style={`--i:${i}`} />)}
     {
       noeuds.map((n, i) => {
@@ -64,6 +64,9 @@ const chemins = liens.map(([a, b]) => {
 </figure>
 
 <style>
+  .schema {
+    position: relative;
+  }
   svg {
     width: 100%;
     height: auto;
@@ -103,8 +106,13 @@ const chemins = liens.map(([a, b]) => {
   [data-trace='1'] .noeud {
     clip-path: inset(0 0 0 0);
   }
+  /* Sur ordinateur, la liste double le schéma pour les lecteurs d'écran. */
   .liste {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
     list-style: none;
     border-top: 1px solid var(--fg);
   }
@@ -127,7 +135,11 @@ const chemins = liens.map(([a, b]) => {
       display: none;
     }
     .liste {
-      display: block;
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {

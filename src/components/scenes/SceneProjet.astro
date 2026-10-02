@@ -9,8 +9,10 @@ interface Props {
   pin: number;
   temps: string[];
   resume: string;
+  /** false : le visuel contient des éléments interactifs, il gère lui-même son accessibilité. */
+  decor?: boolean;
 }
-const { projet, fond, numero, pin, temps, resume } = Astro.props;
+const { projet, fond, numero, pin, temps, resume, decor = true } = Astro.props;
 const { nom, phrase, faits, liens, stack } = projet.data;
 const id = projet.id;
 ---
@@ -26,11 +28,11 @@ const id = projet.id;
             {temps.map((t, i) => <li data-temps={i}><span>{String(i + 1).padStart(2, '0')}</span>{t}</li>)}
           </ol>
         </header>
-        <div class="visuel" aria-hidden="true" style={`view-transition-name: visuel-${id}`}>
-          <svg class="repere r1" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
-          <svg class="repere r2" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
-          <svg class="repere r3" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
-          <svg class="repere r4" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
+        <div class="visuel" aria-hidden={decor ? 'true' : undefined} style={`view-transition-name: visuel-${id}`}>
+          <svg aria-hidden="true" class="repere r1" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
+          <svg aria-hidden="true" class="repere r2" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
+          <svg aria-hidden="true" class="repere r3" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
+          <svg aria-hidden="true" class="repere r4" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" /><path d="M10 0v20M0 10h20" /></svg>
           <slot />
         </div>
       </div>

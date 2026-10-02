@@ -1,7 +1,7 @@
 ---
 ordre: 2
 nom: Clipper
-phrase: Un gestionnaire de presse-papiers pour Windows. Tout ce que vous copiez, retrouvé en une frappe, sans que rien ne quitte votre PC.
+phrase: Un gestionnaire de presse-papiers pour Windows. Tout ce que vous copiez, retrouvé en une frappe et gardé sur votre PC.
 etat: v3.6.0
 periode: depuis juin 2026
 liens:

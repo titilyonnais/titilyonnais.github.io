@@ -17,7 +17,9 @@ const LIBRE = 0.9; // au-delà, la scène est finie : les cartes se prennent à 
 
 type Rect = { x: number; y: number; w: number; h: number; r: number };
 
-export const mount: SceneModule['mount'] = (root, { mobile }) => {
+export const mount: SceneModule['mount'] = (root) => {
+  // Même seuil que le CSS d'Aether.astro, qui ne garde que 12 cartes sous 1024 px.
+  const mobile = innerWidth < 1024;
   const ae = $(root, '.ae');
   const strip = $(ae, '.onglets');
   const toile = $(ae, '.toile');
@@ -46,7 +48,7 @@ export const mount: SceneModule['mount'] = (root, { mobile }) => {
     B = new Array(N);
     const col = tl.width / 3;
     // Deux colonnes de cartes par groupe, décalées de 62 % : le groupe tient dans 86 % de sa colonne.
-    const cw = mobile ? Math.min(118, tl.width * 0.3) : Math.min(200, col * 0.53);
+    const cw = mobile ? Math.min(176, tl.width * 0.3) : Math.min(200, col * 0.53);
     const ch = cw * (mobile ? 0.62 : 0.64);
     const hauteurGroupe = ch * 0.8 * 3 + ch;
 
@@ -189,6 +191,8 @@ export const mount: SceneModule['mount'] = (root, { mobile }) => {
     destroy() {
       ro.disconnect();
       ae.removeEventListener('keydown', clavier);
+      gsap.killTweensOf(cartes);
+      etat(ae, 'libre', false);
       drags.forEach((d) => d.kill());
       drags = [];
       cartes.forEach((c) => {

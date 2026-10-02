@@ -61,7 +61,7 @@ fonctions:
       apres: "Ship Score 71 · le paiement ne répond plus"
   - titre: Le retour arrière
     texte: >-
-      Un déploiement qui a cassé une vérification peut revenir au précédent :
+      Un déploiement Vercel qui a cassé une vérification peut revenir au précédent :
       PostShip repointe la production sur le dernier déploiement qu’il a
       vérifié bon. Une option le fait tout seul quand une page de paiement
       casse.
@@ -82,6 +82,7 @@ fonctions:
         - "- uses: titilyonnais/postship-check@v1"
         - "  with:"
         - "    url: ${{ steps.preview.outputs.url }}"
+        - "    token: ${{ secrets.POSTSHIP_TOKEN }}"
         - "    min-score: 80"
 architecture:
   noeuds:
