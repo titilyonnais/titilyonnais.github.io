@@ -1,0 +1,59 @@
+---
+// Page de composition de l'image de partage (1200 × 630), capturée par scripts/og.mjs.
+import '../styles/tokens.css';
+import '../styles/base.css';
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>og</title>
+  </head>
+  <body class="ink">
+    <div class="og" data-hero data-lignes="THIBAULT|MORRETTON">
+      <canvas></canvas>
+    </div>
+    <div class="bas">
+      <p class="a">Je fabrique des logiciels.</p>
+      <p class="mono">PostShip · Clipper · ÆTHER</p>
+    </div>
+    <script>
+      import { bootHero } from '../lib/dither/hero';
+      bootHero();
+    </script>
+  </body>
+</html>
+<style>
+  body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+  .og {
+    position: relative;
+  }
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .bas {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 22px 40px 30px;
+    border-top: 1px solid var(--fg);
+  }
+  .a {
+    font-size: 44px;
+    letter-spacing: var(--track-title);
+    font-weight: 450;
+  }
+  .mono {
+    font-size: 16px;
+  }
+</style>

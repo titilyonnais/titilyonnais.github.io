@@ -310,7 +310,26 @@ main, à partir des relevés du 2026-10-02 :
 - Métadonnées : titre, description, image Open Graph tramée générée au
   build, `sitemap.xml`, `robots.txt`, favicon monogramme tramé.
 
-## 8. Hors périmètre
+## 8. Écarts décidés à l'implémentation
+
+1. **Transitions entre documents** (`@view-transition { navigation: auto }`)
+   au lieu de `<ClientRouter />` : chaque page est un vrai chargement, sans
+   cycle de vie à rejouer pour Lenis, ScrollTrigger et WebGL. La page
+   suivante se déroule de haut en bas (`clip-path`), sans fondu.
+2. **Méthode** : les mots passent de contour à plein, au lieu d'un gris
+   tramé. C'est du 1-bit pur.
+3. **Trame dans le flux** : le hero a son canvas WebGL, et les coutures sont
+   des demi-teintes en canvas 2D, calculées une fois. Pas de calque fixe
+   superposé, qui décalerait d'une image au défilement natif.
+4. **Scènes en `position: sticky`** plutôt qu'épinglées par ScrollTrigger :
+   aucun décalage de mise en page quand une scène se charge à la demande.
+5. **Sans WebGL** : le nom s'écrit en toutes lettres. Pas de second moteur
+   en canvas 2D.
+6. **Image Open Graph** générée par `scripts/og.mjs` et versionnée.
+7. **Études de cas** : l'en-tête reprend le moteur de trame avec le nom du
+   produit ; le visuel de la scène y voyage par View Transition.
+
+## 9. Hors périmètre
 
 - Version anglaise, blog, formulaire de contact, analytics, mode clair ou
   sombre au choix, captures réelles, vidéos, curseur personnalisé, écran de
