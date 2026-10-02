@@ -1,0 +1,10 @@
+/* Fichier piégé : chaque règle ci-dessous doit être signalée par l'audit. */
+.carte {
+  border-radius: 12px;
+  background: linear-gradient(90deg, red, blue);
+  box-shadow: 0 10px 30px black;
+  backdrop-filter: blur(8px);
+  color: #777777;
+  opacity: 0.6;
+  font-family: Inter, sans-serif;
+}

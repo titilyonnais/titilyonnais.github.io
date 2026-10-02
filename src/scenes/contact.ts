@@ -1,0 +1,76 @@
+import type { SceneModule } from '../lib/motion/scene';
+import { coarse } from '../lib/motion';
+
+/**
+ * L'adresse e-mail : chaque lettre s'élargit selon la distance au curseur
+ * (axe de largeur de Mona Sans, 75 → 125 %). Un clic copie l'adresse.
+ * Pas de défilement ici : progress() ne fait rien.
+ */
+export const mount: SceneModule['mount'] = (root, { calm }) => {
+  const bouton = root.querySelector<HTMLButtonElement>('[data-copier]')!;
+  const lettres = [...bouton.querySelectorAll<HTMLElement>('.l')];
+  const statut = root.closest('section')?.querySelector<HTMLElement>('.statut');
+  const adresse = bouton.dataset.copier ?? '';
+  const zone: HTMLElement = root.closest('section') ?? root;
+
+  let timer = 0;
+  const copier = async () => {
+    try {
+      await navigator.clipboard.writeText(adresse);
+      if (statut) statut.textContent = 'Copié';
+    } catch {
+      if (statut) statut.textContent = adresse;
+    }
+    clearTimeout(timer);
+    timer = window.setTimeout(() => statut && (statut.textContent = ''), 2400);
+  };
+  bouton.addEventListener('click', copier);
+
+  let raf = 0;
+  let px = -1e4;
+  let py = -1e4;
+  const largeurs = lettres.map(() => 100);
+
+  const frame = () => {
+    raf = 0;
+    let encore = false;
+    for (let i = 0; i < lettres.length; i++) {
+      const r = lettres[i]!.getBoundingClientRect();
+      const d = Math.hypot(r.left + r.width / 2 - px, r.top + r.height / 2 - py);
+      const cible = 75 + 50 * Math.max(0, 1 - d / 260);
+      const w = largeurs[i]! + (cible - largeurs[i]!) * 0.2;
+      if (Math.abs(w - largeurs[i]!) > 0.1) encore = true;
+      largeurs[i] = w;
+      lettres[i]!.style.setProperty('--w', `${w.toFixed(1)}%`);
+    }
+    if (encore) raf = requestAnimationFrame(frame);
+  };
+  const move = (e: PointerEvent) => {
+    px = e.clientX;
+    py = e.clientY;
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  const leave = () => {
+    px = py = -1e4;
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+
+  const anime = !calm && !coarse();
+  if (anime) {
+    // Au repos, les lettres sont condensées : le curseur les ouvre.
+    lettres.forEach((l, i) => { largeurs[i] = 75; l.style.setProperty('--w', '75%'); });
+    zone.addEventListener('pointermove', move);
+    zone.addEventListener('pointerleave', leave);
+  }
+
+  return {
+    progress() {},
+    destroy() {
+      bouton.removeEventListener('click', copier);
+      zone.removeEventListener('pointermove', move);
+      zone.removeEventListener('pointerleave', leave);
+      cancelAnimationFrame(raf);
+      lettres.forEach((l) => l.style.removeProperty('--w'));
+    },
+  };
+};

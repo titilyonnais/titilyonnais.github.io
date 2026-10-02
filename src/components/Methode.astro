@@ -1,0 +1,71 @@
+---
+const phrases = ["J'écris la spec.", 'Claude Code écrit le code.', 'Je relis, je teste, je publie.'];
+---
+<section class="methode paper" aria-labelledby="methode-titre">
+  <div class="piste" data-scene="methode" style="--pin: 1.4">
+    <div class="scene wrap">
+      <div class="etiquette mono"><span>00</span><span id="methode-titre">Méthode</span></div>
+      <p class="texte">
+        {
+          phrases.map((p) => (
+            <span class="phrase">
+              {p.split(' ').map((m) => (
+                <>
+                  <span class="mot">{m}</span>{' '}
+                </>
+              ))}
+            </span>
+          ))
+        }
+      </p>
+      <p class="note mono">
+        Une personne, une IA, et des règles écrites avant les écrans. Chaque produit ci-dessous est né comme ça,
+        du premier fichier de spec à la version publiée.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .scene {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3rem;
+    padding-block: calc(var(--nav-h) + 2rem) 3rem;
+  }
+  .etiquette {
+    position: absolute;
+    top: calc(var(--nav-h) + 1.5rem);
+  }
+  .texte {
+    max-width: none;
+    font-size: var(--t-xl);
+    font-weight: 450;
+    letter-spacing: var(--track-title);
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+  .phrase {
+    display: block;
+  }
+  /* Pas encore lu : le contour seul. Lu : l'encre. Du 1-bit, sans gris. */
+  .mot {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fg);
+    transition: color 0.25s linear;
+  }
+  .mot.lu {
+    color: var(--fg);
+  }
+  .note {
+    max-width: 46ch;
+    align-self: flex-end;
+    font-size: var(--t-s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mot {
+      color: var(--fg);
+    }
+  }
+</style>

@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Couture from '../components/Couture.astro';
+import Methode from '../components/Methode.astro';
+import APropos from '../components/APropos.astro';
+import Contact from '../components/Contact.astro';
+---
+<Base
+  title="Thibault Morretton — créateur de logiciels"
+  description="Je fabrique des logiciels : PostShip, la surveillance après mise en ligne ; Clipper, un presse-papiers pour Windows ; ÆTHER, un navigateur sans onglets."
+>
+  <Hero />
+  <Couture de="ink" vers="paper" graine={1} />
+  <Methode />
+  <Couture de="paper" vers="ink" graine={2} />
+  <section id="postship" class="ink" style="height:100svh"></section>
+  <Couture de="ink" vers="paper" graine={3} />
+  <section id="clipper" class="paper" style="height:100svh"></section>
+  <Couture de="paper" vers="ink" graine={4} />
+  <section id="aether" class="ink" style="height:100svh"></section>
+  <Couture de="ink" vers="paper" graine={5} />
+  <APropos />
+  <Couture de="paper" vers="ink" graine={6} />
+  <Contact />
+</Base>

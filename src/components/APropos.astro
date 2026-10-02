@@ -1,0 +1,96 @@
+---
+import Fleche from './Fleche.astro';
+const etapes = ['spec', 'plan', 'code', 'tests', 'release'];
+const outils = ['Claude Code', 'TypeScript', 'Rust', 'Swift', 'Next.js', 'Tauri', 'Electron', 'Supabase', 'Stripe', 'GitHub Actions'];
+---
+<section id="apropos" class="apropos paper" aria-labelledby="apropos-titre">
+  <div class="wrap grid">
+    <div class="etiquette mono"><span>04</span><span>À propos</span></div>
+    <h2 id="apropos-titre" class="titre" data-etire>Créateur de logiciels.</h2>
+    <div class="bio">
+      <p>
+        J'ai commencé par le HTML et le CSS, en refaisant des maquettes. Puis l'IA a changé l'échelle de ce qu'une
+        personne seule peut construire.
+      </p>
+      <p>
+        Aujourd'hui, j'écris les specs, je pilote Claude Code, je relis et je teste. Et je publie des logiciels
+        entiers : un SaaS en production, une application Windows en Rust, un navigateur.
+      </p>
+    </div>
+    <dl class="fiche mono">
+      <div>
+        <dt>Méthode</dt>
+        <dd class="etapes">
+          {
+            etapes.map((e, i) => (
+              <>
+                <span>{e}</span>
+                {i < etapes.length - 1 && <Fleche />}
+              </>
+            ))
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Outils</dt>
+        <dd>{outils.join(' · ')}</dd>
+      </div>
+      <div>
+        <dt>Code</dt>
+        <dd><a href="https://github.com/titilyonnais">github.com/titilyonnais</a></dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .apropos {
+    padding-block: 8rem 10rem;
+  }
+  .etiquette {
+    grid-column: 1 / -1;
+    margin-bottom: 3rem;
+  }
+  .titre {
+    grid-column: 1 / -1;
+    font-size: var(--t-xl);
+    margin-bottom: 4rem;
+  }
+  .bio {
+    grid-column: 1 / span 7;
+    font-size: var(--t-m);
+    line-height: 1.4;
+    display: grid;
+    gap: 1.25em;
+  }
+  .fiche {
+    grid-column: 9 / -1;
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+  .fiche div {
+    border-top: 1px solid var(--fg);
+    padding-top: 0.5rem;
+    display: grid;
+    gap: 0.25rem;
+  }
+  dt {
+    text-transform: uppercase;
+  }
+  .etapes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6em;
+  }
+  @media (max-width: 900px) {
+    .bio,
+    .fiche {
+      grid-column: 1 / -1;
+    }
+    .fiche {
+      margin-top: 4rem;
+    }
+  }
+</style>

@@ -1,0 +1,53 @@
+---
+const liens = [
+  { href: '/#postship', label: 'PostShip' },
+  { href: '/#clipper', label: 'Clipper' },
+  { href: '/#aether', label: 'ÆTHER' },
+  { href: '/#contact', label: 'Contact' },
+];
+---
+<header class="nav mono">
+  <a href="/" class="nom">Thibault Morretton</a>
+  <nav aria-label="Principale">
+    <ul>
+      {liens.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  /* La nav s'inverse d'elle-même au-dessus de l'encre comme du papier. */
+  .nav {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 1.125rem var(--gutter);
+    color: var(--paper);
+    mix-blend-mode: difference;
+    pointer-events: none;
+    view-transition-name: nav;
+  }
+  a {
+    pointer-events: auto;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  ul {
+    list-style: none;
+    display: flex;
+    gap: clamp(0.875rem, 2vw, 2rem);
+  }
+  @media (max-width: 560px) {
+    .nav {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,18 @@
+---
+// Flèche dessinée : ni Mona Sans ni IBM Plex Mono n'ont de flèches dans leur sous-ensemble latin.
+interface Props {
+  sens?: 'droite' | 'diag' | 'gauche';
+}
+const { sens = 'droite' } = Astro.props;
+const rot = sens === 'diag' ? -45 : sens === 'gauche' ? 180 : 0;
+---
+<svg class="fleche" viewBox="0 0 16 16" width="0.8em" height="0.8em" aria-hidden="true" style={`transform: rotate(${rot}deg)`}>
+  <path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" />
+</svg>
+<style>
+  .fleche {
+    display: inline-block;
+    vertical-align: -0.05em;
+    flex: none;
+  }
+</style>

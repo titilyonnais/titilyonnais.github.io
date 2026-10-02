@@ -1,0 +1,85 @@
+---
+import Fleche from './Fleche.astro';
+const email = 'tmorretton@gmail.com';
+const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+---
+<section id="contact" class="contact ink" aria-labelledby="contact-titre">
+  <div class="wrap">
+    <div class="etiquette mono"><span>05</span><span id="contact-titre">Contact</span></div>
+    <p class="invite">Une question sur un produit, une idée de logiciel ? Écrivez-moi.</p>
+    <div data-scene="contact">
+      <button class="email" type="button" data-copier={email} aria-label={`Copier l'adresse ${email}`}>
+        {[...email].map((c) => <span class="l">{c}</span>)}
+      </button>
+    </div>
+    <div class="actions mono">
+      <span class="statut" role="status" aria-live="polite"></span>
+      <a href={`mailto:${email}`}>Écrire un e-mail <Fleche sens="diag" /></a>
+      <a href="https://github.com/titilyonnais">GitHub <Fleche sens="diag" /></a>
+    </div>
+  </div>
+  <footer class="wrap pied mono">
+    <span>Thibault Morretton, 2026</span>
+    <span>Fait avec Astro, un shader de quelques Ko et Claude Code · mis à jour le {maj}</span>
+  </footer>
+</section>
+
+<style>
+  .contact {
+    padding-top: 8rem;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .invite {
+    margin-top: 3rem;
+    font-size: var(--t-m);
+  }
+  .email {
+    display: block;
+    margin-block: 2rem 1.5rem;
+    font-size: 12.6vw;
+    font-weight: 450;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: left;
+    width: 100%;
+  }
+  .l {
+    font-stretch: var(--w, 100%);
+  }
+  .email:hover {
+    text-decoration: none;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    align-items: baseline;
+  }
+  .statut:empty {
+    display: none;
+  }
+  .statut {
+    background: var(--fg);
+    color: var(--bg);
+    padding: 0 0.4em;
+  }
+  .pied {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    border-top: 1px solid var(--fg);
+    padding-block: 1rem 1.5rem;
+    margin-top: 8rem;
+  }
+  @media (max-width: 640px) {
+    .email {
+      white-space: normal;
+      font-size: 12.4vw;
+    }
+  }
+</style>

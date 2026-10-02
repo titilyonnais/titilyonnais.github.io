@@ -1,0 +1,31 @@
+/* Les deux seules valeurs du site. Les gris n'existent que dans la trame. */
+:root {
+  --ink: #000000;
+  --paper: #f4f4f2;
+
+  /* Couleurs de la section courante : .ink / .paper les redéfinissent. */
+  --bg: var(--ink);
+  --fg: var(--paper);
+
+  --sans: 'Mona Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Une seule échelle. */
+  --t-xs: 0.75rem;                                /* 12 — libellés mono */
+  --t-s: 0.875rem;                                /* 14 */
+  --t-base: 1.0625rem;                            /* 17 — texte courant */
+  --t-m: clamp(1.25rem, 1rem + 0.9vw, 1.625rem);  /* 20 → 26 */
+  --t-l: clamp(2rem, 1.2rem + 3.4vw, 4rem);       /* 32 → 64 */
+  --t-xl: clamp(3rem, 1.4rem + 7vw, 8rem);        /* 48 → 128 */
+  --t-mega: clamp(3.5rem, 0.8rem + 12.5vw, 15rem); /* 56 → 240 */
+
+  --track-title: -0.04em;
+  --track-mono: 0.02em;
+
+  --gutter: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+  --col-gap: clamp(0.75rem, 0.4rem + 1vw, 1.5rem);
+  --nav-h: 3.25rem;
+
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
