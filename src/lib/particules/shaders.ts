@@ -175,3 +175,30 @@ void main(){
   gl_FragColor = uAdditif > 0.5 ? vec4(vCouleur * vEclat, a) : vec4(vCouleur, a * vEclat);
 }
 `;
+
+/** Fond : deux aplats séparés par un front qui balaie l'écran (pas de fondu, donc pas de gris). */
+export const FOND_VERT = /* glsl */ `
+varying vec2 vUv;
+void main(){
+  vUv = uv;
+  gl_Position = vec4(position.xy, 0.0, 1.0);
+}
+`;
+
+export const FOND_FRAG = /* glsl */ `
+uniform vec3 uAncien;
+uniform vec3 uNouveau;
+uniform float uFront;   // 0 → 1 : avancée du front
+uniform float uSens;    // 1 : le nouveau monte du bas ; -1 : il descend du haut
+uniform float uTemps;
+uniform vec2 uRes;
+varying vec2 vUv;
+void main(){
+  // Bord ondulé : deux sinus lents, quelques pixels d'amplitude.
+  float x = vUv.x * uRes.x;
+  float onde = (sin(x * 0.011 + uTemps * 2.1) * 9.0 + sin(x * 0.027 - uTemps * 1.3) * 5.0) / uRes.y;
+  float y = uSens > 0.0 ? vUv.y : 1.0 - vUv.y;
+  float limite = uFront * 1.08 - 0.04 + onde;
+  gl_FragColor = vec4(y < limite ? uNouveau : uAncien, 1.0);
+}
+`;

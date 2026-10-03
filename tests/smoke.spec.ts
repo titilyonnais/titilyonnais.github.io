@@ -16,6 +16,7 @@ for (const url of pages) {
 }
 
 test('la page ne défile jamais à l’horizontale', async ({ page }) => {
+  test.setTimeout(150_000); // quatre pages parcourues de bout en bout
   for (const url of pages) {
     await page.goto(url);
     await parcourir(page);

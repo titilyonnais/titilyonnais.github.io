@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Couture from '../components/Couture.astro';
 import Methode from '../components/Methode.astro';
 import APropos from '../components/APropos.astro';
 import Contact from '../components/Contact.astro';
@@ -19,16 +18,10 @@ const aether = (await getEntry('projets', 'aether'))!;
   description="Je fabrique des logiciels : PostShip, la surveillance après mise en ligne ; Clipper, un presse-papiers pour Windows ; ÆTHER, un navigateur sans onglets."
 >
   <Hero />
-  <Couture de="ink" vers="paper" graine={1} />
   <Methode />
-  <Couture de="paper" vers="ink" graine={2} />
   <PostShip projet={postship} />
-  <Couture de="ink" vers="paper" graine={3} />
   <Clipper projet={clipper} />
-  <Couture de="paper" vers="ink" graine={4} />
   <Aether projet={aether} />
-  <Couture de="ink" vers="paper" graine={5} />
   <APropos />
-  <Couture de="paper" vers="ink" graine={6} />
   <Contact />
 </Base>

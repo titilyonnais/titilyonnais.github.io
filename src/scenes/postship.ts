@@ -1,5 +1,5 @@
 import type { SceneModule } from '../lib/motion/scene';
-import { token } from '../lib/dither/couleurs';
+import { token } from '../lib/couleurs';
 import { $, $$, etat, hasard, seg, taper, temps, easeInOut } from './outils';
 
 /*

@@ -14,7 +14,12 @@
     try {
       vu = sessionStorage.getItem('pre') === '1';
     } catch {}
-    if (vu || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Sans WebGL2, pas de particules à attendre : on saute le compteur.
+    let gl2 = false;
+    try {
+      gl2 = !!document.createElement('canvas').getContext('webgl2');
+    } catch {}
+    if (vu || !gl2 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
       html.dataset.pre = 'vu';
       window.__pre = { avancer() {}, finir() {}, fini: true };
       return;
@@ -49,7 +54,7 @@
         pre.fini = true;
         document.dispatchEvent(new CustomEvent('pret'));
         // Filet : si personne ne prend le relais (toile absente), on s'efface.
-        setTimeout(() => (html.dataset.pre = 'vu'), 900);
+        setTimeout(() => (html.dataset.pre = 'vu'), 400);
         return;
       }
       requestAnimationFrame(tic);

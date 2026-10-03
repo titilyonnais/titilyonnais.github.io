@@ -16,7 +16,7 @@ const { projet, fond, numero, pin, temps, resume, decor = true } = Astro.props;
 const { nom, phrase, faits, liens, stack } = projet.data;
 const id = projet.id;
 ---
-<section id={id} class={`projet ${fond}`} aria-labelledby={`${id}-titre`}>
+<section id={id} class={`projet ${fond}`} aria-labelledby={`${id}-titre`} data-station={id} data-fond={fond} data-ancre="ecran">
   <div class="piste" data-scene={id} style={`--pin: ${pin}`}>
     <div class="scene">
       <div class="wrap grid cadre">

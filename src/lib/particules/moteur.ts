@@ -3,9 +3,12 @@ import {
   BufferAttribute,
   BufferGeometry,
   Color,
+  ColorManagement,
   DataTexture,
   NormalBlending,
   OrthographicCamera,
+  Mesh,
+  PlaneGeometry,
   Points,
   RGBAFormat,
   Scene,
@@ -15,7 +18,7 @@ import {
   type IUniform,
 } from 'three';
 import { GPUComputationRenderer, type Variable } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
-import { SIM_POSITION, SIM_VITESSE, RENDU_FRAG, RENDU_VERT } from './shaders';
+import { SIM_POSITION, SIM_VITESSE, RENDU_FRAG, RENDU_VERT, FOND_FRAG, FOND_VERT } from './shaders';
 import type { Cible, Etat, Moteur, Reglages } from './types';
 
 /** Tailles des textures de simulation : 131 072, 73 728 puis 32 768 particules. */
@@ -25,6 +28,9 @@ const PALIERS: [number, number][] = [
   [256, 128],
 ];
 const FOCALE = 1200;
+// Nos shaders écrivent les couleurs telles quelles : pas de passage en espace linéaire,
+// sinon le papier #f4f4f2 sortirait gris et les teintes produits trop sombres.
+ColorManagement.enabled = false;
 const REGLAGES: Reglages = { raideur: 40, amorti: 0.86, bruit: 40, taille: 1.6, additif: true, souffle: 1 };
 
 const hex = (h: string): [number, number, number] => {
@@ -60,12 +66,29 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1); // la projection est faite dans le shader
   const r: Reglages = { ...REGLAGES };
 
-  // Fond : la couleur de clear glisse vers sa cible.
-  const fondActuel = new Color(0, 0, 0);
+  // Fond : un quad plein écran, deux aplats séparés par un front qui balaie l'écran.
   const fondDepart = new Color(0, 0, 0);
   const fondCible = new Color(0, 0, 0);
   let fondT0 = 0;
   let fondDuree = 1;
+  const fondMat = new ShaderMaterial({
+    vertexShader: FOND_VERT,
+    fragmentShader: FOND_FRAG,
+    depthTest: false,
+    depthWrite: false,
+    uniforms: {
+      uAncien: { value: fondDepart },
+      uNouveau: { value: fondCible },
+      uFront: { value: 1 },
+      uSens: { value: 1 },
+      uTemps: { value: 0 },
+      uRes: { value: [W, H] },
+    },
+  });
+  const fondQuad = new Mesh(new PlaneGeometry(2, 2), fondMat);
+  fondQuad.renderOrder = -1;
+  fondQuad.frustumCulled = false;
+  scene.add(fondQuad);
 
   // Souris : position, vitesse lissée, parallaxe.
   const ptr = { x: -9999, y: -9999, v: 0, rx: 0, ry: 0, trx: 0, try: 0, last: 0 };
@@ -304,7 +327,17 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   const durees: number[] = [];
   let lentDepuis = 0;
 
+  let enDessin = false;
   function dessiner(t: number, dt: number) {
+    if (enDessin) return; // un crochet qui décale ne doit pas relancer un dessin
+    enDessin = true;
+    try {
+      tracer(t, dt);
+    } finally {
+      enDessin = false;
+    }
+  }
+  function tracer(t: number, dt: number) {
     for (const f of crochets) f();
     const u = vVit.material.uniforms as Record<string, IUniform>;
     const up = vPos.material.uniforms as Record<string, IUniform>;
@@ -338,8 +371,8 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
     m.uDecalage!.value = [decalage.x, decalage.y];
 
     const k = Math.min(1, (performance.now() - fondT0) / fondDuree);
-    fondActuel.copy(fondDepart).lerp(fondCible, k * k * (3 - 2 * k));
-    renderer.setClearColor(fondActuel, 1);
+    fondMat.uniforms.uFront!.value = 1 - Math.pow(1 - k, 3);
+    fondMat.uniforms.uTemps!.value = t;
     renderer.setRenderTarget(null);
     renderer.render(scene, camera);
     etat.frames++;
@@ -413,6 +446,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
     H = innerHeight;
     renderer.setSize(W, H, false);
     materiau.uniforms.uRes!.value = [W, H];
+    fondMat.uniforms.uRes!.value = [W, H];
     if (fige) dessiner(temps(), 0);
     if (W !== largeur) largeur = W;
   };
@@ -450,11 +484,15 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
     surImage(f) {
       crochets.push(f);
     },
-    fond(couleur, duree = 450) {
-      fondDepart.copy(fondActuel);
-      fondCible.set(couleur);
+    fond(couleur, duree = 650, sens = 1) {
+      const neuf = new Color(couleur);
+      if (neuf.equals(fondCible)) return;
+      // Si un balayage est en cours, il est fini d'un coup : l'ancien fond est celui qu'on voit.
+      fondDepart.copy(fondCible);
+      fondCible.copy(neuf);
+      fondMat.uniforms.uSens!.value = sens;
       fondT0 = performance.now();
-      fondDuree = Math.max(1, duree);
+      fondDuree = fige ? 1 : Math.max(1, duree);
       if (fige) dessiner(temps(), 0);
     },
     impulsion,
@@ -473,6 +511,8 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       removeEventListener('pointerdown', onDown);
       removeEventListener('resize', onResize);
       demonter();
+      fondQuad.geometry.dispose();
+      fondMat.dispose();
       renderer.dispose();
     },
   };

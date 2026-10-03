@@ -42,8 +42,8 @@ export interface Moteur {
   decaler(dx: number, dy: number, rebaser?: boolean): void;
   /** Appelé au début de chaque image (suivi des ancres). */
   surImage(f: () => void): void;
-  /** Couleur de fond (clear), animée sur `duree` ms. */
-  fond(couleur: string, duree?: number): void;
+  /** Couleur de fond : un front la fait entrer en `duree` ms, du bas (sens 1) ou du haut (sens -1). */
+  fond(couleur: string, duree?: number, sens?: 1 | -1): void;
   /** rayon > 0 : explosion depuis (x, y) dans ce rayon. rayon = 0 : onde de choc qui s'étend. */
   impulsion(x: number, y: number, force: number, rayon: number): void;
   /** Mode calme : une image, plus de boucle. */

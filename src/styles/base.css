@@ -281,6 +281,11 @@ main {
   position: relative;
   z-index: 1;
 }
-html[data-particules='on'] :is(.ink, .paper) {
+html[data-particules='on'] :is(.ink, .paper)[data-station] {
   background: transparent;
+}
+
+/* Les boîtes où la toile dessine ne doivent jamais prendre un clic. */
+[data-place] {
+  pointer-events: none;
 }

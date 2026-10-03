@@ -3,7 +3,8 @@ import Fleche from './Fleche.astro';
 const email = 'tmorretton@gmail.com';
 const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 ---
-<section id="contact" class="contact ink" aria-labelledby="contact-titre">
+<section id="contact" class="contact ink" aria-labelledby="contact-titre" data-station="contact" data-fond="ink" data-forme="arobase">
+  <div class="arobase" data-place aria-hidden="true"></div>
   <div class="wrap">
     <div class="etiquette mono"><span>05</span><span id="contact-titre">Contact</span></div>
     <p class="invite">Une question sur un produit, une idée de logiciel ? Écrivez-moi.</p>
@@ -20,17 +21,26 @@ const maj = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', ye
   </div>
   <footer class="wrap pied mono">
     <span>Thibault Morretton, 2026</span>
-    <span>Fait avec Astro, un shader de quelques Ko et Claude Code · mis à jour le {maj}</span>
+    <span>Fait avec Astro, Three.js et Claude Code · mis à jour le {maj}</span>
   </footer>
 </section>
 
 <style>
   .contact {
+    position: relative;
     padding-top: 8rem;
     min-height: 100svh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+  }
+  /* La toile y dessine une arobase géante, derrière l'adresse. */
+  .arobase {
+    position: absolute;
+    right: var(--gutter);
+    top: 6rem;
+    width: min(46vw, 44rem);
+    height: min(62svh, 40rem);
   }
   .invite {
     margin-top: 3rem;

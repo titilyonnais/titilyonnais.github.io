@@ -36,3 +36,21 @@ export async function allerA(page: Page, scene: string, t: number): Promise<void
   );
   await page.waitForTimeout(700);
 }
+
+/** Attend que le défilement (doux) soit arrivé : scrollY ne bouge plus pendant 300 ms. */
+export async function stable(page: Page): Promise<void> {
+  let avant = -1;
+  for (let i = 0; i < 40; i++) {
+    const y = await page.evaluate(() => scrollY);
+    if (y === avant) return;
+    avant = y;
+    await page.waitForTimeout(300);
+  }
+}
+
+/** Attend qu'une scène paresseuse soit montée (son module chargé, data-state posé). */
+export async function montee(page: Page, scene: string): Promise<void> {
+  await page.waitForFunction((s) => !!document.querySelector<HTMLElement>(`[data-scene="${s}"]`)?.dataset.state, scene, {
+    timeout: 15_000,
+  });
+}

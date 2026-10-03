@@ -1,12 +1,10 @@
 import { startScroll, refreshWhenFontsReady } from './motion';
 import { bootScenes } from './motion/scene';
-import { bootCoutures } from './dither/couture';
 import { bootTitres } from './titres';
 import { bootParticules } from './particules';
 
 startScroll();
 void bootParticules();
-bootCoutures();
 bootTitres();
 bootScenes();
 refreshWhenFontsReady();

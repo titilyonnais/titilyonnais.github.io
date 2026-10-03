@@ -68,7 +68,7 @@ export function preparerHero(m: Moteur, section: HTMLElement): Hero {
     const pts = (await pretes)[k]!;
     if (!actif) return;
     // Métamorphose : le ressort mollit et le flux monte, puis tout se resserre en vague.
-    m.viser({ points: pts, teinte: teinteDe(pr.id), eclat: 0.55 }, { bruit: 650, raideur: 9, additif: true, taille: 1.3 }, 0.35);
+    m.viser({ points: pts, teinte: teinteDe(pr.id), eclat: 0.38 }, { bruit: 650, raideur: 9, additif: true, taille: 1.3 }, 0.35);
     setTimeout(() => actif && m.reglages({ bruit: 10, raideur: 38 }), 650);
     if (!premier) etiquette(pr);
   };
