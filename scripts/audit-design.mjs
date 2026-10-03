@@ -39,18 +39,18 @@ const inZones = (i, zones) => zones.some(([a, b]) => i >= a && i < b);
 const FONT_OK = /^(var\(--(sans|mono)\)|inherit|'Mona Sans'|'IBM Plex Mono')/;
 
 const rules = [
-  { id: 'rayon', re: /border-(?:[a-z-]*-)?radius\s*:\s*([^;}\n"]+)/g, css: true, bad: (m) => !/^0(px|rem|em|%)?\s*$/.test(m[1].trim()) },
-  { id: 'dégradé', re: /(?:linear|radial|conic)-gradient\(/g },
-  { id: 'ombre', re: /box-shadow\s*:\s*(?!none)/g, css: true },
-  { id: 'ombre-texte', re: /text-shadow\s*:\s*(?!none)/g, css: true },
-  { id: 'flou', re: /blur\(/g },
-  { id: 'verre', re: /backdrop-filter/g },
+  { id: 'rayon', demoOk: true, re: /border-(?:[a-z-]*-)?radius\s*:\s*([^;}\n"]+)/g, css: true, bad: (m) => !/^0(px|rem|em|%)?\s*$/.test(m[1].trim()) },
+  { id: 'dégradé', demoOk: true, re: /(?:linear|radial|conic)-gradient\(/g },
+  { id: 'ombre', demoOk: true, re: /box-shadow\s*:\s*(?!none)/g, css: true },
+  { id: 'ombre-texte', demoOk: true, re: /text-shadow\s*:\s*(?!none)/g, css: true },
+  { id: 'flou', demoOk: true, re: /blur\(/g },
+  { id: 'verre', demoOk: true, re: /backdrop-filter/g },
   { id: 'couleur', re: /#[0-9a-fA-F]{3,8}\b/g, css: true, skipTokens: true },
   { id: 'couleur', re: /(['"`])#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\1/g, skipTokens: true },
   { id: 'couleur', re: /\b(?:rgba?|hsla?|oklch|lab|lch)\(/g, skipTokens: true },
   { id: 'couleur', re: /(?:color|background|fill|stroke|border|outline)[a-z-]*\s*:[^;}\n]*\b(?:black|white|gr[ae]y|silver|red|blue|green|orange|yellow|purple|pink)\b/g, css: true },
-  { id: 'gris', re: /opacity\s*:\s*0?\.\d/g },
-  { id: 'police', re: /font-family\s*:\s*([^;}\n]+)/g, css: true, bad: (m) => !FONT_OK.test(m[1].trim()) },
+  { id: 'gris', demoOk: true, re: /opacity\s*:\s*0?\.\d/g },
+  { id: 'police', demoOk: true, re: /font-family\s*:\s*([^;}\n]+)/g, css: true, bad: (m) => !FONT_OK.test(m[1].trim()) },
   { id: 'emoji', re: /\p{Emoji_Presentation}/gu },
 ];
 
@@ -62,8 +62,11 @@ for (const dir of dirs) {
     const src = stripComments(raw, ext);
     const zones = cssZones(src, ext);
     const isTokens = basename(file) === 'tokens.css';
+    // Fenêtres produits (DESIGN.md, règle 4) : la forme du vrai produit est permise, pas ses couleurs en dur.
+    const demo = /[\\/]demos[\\/]/.test(file);
     for (const r of rules) {
       if (r.skipTokens && isTokens) continue;
+      if (r.demoOk && demo) continue;
       for (const m of src.matchAll(r.re)) {
         if (r.css && !inZones(m.index, zones)) continue;
         if (r.bad && !r.bad(m)) continue;
