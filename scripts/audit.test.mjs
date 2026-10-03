@@ -18,3 +18,8 @@ assert.match(run('scripts/fixtures/demos/piege-ko'), /\[couleur\]/);
 // Hors démos, les règles strictes restent.
 assert.match(run('scripts/fixtures/piege.css'.replace(/\/piege\.css$/, '')), /\[rayon\]/);
 console.log('audit.test : ok');
+// Déclarer une police dans @font-face n'est pas l'utiliser.
+assert.equal(run('scripts/fixtures/fontface'), '');
+// L'utiliser hors démo reste refusé.
+assert.match(run('scripts/fixtures/fontface-ko'), /\[police\]/);
+console.log('audit.test (@font-face) : ok');

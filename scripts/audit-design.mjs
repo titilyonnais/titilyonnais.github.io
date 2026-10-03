@@ -38,6 +38,9 @@ const inZones = (i, zones) => zones.some(([a, b]) => i >= a && i < b);
 
 const FONT_OK = /^(var\(--(sans|mono)\)|inherit|'Mona Sans'|'IBM Plex Mono')/;
 
+// Le bloc ouvert juste avant `i` est-il un @font-face ? (déclarer une police n'est pas l'utiliser)
+const dansFontFace = (src, i) => /@font-face\s*$/.test(src.slice(0, src.lastIndexOf('{', i)));
+
 const rules = [
   { id: 'rayon', demoOk: true, re: /border-(?:[a-z-]*-)?radius\s*:\s*([^;}\n"]+)/g, css: true, bad: (m) => !/^0(px|rem|em|%)?\s*$/.test(m[1].trim()) },
   { id: 'dégradé', demoOk: true, re: /(?:linear|radial|conic)-gradient\(/g },
@@ -50,7 +53,7 @@ const rules = [
   { id: 'couleur', re: /\b(?:rgba?|hsla?|oklch|lab|lch)\(/g, skipTokens: true },
   { id: 'couleur', re: /(?:color|background|fill|stroke|border|outline)[a-z-]*\s*:[^;}\n]*\b(?:black|white|gr[ae]y|silver|red|blue|green|orange|yellow|purple|pink)\b/g, css: true },
   { id: 'gris', demoOk: true, re: /opacity\s*:\s*0?\.\d/g },
-  { id: 'police', demoOk: true, re: /font-family\s*:\s*([^;}\n]+)/g, css: true, bad: (m) => !FONT_OK.test(m[1].trim()) },
+  { id: 'police', demoOk: true, re: /font-family\s*:\s*([^;}\n]+)/g, css: true, bad: (m, src) => !FONT_OK.test(m[1].trim()) && !dansFontFace(src, m.index) },
   { id: 'emoji', re: /\p{Emoji_Presentation}/gu },
 ];
 
@@ -69,7 +72,7 @@ for (const dir of dirs) {
       if (r.demoOk && demo) continue;
       for (const m of src.matchAll(r.re)) {
         if (r.css && !inZones(m.index, zones)) continue;
-        if (r.bad && !r.bad(m)) continue;
+        if (r.bad && !r.bad(m, src)) continue;
         const line = src.slice(0, m.index).split('\n').length;
         failures.push(`${file}:${line}  [${r.id}]  ${raw.split('\n')[line - 1].trim()}`);
       }
