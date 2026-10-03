@@ -33,8 +33,6 @@ const lerp = (a: number, b: number, e: number) => a + (b - a) * e;
 export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: boolean; chef: Chef | null }): Fenetre3D {
   const theatre = scene.querySelector<HTMLElement>('.theatre')!;
   const fen = scene.querySelector<HTMLElement>('[data-fenetre]')!;
-  const w = parseFloat(fen.style.getPropertyValue('--w')) || fen.offsetWidth;
-  const h = parseFloat(fen.style.getPropertyValue('--h')) || fen.offsetHeight;
   // Le chef démarre après le préchargeur : on le demande au moment d'agir.
   const chef = () => opts.chef ?? leChef();
 
@@ -59,6 +57,8 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
     fen.style.setProperty('--rx', `${(etat.rx + etat.ix).toFixed(3)}deg`);
     fen.style.setProperty('--ry', `${(etat.ry + etat.iy).toFixed(3)}deg`);
     couches.forEach((c) => c.el.style.setProperty('--tz', `${(c.z * etat.z).toFixed(2)}px`));
+    // En vue éclatée, la fenêtre recule un peu : inclinée, elle tient encore dans le théâtre.
+    fen.style.setProperty('--ke', (1 - 0.14 * etat.z).toFixed(4));
   };
   const versIx = gsap.quickTo(etat, 'ix', { duration: 0.6, ease: 'power3.out', onUpdate: rendre });
   const versIy = gsap.quickTo(etat, 'iy', { duration: 0.6, ease: 'power3.out', onUpdate: rendre });
@@ -73,7 +73,11 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
     return [r.left + r.width / 2, r.top + r.height / 2] as const;
   };
 
+  // La taille native vient du CSS : elle change sous 768 px (une mise en page de téléphone).
   const echelle = () => {
+    const css = getComputedStyle(fen);
+    const w = parseFloat(css.getPropertyValue('--w')) || fen.offsetWidth;
+    const h = parseFloat(css.getPropertyValue('--h')) || fen.offsetHeight;
     // 4 % de marge : en perspective, le bord incliné vers soi grandit un peu.
     const k = Math.min(1, theatre.clientWidth / w, theatre.clientHeight / h) * 0.96;
     fen.style.setProperty('--k', String(Math.max(0.1, k)));
@@ -136,7 +140,8 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
       const e = lisse((t - 0.45) / 0.1);
       Object.assign(etat, { rx: lerp(14, 4, e), ry: lerp(-18, 0, e), z: 1 - e });
     } else Object.assign(etat, { rx: 4, ry: 0, z: 0 });
-    fen.dataset.legendes = t > 0.15 + 0.15 && t < 0.5 ? 'on' : 'off';
+    fen.dataset.legendes = t > 0.3 && t < 0.5 ? 'on' : 'off';
+    fen.dataset.eclate = etat.z > 0.05 ? 'on' : 'off';
 
     const demo = t >= 0.55 && t < 0.95;
     if (demo !== enDemo) {

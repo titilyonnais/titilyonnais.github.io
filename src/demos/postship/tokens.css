@@ -1,0 +1,29 @@
+/* Source : claude-projects/postship/src/app/globals.css (thème sombre) */
+.ps {
+  --ps-background: #000000;
+  --ps-foreground: #ededed;
+  --ps-card: #0f0f0f;
+  --ps-popover: #1a1a1a;
+  --ps-secondary: #242424;
+  --ps-muted: #242424;
+  --ps-muted-foreground: #a1a1a1;
+  --ps-subtle-foreground: #868686;
+  --ps-border: #333333;
+  --ps-line: #2a2a2a;
+  --ps-sidebar: #000000;
+  --ps-sidebar-actif: #1c1c1c;
+  --ps-signal: #8fb0dc;
+  --ps-signal-foreground: #000000;
+  --ps-ok: #4a9e70;
+  --ps-warn: #b09134;
+  --ps-danger: #d9635a;
+  --ps-ok-fond: #4a9e7026;
+  --ps-danger-fond: #d9635a26;
+  --ps-danger-voile: #d9635a0d;
+  --ps-danger-filet: #d9635a4d;
+  --ps-radius-xs: 4px;
+  --ps-radius-ctl: 7px;
+  --ps-radius-carte: 6px;
+  --ps-radius-cadre: 8px;
+  --ps-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

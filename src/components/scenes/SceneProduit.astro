@@ -10,10 +10,13 @@ interface Props {
   /** Taille native de la fenêtre, en px ; elle est mise à l'échelle de son théâtre. */
   largeur: number;
   hauteur: number;
+  /** Taille native sous 768 px, quand la fenêtre a une mise en page de téléphone. */
+  largeurMobile?: number;
+  hauteurMobile?: number;
   /** Variables CSS de la teinte des particules, séparées par des virgules. */
   teinte: string;
 }
-const { projet, fond, numero, pin, largeur, hauteur, teinte } = Astro.props;
+const { projet, fond, numero, pin, largeur, hauteur, largeurMobile = largeur, hauteurMobile = hauteur, teinte } = Astro.props;
 const { nom, phrase, faits, liens, stack } = projet.data;
 const id = projet.id;
 ---
@@ -26,7 +29,7 @@ const id = projet.id;
         <p class="phrase">{phrase}</p>
       </header>
       <div class="theatre" data-place>
-        <div class="fenetre" data-fenetre data-vue="1" style={`--w: ${largeur}px; --h: ${hauteur}px`}>
+        <div class="fenetre" data-fenetre data-vue="1" style={`--wd: ${largeur}px; --hd: ${hauteur}px; --wm: ${largeurMobile}px; --hm: ${hauteurMobile}px`}>
           <slot />
         </div>
         <p class="invite mono" data-invite aria-live="polite"></p>
@@ -108,10 +111,13 @@ const id = projet.id;
     position: absolute;
     left: 50%;
     top: 50%;
+    --w: var(--wd);
+    --h: var(--hd);
     width: var(--w);
     height: var(--h);
-    transform: translate(-50%, -50%) scale(var(--k, 1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform: translate(-50%, -50%) scale(calc(var(--k, 1) * var(--ke, 1))) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transform-style: preserve-3d;
+    pointer-events: auto; /* le théâtre est un [data-place], transparent aux clics */
     transition:
       opacity 0.3s var(--ease),
       visibility 0.3s;
@@ -124,8 +130,11 @@ const id = projet.id;
     transform-style: preserve-3d;
   }
   .fenetre :global([data-couche]) {
-    position: relative;
     transform: translateZ(var(--tz, 0px));
+  }
+  /* Spécificité nulle : une couche placée en absolu par sa démo le reste. */
+  :global(:where(.fenetre [data-couche])) {
+    position: relative;
   }
   .fenetre :global(.legende) {
     position: absolute;
@@ -216,6 +225,12 @@ const id = projet.id;
     outline-offset: 3px;
   }
 
+  @media (max-width: 767px) {
+    .fenetre {
+      --w: var(--wm);
+      --h: var(--hm);
+    }
+  }
   @media (max-width: 1023px) {
     .tete {
       grid-template-columns: 1fr;

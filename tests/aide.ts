@@ -54,3 +54,13 @@ export async function montee(page: Page, scene: string): Promise<void> {
     timeout: 15_000,
   });
 }
+
+/**
+ * Le visiteur prend la main sur la démo PostShip : un appui dans la fenêtre
+ * coupe la démo automatique, puis « git push » si elle n'était pas partie.
+ */
+export async function prendreLaMain(page: Page): Promise<void> {
+  const ps = page.locator('#postship [data-etat-demo]');
+  await ps.dispatchEvent('pointerdown');
+  if ((await ps.getAttribute('data-etat-demo')) === 'repos') await page.locator('#postship [data-action="pousser"]').click();
+}

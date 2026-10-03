@@ -1,27 +1,952 @@
 ---
-/* Fenêtre PostShip : remplacée par l'interface réelle à la Task 7. */
+/**
+ * La fenêtre PostShip : le vrai cadre de l'app (cadre-app.tsx), ses vrais
+ * jetons, ses vraies icônes, et la démo de l'accueil (demo.tsx) rendue
+ * jouable. Cinq couches se séparent en vue éclatée ; un écran flottant
+ * joue l'extrait de la vidéo v4.
+ */
+import '../../styles/polices-produits.css';
+import './tokens.css';
+import Lucide from '../../components/Lucide.astro';
+import { CHECKS, COMMIT, RAIL, VERIFIE, PAS_ENCORE } from './donnees';
+import type { Icone } from '../../lib/icones-lucide';
+
+const feuilles: [string, Icone][] = [
+  ['Aperçu', 'layout-dashboard'],
+  ['Déploiements', 'rocket'],
+  ['Incidents', 'siren'],
+  ['URLs', 'link-2'],
+];
+const groupes: [string, Icone][] = [
+  ['Surveillance', 'radar'],
+  ['Alertes', 'bell'],
+  ['Public', 'megaphone'],
+  ['Paramètres', 'settings'],
+];
+const heures = Array.from({ length: 24 }, (_, i) => i);
 ---
 <div class="ps" data-3d data-etat-demo="repos">
-  <div class="couche barre" data-couche data-z="60" data-legende="Projets"></div>
-  <div class="couche haut" data-couche data-z="140" data-legende="Espace de travail"></div>
-  <div class="couche corps" data-couche data-z="220" data-legende="Disponibilité"></div>
+  <aside class="barre" data-couche data-z="60" data-legende="Projets">
+    <div class="logo">
+      <svg viewBox="20 20 196 160" aria-hidden="true">
+        <path d="M 99.900 35.600 L 36.000 100.000 L 99.900 164.400 L 115.700 148.000 L 68.500 100.000 L 115.700 52.000 Z" />
+        <path d="M 136.500 35.600 L 200.400 100.000 L 136.500 164.400 L 120.700 148.000 L 167.900 100.000 L 120.700 52.000 Z" />
+      </svg>
+    </div>
+    <div class="col">
+      <div class="recherche">
+        <Lucide nom="search" />
+        <span class="lib">Rechercher…</span>
+        <kbd>Ctrl K</kbd>
+      </div>
+      <div class="bloc">
+        {
+          feuilles.map(([l, i]) => (
+            <span class:list={['entree', { allume: l === 'Aperçu' }]}>
+              <Lucide nom={i} />
+              <span class="lib">{l}</span>
+              {l === 'Incidents' && <span class="badge" data-badge>1</span>}
+            </span>
+          ))
+        }
+      </div>
+      <span class="sep"></span>
+      <div class="bloc">
+        {
+          groupes.map(([l, i]) => (
+            <span class="entree">
+              <Lucide nom={i} />
+              <span class="lib">{l}</span>
+              <Lucide nom="chevron-right" taille={14} />
+            </span>
+          ))
+        }
+      </div>
+      <span class="sep"></span>
+      <div class="bloc">
+        <span class="entree"><Lucide nom="life-buoy" /><span class="lib">Aide</span></span>
+      </div>
+    </div>
+    <div class="replier">
+      <Lucide nom="panel-left" />
+      <span class="lib">Replier</span>
+    </div>
+  </aside>
+
+  <div class="droite" data-3d>
+    <header class="haut" data-couche data-z="100" data-legende="Espace de travail">
+      <div class="fil">
+        <span class="morceau espace"><Lucide nom="folder-kanban" taille={14} /><span>agence-onze</span><Lucide nom="chevron-down" taille={14} /></span>
+        <Lucide nom="chevron-right" taille={14} />
+        <span class="morceau">
+          <span class="tuile"><Lucide nom="globe" taille={12} /><span class="point" data-point></span></span>
+          <span>Boutique Corail</span>
+          <Lucide nom="chevron-down" taille={14} />
+        </span>
+      </div>
+      <span class="page">Aperçu</span>
+      <span class="avatar">L</span>
+    </header>
+
+    <div class="contenu" data-3d>
+      <div class="gauche" data-3d>
+        <section class="dispo" data-couche data-z="140" data-legende="Disponibilité">
+          <p class="url mono">boutique-corail.fr</p>
+          <p class="statut"><span class="point" data-point></span><span data-statut>Tout va bien</span></p>
+          <p class="sous">vérifié il y a 5 min · 6 URLs surveillées</p>
+          <dl class="chiffres">
+            <div><dt>Disponibilité 24 h</dt><dd data-dispo>100 %</dd></div>
+            <div><dt>7 jours</dt><dd>99,98 %</dd></div>
+            <div><dt>Incidents ouverts</dt><dd data-incidents>0</dd></div>
+          </dl>
+          <div class="frise">
+            <p class="tete-frise"><span>Dernières 24 heures</span><span data-frise>tout est passé</span></p>
+            <div class="barres">{heures.map((h) => <span class="b" data-heure={h}></span>)}</div>
+            <p class="heures"><span>11:15</span><span>23:15</span><span>maintenant</span></p>
+          </div>
+        </section>
+
+        <section class="score carte" data-couche data-z="180" data-legende="Ship Score · /100">
+          <header class="tete-score">
+            <p class="titre"><Lucide nom="rocket" /><span>Ship Score du dernier déploiement</span></p>
+            <p class="valeur"><span data-score data-ton="ok">100</span><span class="sur">/ 100</span></p>
+          </header>
+          <p class="raison" data-raison>Rien retiré : tout ce qui est vérifié est passé.</p>
+          <div class="colonnes">
+            <div>
+              <p class="sous-titre">Vérifié sur ce ship</p>
+              <ul>
+                {
+                  VERIFIE.map((v) => (
+                    <li data-categorie={v.libelle}>
+                      <span class="marque">✓</span>
+                      <span class="lib">{v.libelle}</span>
+                      <span class="bareme" data-bareme={v.bareme}>sur {v.bareme}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+            <div class="pas-encore">
+              <p class="sous-titre">Pas encore vérifié</p>
+              <ul>
+                {
+                  PAS_ENCORE.map((v) => (
+                    <li>
+                      <span class="marque vide">○</span>
+                      <span class="lib">{v.libelle}</span>
+                      <span class="bareme">jusqu’à −{v.bareme}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="verifs carte" data-couche data-z="220" data-legende="6 vérifications par déploiement">
+        <div class="filet"><span data-filet></span></div>
+        <div class="commit">
+          <p class="qui"><span class="sha mono" data-sha>{COMMIT.sha}</span><span class="msg" data-msg>{COMMIT.message}</span></p>
+          <p class="bilan" data-bilan>En attente d’un déploiement</p>
+        </div>
+        <ul class="liste">
+          {
+            CHECKS.map((c) => (
+              <li data-check data-e="attente">
+                <span class="pt" />
+                <span class="nom">
+                  <span class="label">{c.label}</span>
+                  <span class="lien mono">{c.url}</span>
+                </span>
+                <span class="verdict" data-verdict>à venir</span>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="suite">
+          <div class="alerte">
+          <div class="message" data-message>
+            <p class="m-titre"><span class="pt"></span>Message envoyé dans #alertes</p>
+            <p class="m-texte">/checkout répond 500 après « Payer » depuis {COMMIT.sha}.</p>
+            <p class="m-cause">Cause probable : STRIPE_SECRET absente de la preview, retirée dans le même commit.</p>
+          </div>
+          <div class="banniere" data-banniere>
+            <p>Le dernier déploiement de production a cassé. Vous pouvez remettre en ligne le précédent.</p>
+            <button type="button" class="bouton secondaire" data-action="retour">Remettre en ligne le précédent</button>
+          </div>
+          </div>
+          <div class="rail" data-rail>
+            <p class="r-shas mono"><span class="casse">{RAIL[0]}</span><span class="vers">→</span><span>{RAIL[1]}</span></p>
+            <div class="r-barre"><span data-progression></span></div>
+            <p class="r-fin" data-fin>Remise en ligne de {RAIL[1]}…</p>
+          </div>
+        </div>
+        <footer class="actions">
+          <button type="button" class="bouton signal" data-action="pousser"><span class="mono">git push</span></button>
+          <button type="button" class="bouton fantome" data-action="rejouer"><Lucide nom="rotate-ccw" />Rejouer</button>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <div class="ecran" data-couche data-z="120" aria-hidden="true">
+    <video muted loop playsinline preload="none" poster="/produits/postship/sonde-clients.jpg" width="720" height="820">
+      <source src="/produits/postship/sonde-clients.webm" type="video/webm" />
+      <source src="/produits/postship/sonde-clients.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <p class="sr-only" role="status" aria-live="polite" data-annonce></p>
 </div>
 
 <style>
   .ps {
+    position: relative;
     display: grid;
-    grid-template-columns: 240px 1fr;
-    grid-template-rows: 52px 1fr;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     width: 100%;
     height: 100%;
-    background: var(--ink);
-    outline: 1px solid var(--paper);
+    font-family: 'Onest', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 400;
+    color: var(--ps-foreground);
+    background: var(--ps-background);
+    border: 1px solid var(--ps-border);
+    border-radius: 12px;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
   }
+  .ps :global(svg) {
+    flex-shrink: 0;
+  }
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .lib {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* La colonne. */
   .barre {
-    grid-row: 1 / -1;
-    border-right: 1px solid var(--paper);
+    display: flex;
+    flex-direction: column;
+    background: var(--ps-sidebar);
+    border-right: 1px solid var(--ps-border);
+    border-radius: 12px 0 0 12px;
+  }
+  .logo {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding-inline: 12px;
+  }
+  .logo svg {
+    width: 32px;
+    height: 32px;
+    fill: var(--ps-foreground);
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 12px 16px;
+  }
+  .recherche {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding-inline: 8px;
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius-ctl);
+    color: var(--ps-muted-foreground);
+  }
+  kbd {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--ps-subtle-foreground);
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius-xs);
+    padding: 0 6px;
+  }
+  .bloc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .entree {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding-inline: 8px;
+    border-radius: var(--ps-radius-ctl);
+    color: var(--ps-muted-foreground);
+  }
+  .entree.allume {
+    background: var(--ps-sidebar-actif);
+    color: var(--ps-foreground);
+    font-weight: 500;
+  }
+  .badge {
+    background: var(--ps-danger);
+    color: var(--ps-background);
+    border-radius: 999px;
+    padding: 2px 6px;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 500;
+    display: none;
+  }
+  .sep {
+    height: 1px;
+    background: var(--ps-border);
+  }
+  .replier {
+    margin-top: auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 20px;
+    color: var(--ps-muted-foreground);
+  }
+
+  /* La barre du haut. */
+  .droite {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
   }
   .haut {
-    border-bottom: 1px solid var(--paper);
+    height: 56px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding-inline: 16px;
+    border-bottom: 1px solid var(--ps-border);
+    background: var(--ps-background);
+    border-radius: 0 12px 0 0;
+  }
+  .fil {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    color: var(--ps-muted-foreground);
+  }
+  .morceau {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    color: var(--ps-foreground);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .morceau :global(svg) {
+    color: var(--ps-muted-foreground);
+  }
+  .tuile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--ps-secondary);
+    box-shadow: inset 0 0 0 1px var(--ps-border);
+  }
+  .tuile .point {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ps-ok);
+    box-shadow: 0 0 0 2px var(--ps-background);
+  }
+  .page {
+    font-weight: 500;
+  }
+  .avatar {
+    justify-self: end;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ps-signal);
+    color: var(--ps-signal-foreground);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Le contenu. */
+  .contenu {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 25rem;
+    gap: 24px;
+    padding: 24px;
+  }
+  .gauche {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+  }
+  .carte {
+    background: var(--ps-card);
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius-cadre);
+  }
+  .dispo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .url {
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+  }
+  .statut {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    transition: color 0.32s var(--ps-ease);
+  }
+  .statut .point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ps-ok);
+  }
+  .sous {
+    color: var(--ps-muted-foreground);
+  }
+  .chiffres {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 10px;
+    border: 1px solid var(--ps-border);
+    border-radius: var(--ps-radius-cadre);
+    background: var(--ps-card);
+  }
+  .chiffres div {
+    padding: 12px 14px;
+  }
+  .chiffres div + div {
+    border-left: 1px solid var(--ps-border);
+  }
+  .chiffres dt {
+    color: var(--ps-muted-foreground);
+    font-size: 13px;
+  }
+  .chiffres dd {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .frise {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .tete-frise,
+  .heures {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+  }
+  .heures {
+    font-size: 12px;
+    color: var(--ps-subtle-foreground);
+  }
+  .barres {
+    display: grid;
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    gap: 3px;
+    height: 28px;
+  }
+  .b {
+    border-radius: 3px;
+    background: var(--ps-ok);
+    transition: background-color 0.32s var(--ps-ease);
+  }
+
+  .score {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tete-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .titre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 15px;
+  }
+  .titre :global(svg) {
+    color: var(--ps-muted-foreground);
+  }
+  .valeur {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  [data-score] {
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1;
+    transition: color 0.32s var(--ps-ease);
+  }
+  [data-score][data-ton='ok'] {
+    color: var(--ps-ok);
+  }
+  [data-score][data-ton='warn'] {
+    color: var(--ps-warn);
+  }
+  [data-score][data-ton='danger'] {
+    color: var(--ps-danger);
+  }
+  .sur {
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+  }
+  .raison {
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+  }
+  .colonnes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .sous-titre {
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .colonnes li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: 13px;
+  }
+  .colonnes li + li {
+    border-top: 1px solid var(--ps-border);
+  }
+  .marque {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ps-radius-xs);
+    background: var(--ps-ok-fond);
+    color: var(--ps-ok);
+    font-size: 11px;
+  }
+  .marque.vide {
+    background: var(--ps-secondary);
+    color: var(--ps-muted-foreground);
+  }
+  .bareme {
+    font-size: 12px;
+    color: var(--ps-subtle-foreground);
+  }
+  li.retire .marque {
+    background: var(--ps-danger-fond);
+    color: var(--ps-danger);
+  }
+  li.retire .bareme {
+    color: var(--ps-danger);
+  }
+
+  /* Les vérifications : la démo de l'accueil, jouable. */
+  .verifs {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+  .filet {
+    height: 1px;
+    background: var(--ps-border);
+    border-radius: 8px 8px 0 0;
+  }
+  .filet span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--ps-foreground);
+    opacity: 0.6;
+    transition: width 0.3s linear;
+  }
+  .commit {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 14px 18px;
+  }
+  .qui {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+    opacity: 0;
+    transition: opacity 0.32s var(--ps-ease);
+  }
+  .ps:not([data-etat-demo='repos']) .qui {
+    opacity: 1;
+  }
+  .sha {
+    font-size: 13px;
+  }
+  .msg {
+    color: var(--ps-muted-foreground);
+    font-size: 13px;
+  }
+  .bilan {
+    flex-shrink: 0;
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+    transition: color 0.3s;
+  }
+  .bilan.ko {
+    color: var(--ps-danger);
+  }
+  .bilan.ok {
+    color: var(--ps-ok);
+  }
+  .liste {
+    border-top: 1px solid var(--ps-border);
+  }
+  .liste li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 18px;
+    transition: background-color 0.6s var(--ps-ease);
+  }
+  .liste li + li {
+    border-top: 1px solid var(--ps-border);
+  }
+  .liste .pt {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--ps-muted-foreground);
+    opacity: 0.3;
+    transition: background-color 0.3s, opacity 0.3s;
+  }
+  .liste li[data-e='cours'] .pt {
+    background: var(--ps-foreground);
+    opacity: 0.6;
+    animation: pouls 0.9s ease-in-out infinite;
+  }
+  .liste li[data-e='ok'] .pt {
+    background: var(--ps-ok);
+    opacity: 1;
+  }
+  .liste li[data-e='ko'] .pt {
+    background: var(--ps-danger);
+    opacity: 1;
+  }
+  .liste li.flash {
+    background: var(--ps-danger-fond);
+    transition: none;
+  }
+  @keyframes pouls {
+    50% {
+      opacity: 0.2;
+    }
+  }
+  .nom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    min-width: 0;
+    flex: 1;
+  }
+  .label {
+    font-size: 15px;
+    transition: color 0.3s;
+  }
+  li[data-e='attente'] .label {
+    color: var(--ps-muted-foreground);
+  }
+  .lien {
+    font-size: 12px;
+    color: var(--ps-muted-foreground);
+  }
+  .verdict {
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+    white-space: nowrap;
+  }
+  li[data-e='ko'] .verdict {
+    color: var(--ps-danger);
+    font-weight: 500;
+  }
+
+  .suite {
+    display: grid;
+    border-top: 1px solid var(--ps-border);
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+  }
+  .suite > div {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition:
+      opacity 0.32s var(--ps-ease),
+      transform 0.32s var(--ps-ease),
+      visibility 0.32s;
+  }
+  .ps[data-etat-demo='alerte'] .alerte,
+  .ps[data-etat-demo='retour'] .rail,
+  .ps[data-etat-demo='retabli'] .rail {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .message {
+    padding: 12px 18px;
+    background: var(--ps-danger-voile);
+    border-bottom: 1px solid var(--ps-danger-filet);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .m-titre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ps-danger);
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .m-titre .pt {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ps-danger);
+  }
+  .m-cause {
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+  }
+  .banniere {
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .banniere p {
+    font-size: 13px;
+  }
+  .rail {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .r-shas {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .casse {
+    color: var(--ps-danger);
+    text-decoration: line-through;
+  }
+  .vers {
+    color: var(--ps-muted-foreground);
+  }
+  .r-barre {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--ps-secondary);
+    overflow: hidden;
+  }
+  .r-barre span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--ps-ok);
+  }
+  .r-fin {
+    font-size: 13px;
+    color: var(--ps-muted-foreground);
+  }
+  .ps[data-etat-demo='retabli'] .r-fin {
+    color: var(--ps-ok);
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-top: 1px solid var(--ps-border);
+  }
+  .bouton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding-inline: 12px;
+    border-radius: var(--ps-radius-ctl);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition:
+      opacity 0.18s var(--ps-ease),
+      background-color 0.18s var(--ps-ease);
+  }
+  .bouton:focus-visible {
+    outline: 2px solid var(--ps-signal);
+    outline-offset: 2px;
+  }
+  .signal {
+    background: var(--ps-signal);
+    color: var(--ps-signal-foreground);
+  }
+  .signal:hover {
+    opacity: 0.9;
+  }
+  .secondaire {
+    align-self: flex-start;
+    background: var(--ps-secondary);
+    color: var(--ps-foreground);
+    border-color: var(--ps-border);
+  }
+  .secondaire:hover {
+    background: var(--ps-popover);
+  }
+  .fantome {
+    background: transparent;
+    color: var(--ps-muted-foreground);
+    margin-left: auto;
+  }
+  .fantome:hover {
+    background: var(--ps-secondary);
+    color: var(--ps-foreground);
+  }
+  .ps:not([data-etat-demo='repos']) [data-action='pousser'],
+  .ps:not([data-etat-demo='retabli']) [data-action='rejouer'] {
+    visibility: hidden;
+  }
+
+  /* États de panne, posés par la démo. */
+  .ps[data-sante='ko'] [data-point] {
+    background: var(--ps-danger);
+  }
+  .ps[data-sante='ko'] .statut {
+    color: var(--ps-danger);
+  }
+  .ps[data-sante='ko'] .badge {
+    display: inline-block;
+  }
+  .ps[data-sante='ko'] .b:last-child {
+    background: var(--ps-danger);
+  }
+
+  /* L'écran flottant : l'extrait vidéo, seulement en vue éclatée. */
+  .ecran {
+    position: absolute;
+    left: -200px;
+    bottom: 56px;
+    width: 250px;
+    aspect-ratio: 720 / 820;
+    border: 1px solid var(--ps-border);
+    border-radius: 10px;
+    background: var(--ps-background);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.4s var(--ps-ease);
+    pointer-events: none;
+  }
+  .ecran video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  :global([data-eclate='on']) .ecran {
+    opacity: 1;
+  }
+
+  /* Téléphone : comme l'app sous 56 rem, la colonne disparaît. */
+  @media (max-width: 767px) {
+    .ps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .barre,
+    .fil .espace,
+    .fil > :global(svg),
+    .dispo,
+    .raison,
+    .colonnes,
+    .ecran {
+      display: none;
+    }
+    .haut {
+      border-radius: 12px 12px 0 0;
+    }
+    .contenu {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 14px;
+    }
+    .liste li {
+      padding: 9px 14px;
+    }
+    .lien {
+      display: none;
+    }
+    .label {
+      font-size: 14px;
+    }
   }
 </style>

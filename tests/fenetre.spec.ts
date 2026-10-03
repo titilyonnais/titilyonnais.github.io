@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { allerA, montee } from './aide';
+import { allerA, montee, prendreLaMain } from './aide';
 
 test('la fenêtre s’éclate puis se réassemble', async ({ page }) => {
   await page.goto('/');
@@ -24,11 +24,12 @@ test('la fenêtre tient dans son théâtre', async ({ page }) => {
   expect(f.height).toBeLessThanOrEqual(t.height + 1);
 });
 
-// Passe après la démo PostShip (Task 7) : fixe le contrat dès maintenant.
-test.fixme('redimensionner pendant la démo garde l’état', async ({ page }) => {
+test('redimensionner pendant la démo garde l’état', async ({ page }) => {
   await page.goto('/');
   await allerA(page, 'postship', 0.7);
-  await page.click('#postship [data-action="pousser"]');
+  await montee(page, 'postship');
+  await allerA(page, 'postship', 0.7);
+  await prendreLaMain(page);
   await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', /verifie|panne|alerte/);
   await page.setViewportSize({ width: 1100, height: 800 });
   await page.waitForTimeout(400);
