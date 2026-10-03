@@ -1,4 +1,4 @@
-/* Les deux seules valeurs du site. Les gris n'existent que dans la trame. */
+/* Les deux seules valeurs du site. Les gris n'existent que par densité de particules. */
 :root {
   --ink: #000000;
   --paper: #f4f4f2;

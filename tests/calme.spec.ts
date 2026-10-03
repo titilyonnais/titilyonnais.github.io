@@ -1,13 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { allerA, erreurs, parcourir } from './aide';
+import { allerA, erreurs, montee, parcourir } from './aide';
 
 test.describe('version calme (réduire les animations)', () => {
   test.use({ reducedMotion: 'reduce' });
 
-  test('toutes les scènes sont posées dans leur état final, sans piste de défilement', async ({ page }) => {
+  test('tout est posé : pas de préchargeur, pas de boucle, pas de piste collante', async ({ page }) => {
     const errs = erreurs(page);
     await page.goto('/');
+    await expect(page.locator('.pre')).toBeHidden();
     await parcourir(page);
+    expect(await page.evaluate(() => window.__particules?.running ?? false)).toBe(false);
     for (const s of await page.locator('[data-scene]').all()) {
       await expect(s).toHaveAttribute('data-state', 'final');
     }
@@ -20,6 +22,27 @@ test.describe('version calme (réduire les animations)', () => {
     const lettres = await page.locator('#contact .email .l').last().boundingBox();
     expect(lettres!.x + lettres!.width).toBeLessThanOrEqual(email.x + email.width + 1);
     expect(errs).toEqual([]);
+  });
+
+  test('les trois démos répondent sans délai', async ({ page }) => {
+    await page.goto('/');
+    // PostShip : pousser mène droit à l'alerte.
+    await page.locator('#postship [data-fenetre]').scrollIntoViewIfNeeded();
+    await montee(page, 'postship');
+    await page.locator('#postship [data-action="pousser"]').click();
+    await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', 'alerte', { timeout: 500 });
+    // Clipper : « facture » ne garde que deux éléments.
+    await page.locator('#clipper [data-fenetre]').scrollIntoViewIfNeeded();
+    await montee(page, 'clipper');
+    await page.locator('#clipper input[type="search"]').fill('facture');
+    await expect(page.locator('#clipper [data-item]:visible')).toHaveCount(2, { timeout: 500 });
+    // ÆTHER : la pilule, Entrée, et dix cartes.
+    await page.locator('#aether [data-fenetre]').scrollIntoViewIfNeeded();
+    await montee(page, 'aether');
+    await page.locator('#aether [data-pilule]').click();
+    await page.keyboard.type('compare rust et zig');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#aether [data-carte]')).toHaveCount(10, { timeout: 500 });
   });
 
   test('Méthode : tous les mots sont pleins', async ({ page }) => {

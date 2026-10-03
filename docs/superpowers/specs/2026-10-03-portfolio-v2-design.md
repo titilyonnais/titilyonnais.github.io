@@ -695,3 +695,37 @@ la mise en ligne. Ordre de travail :
 Son, nouvelles pages, nouveaux projets, version anglaise, mini-apps
 complètes au-delà du scénario guidé, captures d'écran des produits (hors
 extrait vidéo).
+
+## 14. Écarts décidés pendant la réalisation
+
+Les écarts réels avec ce document, décidés en cours de route (le détail et le
+coût de chacun sont dans le registre d'exécution) :
+
+- **Moteur.** Le fond passe par un quad plein écran à front ondulé (jamais de
+  gris intermédiaire) ; il sait devenir transparent (station `fond="aucun"`)
+  pour laisser voir le ciel d'ÆTHER, posé sous la toile. Rendu logiciel
+  (SwiftShader, llvmpipe) : plus petit palier dès le départ.
+- **Préchargeur.** Plafonné à 1,8 s, compteur au temps ; sauté sans WebGL2.
+- **Hero.** Cycle de 5,2 s (les formes mettent ~3,5 s à se poser) ; la ligne
+  sous le nom dit « Créateur de logiciels ».
+- **Fenêtres 3D.** Échelle × 0,96 (la perspective agrandit le bord incliné) ;
+  hors vue éclatée la fenêtre est à plat (Chrome départage mal les couches
+  coplanaires au clic) ; l'inclinaison se fige sous le pointeur ; la
+  profondeur des couches passe par `translate`, pas `transform`.
+- **Démos.** Survoler la fenêtre retarde la démo automatique ; chaque démo a
+  une mise en page de téléphone native (400 px de large).
+  PostShip : la colonne allume « Aperçu » (entrée par défaut du vrai cadre).
+  Clipper : un appui choisit une ligne, un double-clic colle (comme ClipRow) ;
+  le Bloc-notes fait partie de la fenêtre native ; les onglets Historique,
+  Snippets et Collections sont décoratifs.
+  ÆTHER : le zoom est une vraie échelle de la Toile (0,25 → 2), les flèches
+  déplacent de 16 px à l'écran ; pas de pincement au doigt (la page défile) ;
+  l'Espace Rust est actif au départ ; une adresse ou une recherche ajoute une
+  carte ; la fenêtre est translucide sur le ciel ; le sélecteur de thèmes est
+  sous la fenêtre.
+- **Études de cas.** L'univers vit dans `src/demos/univers.css` ; les sections
+  « papier » prennent la surface du produit ; l'ouverture d'ÆTHER montre le
+  ciel immobile ; le passage en particules vaut aussi pour « Suivant » et
+  « Retour à l'accueil » ; le nom de l'étude suivante reste en Mona Sans.
+- **Audit.** `donnees.ts` peut porter une couleur littérale quand elle est un
+  contenu (la couleur copiée depuis Figma dans Clipper).
