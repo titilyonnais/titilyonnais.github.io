@@ -29,3 +29,11 @@
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Teintes des produits, pour les particules qui forment leurs logos (DESIGN.md, règle 5). */
+:root {
+  --teinte-postship: #8fb0dc;   /* postship/src/app/globals.css, --signal (sombre) */
+  --teinte-clipper: #ededed;    /* clipper/loopy-clipboard/src/styles.css, --foreground (sombre) */
+  --teinte-aether-1: #a9c9ec;   /* aether-browser/src/renderer/src/styles/global.css, --color-glacier */
+  --teinte-aether-2: #b3a4e6;   /* idem, --color-lavande */
+}

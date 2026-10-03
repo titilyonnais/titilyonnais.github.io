@@ -36,7 +36,7 @@ function cssZones(src, ext) {
 }
 const inZones = (i, zones) => zones.some(([a, b]) => i >= a && i < b);
 
-const FONT_OK = /^(var\(--(sans|mono)\)|inherit|'Mona Sans'|'IBM Plex Mono')/;
+const FONT_OK = /^(var\(--(sans|mono|police-produit)\)|inherit|'Mona Sans'|'IBM Plex Mono')/;
 
 // Le bloc ouvert juste avant `i` est-il un @font-face ? (déclarer une police n'est pas l'utiliser)
 const dansFontFace = (src, i) => /@font-face\s*$/.test(src.slice(0, src.lastIndexOf('{', i)));

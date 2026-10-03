@@ -1,17 +1,42 @@
 ---
+import '../styles/polices-produits.css';
+
+/** Les trois produits du cycle, dans l'ordre. `police` : celle du produit, pour son nom. */
+const PRODUITS = [
+  { id: 'postship', nom: 'PostShip', ligne: 'Vérifie votre site après chaque déploiement.', police: "'Onest', var(--sans)" },
+  { id: 'clipper', nom: 'Clipper', ligne: 'Le presse-papiers qui se souvient.', police: "'Onest', var(--sans)" },
+  { id: 'aether', nom: 'ÆTHER', ligne: 'Le navigateur où les pages deviennent des cartes.', police: "'Instrument Serif', var(--sans)" },
+];
 const sommaire = [
   { n: '01', href: '#postship', label: 'PostShip', note: 'surveillance après mise en ligne' },
   { n: '02', href: '#clipper', label: 'Clipper', note: 'presse-papiers pour Windows' },
   { n: '03', href: '#aether', label: 'ÆTHER', note: 'navigateur sans onglets' },
 ];
+const p0 = PRODUITS[0]!;
 ---
-<section class="hero ink" data-hero data-lignes="THIBAULT|MORRETTON">
-  <h1 class="titre">Thibault Morretton</h1>
-  <div class="plaque" aria-hidden="true">
-    <canvas></canvas>
+<section
+  class="hero ink"
+  data-station="hero"
+  data-fond="ink"
+  data-cycle={PRODUITS.map((p) => p.id).join(',')}
+  data-produits={JSON.stringify(PRODUITS)}
+>
+  <h1 class="sr-only">Thibault Morretton, créateur de logiciels</h1>
+  <p class="qui mono">Créateur de logiciels</p>
+
+  <div class="logo" data-place aria-hidden="true">
+    <img class="repli" src="/produits/postship/logo.svg" alt="" width="64" height="52" />
+    <img class="repli" src="/produits/clipper/tuile.svg" alt="" width="64" height="64" />
+    <img class="repli" src="/produits/aether/icone.png" alt="" width="64" height="64" />
   </div>
-  <div class="pied wrap grid">
-    <p class="accroche">Je fabrique des logiciels.</p>
+
+  <a class="produit" data-hero-produit href={`#${p0.id}`} style={`--police-produit: ${p0.police}`}>
+    <span class="nom">{p0.nom}</span>
+    <span class="ligne mono">{p0.ligne}</span>
+  </a>
+
+  <div class="pied grid">
+    <p class="phrase">Trois logiciels en service.<br />D’autres en route.</p>
     <ol class="sommaire mono">
       {
         sommaire.map((s) => (
@@ -32,44 +57,84 @@ const sommaire = [
   .hero {
     position: relative;
     height: 100svh;
-    min-height: 560px;
+    min-height: 600px;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    column-gap: var(--col-gap);
+    padding-inline: var(--gutter);
   }
-  .titre {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .qui {
+    grid-column: 1 / -1;
+    padding-top: calc(var(--nav-h) + 0.25rem);
+    text-transform: uppercase;
   }
-  .plaque {
-    position: relative;
-    min-height: 0;
-    margin-top: var(--nav-h);
+  /* La boîte où la toile dessine les logos. */
+  .logo {
+    grid-column: 6 / 12;
+    grid-row: 2;
+    align-self: center;
+    height: min(46svh, 34vw);
+    display: flex;
+    gap: 6%;
+    align-items: center;
+    justify-content: center;
   }
-  canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
+  .repli {
+    display: none;
+    width: 26%;
+    height: auto;
+  }
+  :global(html[data-particules='off']) .repli {
+    display: block;
+  }
+  .produit {
+    grid-column: 6 / 12;
+    grid-row: 3;
+    justify-self: start;
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    clip-path: inset(0 0 0 0);
+  }
+  .produit .nom {
+    font-family: var(--police-produit);
+    font-size: var(--t-m);
+    letter-spacing: -0.02em;
+  }
+  .produit:hover .nom {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  /* Changement de produit : l'ancien texte se replie vers le haut, le nouveau monte de 8 px. */
+  .produit:global(.sortant) {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.22s var(--ease);
+  }
+  .produit:global(.entrant) {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(8px);
+  }
+  .produit:not(:global(.entrant)) {
+    transition: clip-path 0.4s var(--ease-out), transform 0.4s var(--ease-out);
   }
   .pied {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    padding: 0 0 1.75rem;
     align-items: end;
-    padding-block: 1.25rem 1.75rem;
-    border-top: 1px solid var(--fg);
   }
-  .accroche {
-    grid-column: 1 / span 7;
-    font-size: var(--t-l);
+  .phrase {
+    grid-column: 1 / span 9;
+    font-size: clamp(2.25rem, 0.6rem + 4.6vw, 6.5rem);
     font-weight: 450;
     letter-spacing: var(--track-title);
-    line-height: 1;
+    line-height: 0.92;
+    max-width: none;
   }
   .sommaire {
-    grid-column: 8 / -1;
+    grid-column: 9 / -1;
     list-style: none;
   }
   .sommaire a {
@@ -86,32 +151,32 @@ const sommaire = [
     text-align: right;
   }
 
-  /* Sans WebGL : le nom s’écrit en toutes lettres. */
-  :global(html[data-dither='off']) .titre {
-    position: static;
-    width: auto;
-    height: auto;
-    clip-path: none;
-    white-space: normal;
-    align-self: center;
-    padding: calc(var(--nav-h) + 1rem) var(--gutter) 0;
-    font-size: var(--t-mega);
-    font-stretch: 125%;
-    font-weight: 500;
-    text-transform: uppercase;
-    line-height: 0.88;
-  }
-  :global(html[data-dither='off']) .plaque {
-    display: none;
-  }
-
   @media (max-width: 767px) {
-    .accroche,
-    .sommaire {
+    /* La nav passe sur deux lignes : le sous-titre lui laisse la place. */
+    .qui {
+      visibility: hidden;
+    }
+  }
+  @media (max-width: 1023px) {
+    .logo,
+    .produit {
       grid-column: 1 / -1;
     }
-    .accroche {
-      margin-bottom: 1rem;
+    .logo {
+      height: min(34svh, 60vw);
+    }
+    .produit {
+      justify-self: center;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .phrase {
+      grid-column: 1 / -1;
+      font-size: var(--t-l);
+      margin-bottom: 1.25rem;
+    }
+    .sommaire {
+      grid-column: 1 / -1;
     }
     .sommaire a {
       grid-template-columns: 2.5em 1fr;

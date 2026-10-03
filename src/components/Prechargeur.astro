@@ -1,0 +1,88 @@
+---
+// Préchargeur : un compteur 000 → 100 qui suit le vrai chargement (polices, Three.js,
+// cibles des logos, premier rendu). À 100, ses chiffres deviennent des particules.
+// Sauté aux visites suivantes de la session et avec « réduire les animations ».
+---
+<div class="pre" aria-hidden="true">
+  <span class="compteur mono" data-compteur>000</span>
+</div>
+
+<script is:inline>
+  (() => {
+    const html = document.documentElement;
+    let vu = false;
+    try {
+      vu = sessionStorage.getItem('pre') === '1';
+    } catch {}
+    if (vu || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      html.dataset.pre = 'vu';
+      window.__pre = { avancer() {}, finir() {}, fini: true };
+      return;
+    }
+    const POIDS = { polices: 20, three: 40, cibles: 30, rendu: 10 };
+    const faits = new Set();
+    let cible = 0;
+    let affiche = 0;
+    let avant = performance.now();
+    const pre = (window.__pre = {
+      fini: false,
+      avancer(k) {
+        if (faits.has(k)) return;
+        faits.add(k);
+        cible = Math.min(100, cible + (POIDS[k] || 0));
+      },
+      finir() {
+        cible = 100;
+      },
+    });
+    // Le compteur rattrape la valeur atteinte en temps (≈ 150 ms), pas en images : il ne traîne pas si la machine rame.
+    const tic = (now) => {
+      const dt = Math.min(200, now - avant);
+      avant = now;
+      affiche = Math.min(cible, affiche + Math.max(dt * 0.04, (cible - affiche) * (1 - Math.exp(-dt / 150))));
+      const el = document.querySelector('[data-compteur]');
+      if (el) el.textContent = String(Math.round(affiche)).padStart(3, '0');
+      if (affiche >= 100) {
+        try {
+          sessionStorage.setItem('pre', '1');
+        } catch {}
+        pre.fini = true;
+        document.dispatchEvent(new CustomEvent('pret'));
+        // Filet : si personne ne prend le relais (toile absente), on s'efface.
+        setTimeout(() => (html.dataset.pre = 'vu'), 900);
+        return;
+      }
+      requestAnimationFrame(tic);
+    };
+    requestAnimationFrame(tic);
+    setTimeout(() => pre.finir(), 2200); // plafond d'attente : le site s'affiche, les particules suivront
+  })();
+</script>
+
+<style>
+  .pre {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: flex-end;
+    padding: var(--gutter);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .compteur {
+    font-size: var(--t-xl);
+    letter-spacing: -0.02em;
+    line-height: 0.8;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Bascule nette, pas de fondu : les particules prennent la place des chiffres. */
+  :global(html[data-pre='vu']) .pre,
+  .pre:global(.fini) {
+    display: none;
+  }
+  /* Le fond disparaît d'abord, les chiffres restent une image le temps que la toile les reprenne. */
+  .pre:global(.relais) {
+    background: transparent;
+  }
+</style>

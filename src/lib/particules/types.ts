@@ -7,6 +7,8 @@ export type Teinte = [string, string?];
 export type Cible = {
   points: Vec3;
   teinte: Teinte;
+  /** Couleur propre à chaque point (rgb 0–1 entrelacés) ; remplace la teinte. */
+  couleurs?: Float32Array;
   /** Éclat des particules de la forme (0–1). Celles en surplus deviennent une poussière à 15 %. */
   eclat?: number;
 };
@@ -33,8 +35,13 @@ export interface Moteur {
   /** decalage : retard maximal par particule (s). instant : les particules sont posées sans trajet. */
   viser(c: Cible, r?: Partial<Reglages>, decalage?: number, instant?: boolean): void;
   reglages(r: Partial<Reglages>): void;
-  /** Décale toute la cible (px), pour suivre un élément qui défile sans rééchantillonner. */
-  decaler(dx: number, dy: number): void;
+  /**
+   * Position écran de l'ancre (px) : la simulation vit dans son repère, le rendu est décalé
+   * d'autant, sans retard. rebaser : l'ancre change, les particules ne bougent pas à l'écran.
+   */
+  decaler(dx: number, dy: number, rebaser?: boolean): void;
+  /** Appelé au début de chaque image (suivi des ancres). */
+  surImage(f: () => void): void;
   /** Couleur de fond (clear), animée sur `duree` ms. */
   fond(couleur: string, duree?: number): void;
   /** rayon > 0 : explosion depuis (x, y) dans ce rayon. rayon = 0 : onde de choc qui s'étend. */

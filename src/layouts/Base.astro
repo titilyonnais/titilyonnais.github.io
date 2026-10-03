@@ -2,6 +2,7 @@
 import '../styles/tokens.css';
 import '../styles/base.css';
 import Nav from '../components/Nav.astro';
+import Prechargeur from '../components/Prechargeur.astro';
 
 interface Props {
   title: string;
@@ -38,6 +39,7 @@ const og = new URL('/og.png', Astro.site);
     <slot name="head" />
     <noscript>
       <style is:inline>
+        .pre { display: none !important; }
         .mot { color: var(--fg) !important; }
         .el { grid-template-rows: 1fr !important; }
         .b { --r: 1 !important; }
@@ -49,6 +51,7 @@ const og = new URL('/og.png', Astro.site);
     </noscript>
   </head>
   <body>
+    <Prechargeur />
     <canvas id="particules" aria-hidden="true"></canvas>
     <a class="skip" href="#contenu">Aller au contenu</a>
     <Nav />

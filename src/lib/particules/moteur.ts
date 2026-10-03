@@ -38,6 +38,13 @@ function contexte(canvas: HTMLCanvasElement): WebGL2RenderingContext | null {
   return gl && gl.getExtension('EXT_color_buffer_float') ? gl : null;
 }
 
+/** Rendu logiciel (pas de GPU) : on part du plus petit palier plutôt que d'attendre le garde-fou. */
+function logiciel(gl: WebGL2RenderingContext): boolean {
+  const ext = gl.getExtension('WEBGL_debug_renderer_info');
+  const nom = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  return /swiftshader|llvmpipe|software|basic render/i.test(nom);
+}
+
 export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | null {
   const gl = contexte(canvas);
   if (!gl) return null;
@@ -66,7 +73,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   let prochaineOnde = 0;
   let explosion: [number, number, number, number] | null = null;
 
-  let palier = 0;
+  let palier = logiciel(gl) ? PALIERS.length - 1 : 0;
   let TW = 0;
   let TH = 0;
   let gpu: GPUComputationRenderer;
@@ -79,6 +86,8 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   let materiau: ShaderMaterial;
   let derniereCible: { c: Cible; decalage: number } | null = null;
   let decalage = { x: 0, y: 0 };
+  let recale = { x: 0, y: 0 };
+  const crochets: (() => void)[] = [];
 
   const temps = () => performance.now() / 1000;
 
@@ -124,11 +133,11 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
     u.uRaideur = { value: r.raideur };
     u.uAmorti = { value: r.amorti };
     u.uBruit = { value: r.bruit };
-    u.uDecalage = { value: [decalage.x, decalage.y] };
     u.uPointeur = { value: [ptr.x, ptr.y, 140, 0] };
     u.uOndes = { value: ondes.map(() => [0, 0, -10, 0]).flat() };
     u.uExplosion = { value: [0, 0, 0, 0] };
     (vPos.material.uniforms as Record<string, IUniform>).uDt = { value: 1 / 60 };
+    (vPos.material.uniforms as Record<string, IUniform>).uRecale = { value: [0, 0] };
 
     const err = gpu.init();
     if (err) throw new Error(err);
@@ -164,6 +173,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
         tCouleur: { value: tCouleur },
         tCouleurAvant: { value: tCouleurAvant },
         uRes: { value: [W, H] },
+        uDecalage: { value: [decalage.x, decalage.y] },
         uRot: { value: [0, 0] },
         uFocale: { value: FOCALE },
         uTaille: { value: r.taille },
@@ -252,10 +262,16 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       c[i * 4 + 1] = y;
       c[i * 4 + 2] = z;
       c[i * 4 + 3] = instant ? -1 : t + Math.random() * retard;
-      const k = Math.min(1, Math.max(0, (x - minX) / largeur));
-      col[i * 4] = Math.round((a[0] + (b[0] - a[0]) * k) * 255);
-      col[i * 4 + 1] = Math.round((a[1] + (b[1] - a[1]) * k) * 255);
-      col[i * 4 + 2] = Math.round((a[2] + (b[2] - a[2]) * k) * 255);
+      if (cible.couleurs && m) {
+        col[i * 4] = Math.round(cible.couleurs[j]! * 255);
+        col[i * 4 + 1] = Math.round(cible.couleurs[j + 1]! * 255);
+        col[i * 4 + 2] = Math.round(cible.couleurs[j + 2]! * 255);
+      } else {
+        const k = Math.min(1, Math.max(0, (x - minX) / largeur));
+        col[i * 4] = Math.round((a[0] + (b[0] - a[0]) * k) * 255);
+        col[i * 4 + 1] = Math.round((a[1] + (b[1] - a[1]) * k) * 255);
+        col[i * 4 + 2] = Math.round((a[2] + (b[2] - a[2]) * k) * 255);
+      }
       col[i * 4 + 3] = Math.round((surplus ? 0.15 : eclat) * 255);
     }
     tCible.needsUpdate = true;
@@ -265,8 +281,8 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       const pos = gpu.createTexture();
       const p = pos.image.data as Float32Array;
       for (let i = 0; i < n; i++) {
-        p[i * 4] = c[i * 4]! + decalage.x;
-        p[i * 4 + 1] = c[i * 4 + 1]! + decalage.y;
+        p[i * 4] = c[i * 4]!;
+        p[i * 4 + 1] = c[i * 4 + 1]!;
         p[i * 4 + 2] = c[i * 4 + 2]!;
         p[i * 4 + 3] = 1;
       }
@@ -289,20 +305,28 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   let lentDepuis = 0;
 
   function dessiner(t: number, dt: number) {
+    for (const f of crochets) f();
     const u = vVit.material.uniforms as Record<string, IUniform>;
+    const up = vPos.material.uniforms as Record<string, IUniform>;
     u.uTemps!.value = t;
     u.uDt!.value = dt;
-    (vPos.material.uniforms as Record<string, IUniform>).uDt!.value = dt;
-    u.uDecalage!.value = [decalage.x, decalage.y];
+    up.uDt!.value = dt;
 
-    // Souffle : proportionnel à la vitesse du curseur, qui retombe vite.
+    // Le curseur et les impulsions sont en coordonnées écran : on les ramène dans le repère de l'ancre.
     ptr.v *= 0.9;
-    u.uPointeur!.value = [ptr.x, ptr.y, 140, Math.min(ptr.v * 0.9, 2600) * r.souffle];
-    u.uOndes!.value = ondes.flatMap((o) => [o.x, o.y, o.t0, o.f]);
-    u.uExplosion!.value = explosion ?? [0, 0, 0, 0];
+    u.uPointeur!.value = [ptr.x - decalage.x, ptr.y - decalage.y, 140, Math.min(ptr.v * 0.9, 2600) * r.souffle];
+    u.uOndes!.value = ondes.flatMap((o) => [o.x - decalage.x, o.y - decalage.y, o.t0, o.f]);
+    u.uExplosion!.value = explosion ? [explosion[0] - decalage.x, explosion[1] - decalage.y, explosion[2], explosion[3]] : [0, 0, 0, 0];
     explosion = null;
 
-    if (dt > 0) gpu.compute();
+    if (recale.x || recale.y) {
+      up.uRecale!.value = [recale.x, recale.y];
+      // Recalage sans mouvement : un pas de simulation à dt nul.
+      if (dt === 0) up.uDt!.value = 0;
+      gpu.compute();
+      up.uRecale!.value = [0, 0];
+      recale = { x: 0, y: 0 };
+    } else if (dt > 0) gpu.compute();
 
     ptr.rx += (ptr.trx - ptr.rx) * 0.05;
     ptr.ry += (ptr.try - ptr.ry) * 0.05;
@@ -311,6 +335,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
     m.textureVitesse!.value = gpu.getCurrentRenderTarget(vVit).texture;
     m.uTemps!.value = t;
     m.uRot!.value = [ptr.rx, ptr.ry];
+    m.uDecalage!.value = [decalage.x, decalage.y];
 
     const k = Math.min(1, (performance.now() - fondT0) / fondDuree);
     fondActuel.copy(fondDepart).lerp(fondCible, k * k * (3 - 2 * k));
@@ -416,9 +441,14 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       Object.assign(r, reg);
       appliquerReglages();
     },
-    decaler(dx, dy) {
+    decaler(dx, dy, rebaser = false) {
+      // Rebaser : les particules restent où elles sont à l'écran, seul leur repère change.
+      if (rebaser) recale = { x: recale.x + decalage.x - dx, y: recale.y + decalage.y - dy };
       decalage = { x: dx, y: dy };
       if (fige) dessiner(temps(), 0);
+    },
+    surImage(f) {
+      crochets.push(f);
     },
     fond(couleur, duree = 450) {
       fondDepart.copy(fondActuel);

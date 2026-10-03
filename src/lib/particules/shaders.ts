@@ -61,7 +61,6 @@ uniform float uDt;
 uniform float uRaideur;
 uniform float uAmorti;
 uniform float uBruit;
-uniform vec2 uDecalage;
 uniform vec4 uPointeur;       // x, y, rayon, force (signée : + repousse, - attire)
 uniform vec4 uOndes[4];       // x, y, t0, force
 uniform vec4 uExplosion;      // x, y, force, rayon (appliquée une seule image)
@@ -72,7 +71,7 @@ void main(){
   vec3 p = texture2D(texturePosition, uv).xyz;
   vec3 v = texture2D(textureVitesse, uv).xyz;
   vec4 c = texture2D(tCible, uv);
-  vec3 cible = c.xyz + vec3(uDecalage, 0.0);
+  vec3 cible = c.xyz;
   float actif = smoothstep(c.w, c.w + 0.35, uTemps);
 
   vec3 acc = (cible - p) * uRaideur * mix(0.08, 1.0, actif);
@@ -109,13 +108,15 @@ void main(){
 }
 `;
 
+/** uRecale : translation ponctuelle quand l'ancre change, pour que rien ne bouge à l'écran. */
 export const SIM_POSITION = /* glsl */ `
 uniform float uDt;
+uniform vec2 uRecale;
 void main(){
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec3 p = texture2D(texturePosition, uv).xyz;
   vec3 v = texture2D(textureVitesse, uv).xyz;
-  gl_FragColor = vec4(p + v * uDt, 1.0);
+  gl_FragColor = vec4(p + v * uDt + vec3(uRecale, 0.0), 1.0);
 }
 `;
 
@@ -127,6 +128,7 @@ uniform sampler2D tCible;
 uniform sampler2D tCouleur;
 uniform sampler2D tCouleurAvant;
 uniform vec2 uRes;
+uniform vec2 uDecalage;
 uniform vec2 uRot;
 uniform float uFocale;
 uniform float uTaille;
@@ -141,7 +143,8 @@ void main(){
   vec3 v = texture2D(textureVitesse, ref).xyz;
   float depart = texture2D(tCible, ref).w;
 
-  vec3 q = p - vec3(uRes * 0.5, 0.0);
+  // La simulation vit dans le repère de l'ancre ; l'écran l'est décalé de uDecalage.
+  vec3 q = p + vec3(uDecalage, 0.0) - vec3(uRes * 0.5, 0.0);
   float cy = cos(uRot.y), sy = sin(uRot.y);
   q = vec3(cy * q.x + sy * q.z, q.y, -sy * q.x + cy * q.z);
   float cx = cos(uRot.x), sx = sin(uRot.x);
