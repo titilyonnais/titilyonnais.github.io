@@ -46,8 +46,13 @@ export interface Moteur {
 
 export type Etat = { frames: number; palier: number; station: string; running: boolean };
 
+/** Boîte écran en px CSS. */
+export type Placement = { x: number; y: number; w: number; h: number };
+
 declare global {
   interface Window {
     __particules?: Etat;
+    /** Accès de test aux cibles. */
+    __particulesApi?: { cible(cle: string, place: Placement, n: number, texte?: string): Promise<Float32Array> };
   }
 }

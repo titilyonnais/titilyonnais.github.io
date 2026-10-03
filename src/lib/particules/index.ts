@@ -8,6 +8,8 @@ import type { Etat, Moteur } from './types';
 export async function bootParticules(): Promise<Moteur | null> {
   const etat: Etat = { frames: 0, palier: 0, station: '', running: false };
   window.__particules = etat;
+  const { cible } = await import('./cibles');
+  window.__particulesApi = { cible };
   const canvas = document.getElementById('particules') as HTMLCanvasElement | null;
   if (!canvas) return null;
   const { creerMoteur } = await import('./moteur');
