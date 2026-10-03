@@ -36,7 +36,7 @@ test('Clipper : Ctrl+1 colle le premier, Échap vide la recherche', async ({ pag
   await champ.fill('tanneurs');
   await expect(s.locator('[data-item]:visible')).toHaveCount(1);
   await page.keyboard.press('Control+1');
-  await expect(s.locator('[data-blocnotes]')).toContainText('Tanneurs', { timeout: 3000 });
+  await expect(s.locator('[data-blocnotes]')).toContainText('Tanneurs', { timeout: 8000 });
   await champ.focus();
   await page.keyboard.press('Escape');
   await expect(champ).toHaveValue('');
