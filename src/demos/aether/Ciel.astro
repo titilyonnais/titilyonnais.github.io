@@ -7,8 +7,14 @@
  */
 import './tokens.css';
 import { THEMES } from './themes';
+
+interface Props {
+  /** Immobile : le fond d'une étude de cas, qu'on lit. */
+  statique?: boolean;
+}
+const { statique = false } = Astro.props;
 ---
-<div class="ae-ciel" data-ciel data-theme="aurore" aria-hidden="true">
+<div class="ae-ciel" data-ciel data-theme="aurore" data-statique={statique ? '' : undefined} aria-hidden="true">
   <div class="halos"></div>
   {
     THEMES.map((t) => (
@@ -98,6 +104,9 @@ import { THEMES } from './themes';
   .grain {
     opacity: 0.016;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .ae-ciel[data-statique] .vivante {
+    animation: none;
   }
   @media (prefers-reduced-motion: reduce) {
     .vivante {

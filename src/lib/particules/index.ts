@@ -1,4 +1,5 @@
 import type { Etat, Moteur } from './types';
+import { lirePassage, nuage } from './passage';
 
 type Pre = { avancer(k: string): void; finir(): void; fini: boolean };
 declare global {
@@ -41,6 +42,13 @@ export async function bootParticules(): Promise<Moteur | null> {
   }
   document.documentElement.dataset.particules = 'on';
   const moteur = m;
+
+  // Arrivée par un passage : la toile repart du nuage éclaté de la page d'avant.
+  const passage = lirePassage(location.pathname);
+  if (passage) {
+    document.documentElement.dataset.passage = 'lu';
+    if (!calme()) moteur.viser({ points: nuage(passage, moteur.n), teinte: [passage.teinte], eclat: 0.6 }, { bruit: 0, raideur: 0 }, 0, true);
+  }
 
   const section = document.querySelector<HTMLElement>('[data-station="hero"]');
   const { preparerHero } = await import('./hero');

@@ -222,42 +222,12 @@ p {
   text-transform: uppercase;
 }
 
-/* Transitions de page : la nouvelle page se déroule de haut en bas, sans fondu
-   (pas de gris intermédiaire). Le visuel d'une scène voyage jusqu'à l'en-tête
-   de son étude de cas. */
-::view-transition-old(root) {
-  animation: none;
-}
+/* Transitions de page : un fondu bref. Le spectacle, c'est le passage en particules
+   (lib/particules/passage.ts) : le nuage éclate au clic et se reforme à l'arrivée. */
+::view-transition-old(root),
 ::view-transition-new(root) {
-  animation: vt-deroule 0.75s var(--ease) both;
-}
-@keyframes vt-deroule {
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-::view-transition-group(visuel-postship),
-::view-transition-group(visuel-clipper),
-::view-transition-group(visuel-aether) {
-  animation-duration: 0.75s;
-  animation-timing-function: var(--ease);
-  z-index: 2;
-}
-::view-transition-old(visuel-postship),
-::view-transition-old(visuel-clipper),
-::view-transition-old(visuel-aether) {
-  animation: none;
-  opacity: 0;
-}
-::view-transition-new(visuel-postship),
-::view-transition-new(visuel-clipper),
-::view-transition-new(visuel-aether) {
-  animation: none;
-  height: 100%;
-  object-fit: fill;
+  animation-duration: 0.15s;
+  animation-timing-function: linear;
 }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),

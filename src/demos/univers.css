@@ -1,0 +1,162 @@
+/*
+ * L'univers d'un produit, pour son étude de cas : fond, texte, surface, accent
+ * et police des titres viennent des jetons du produit (src/demos/<produit>/tokens.css).
+ * Le texte courant reste en Mona Sans, la mono en IBM Plex Mono.
+ */
+body.univers-postship {
+  --u-bg: var(--ps-background);
+  --u-fg: var(--ps-foreground);
+  --u-surface: var(--ps-card);
+  --u-ligne: var(--ps-border);
+  --u-doux: var(--ps-muted-foreground);
+  --accent: var(--ps-signal);
+  --u-titre: 'Onest', system-ui, sans-serif;
+  --u-rayon: var(--ps-radius-cadre);
+}
+body.univers-clipper {
+  --u-bg: var(--cl-background);
+  --u-fg: var(--cl-foreground);
+  --u-surface: var(--cl-surface);
+  --u-ligne: var(--cl-border);
+  --u-doux: var(--cl-muted-foreground);
+  --accent: var(--cl-foreground);
+  --u-titre: 'Onest', system-ui, sans-serif;
+  --u-rayon: 10px;
+}
+body.univers-aether {
+  --u-bg: var(--ae-void);
+  --u-fg: var(--ae-ink);
+  --u-surface: var(--ae-mist);
+  --u-ligne: var(--ae-blanc-9);
+  --u-doux: var(--ae-ink-dim);
+  --accent: var(--ae-glacier);
+  --u-titre: 'Instrument Serif', serif;
+  --u-titre-style: italic;
+  --u-rayon: 16px;
+}
+
+/* Toutes les sections prennent le fond du produit ; les « papier » deviennent sa surface. */
+body[class*='univers-'] {
+  --bg: var(--u-bg);
+  --fg: var(--u-fg);
+  background: var(--u-bg);
+  color: var(--u-fg);
+}
+body[class*='univers-'] :is(.ink, .paper) {
+  --bg: var(--u-bg);
+  --fg: var(--u-fg);
+}
+body[class*='univers-'] .paper {
+  --bg: var(--u-surface);
+}
+body[class*='univers-'] :is(h1, h2) {
+  font-family: var(--u-titre);
+  font-style: var(--u-titre-style, normal);
+  font-stretch: 100%;
+  text-transform: none;
+}
+body[class*='univers-'] ::selection {
+  background: var(--accent);
+  color: var(--u-bg);
+}
+
+/* Sans toile de particules, l'ouverture d'ÆTHER laisse voir son ciel. */
+html:not([data-particules='on']) body.univers-aether .ouverture {
+  background: transparent;
+}
+
+/* Figures : dans la matière du produit. */
+body[class*='univers-'] .fig {
+  border-color: var(--u-ligne);
+  border-radius: var(--u-rayon);
+  background: var(--u-surface);
+}
+body.univers-postship .fig .term p:first-child {
+  color: var(--accent);
+}
+body.univers-postship .fig .term p:not(:first-child) {
+  color: var(--u-doux);
+}
+body.univers-postship .fig .bascule {
+  border-color: var(--ps-border);
+  border-radius: var(--ps-radius-ctl);
+  background: var(--ps-secondary);
+}
+body.univers-postship .fig .bascule.inverse {
+  border-color: var(--ps-ok);
+  background: var(--ps-ok-fond);
+  color: var(--ps-foreground);
+}
+
+/* Clipper : des lignes d'historique en tuiles, des touches qui s'enfoncent. */
+body.univers-clipper .fig .liste {
+  border-top: 0;
+  display: grid;
+  gap: 6px;
+}
+body.univers-clipper .fig .liste li {
+  border: 1px solid var(--cl-line);
+  border-radius: 8px;
+  background: var(--cl-popover);
+}
+body.univers-clipper .fig .liste li.actif {
+  background: var(--cl-selected);
+  border-color: var(--cl-border);
+  color: var(--cl-foreground);
+  box-shadow: inset 2px 0 0 var(--cl-foreground);
+}
+body.univers-clipper .fig kbd {
+  font-family: 'Onest', system-ui, sans-serif;
+  border: 1px solid var(--cl-border);
+  border-radius: 10px;
+  background: var(--cl-popover);
+  box-shadow: 0 4px 0 var(--cl-muted);
+}
+body.univers-clipper .fig kbd.presse {
+  background: var(--cl-secondary);
+  color: var(--cl-foreground);
+  box-shadow: 0 1px 0 var(--cl-muted);
+}
+
+/* ÆTHER : des cartes en verre sur le ciel. */
+body.univers-aether .fig {
+  background: var(--ae-blanc-3);
+  border-color: var(--ae-blanc-7);
+  backdrop-filter: blur(24px) saturate(1.25);
+  box-shadow: var(--ae-ombre-carte);
+}
+body.univers-aether .fig .liste {
+  border-top: 0;
+}
+body.univers-aether .fig .liste li {
+  border: 0;
+  border-radius: 8px;
+}
+body.univers-aether .fig .liste li.actif {
+  background: var(--ae-blanc-8);
+  color: var(--ae-glacier);
+}
+body.univers-aether .fig kbd {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  border: 1px solid var(--ae-blanc-9);
+  border-radius: 8px;
+  background: var(--ae-blanc-4);
+  color: var(--ae-ink-dim);
+}
+body.univers-aether .fig kbd.presse {
+  background: var(--ae-blanc-13);
+  color: var(--ae-glacier);
+}
+body.univers-aether .fig .term p:first-child {
+  color: var(--ae-lavande);
+}
+
+/* Schéma : les liens à l'accent, les nœuds sur la surface. */
+body[class*='univers-'] [data-schema] .noeud rect {
+  fill: var(--u-surface);
+  stroke: var(--u-ligne);
+  rx: 8px;
+}
+body[class*='univers-'] [data-schema] .lien {
+  stroke: var(--accent);
+}

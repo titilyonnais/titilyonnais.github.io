@@ -1,7 +1,8 @@
 /* Source : claude-projects/clipper/loopy-clipboard/src/styles.css (thème sombre) */
 .cl,
 .cl-touches,
-.cl-notes {
+.cl-notes,
+body.univers-clipper {
   --cl-background: #000000;
   --cl-surface: #0f0f0f;
   --cl-popover: #141414;

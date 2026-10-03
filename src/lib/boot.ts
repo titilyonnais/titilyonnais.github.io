@@ -2,9 +2,11 @@ import { startScroll, refreshWhenFontsReady } from './motion';
 import { bootScenes } from './motion/scene';
 import { bootTitres } from './titres';
 import { bootParticules } from './particules';
+import { bootPassages } from './particules/passage';
 
 startScroll();
 void bootParticules();
+bootPassages();
 bootTitres();
 bootScenes();
 refreshWhenFontsReady();

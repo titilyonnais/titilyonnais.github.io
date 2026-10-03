@@ -7,8 +7,10 @@ import Prechargeur from '../components/Prechargeur.astro';
 interface Props {
   title: string;
   description: string;
+  /** Une étude de cas prend l'univers de son produit (body.univers-<id>, voir demos/univers.css). */
+  univers?: string;
 }
-const { title, description } = Astro.props;
+const { title, description, univers } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const og = new URL('/og.png', Astro.site);
 ---
@@ -50,7 +52,7 @@ const og = new URL('/og.png', Astro.site);
       </style>
     </noscript>
   </head>
-  <body>
+  <body class={univers ? `univers-${univers}` : undefined}>
     <Prechargeur />
     <slot name="ciel" />
     <canvas id="particules" aria-hidden="true"></canvas>

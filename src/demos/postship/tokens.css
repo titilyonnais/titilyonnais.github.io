@@ -1,5 +1,6 @@
 /* Source : claude-projects/postship/src/app/globals.css (thème sombre) */
-.ps {
+.ps,
+body.univers-postship {
   --ps-background: #000000;
   --ps-foreground: #ededed;
   --ps-card: #0f0f0f;
