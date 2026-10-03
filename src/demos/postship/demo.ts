@@ -113,8 +113,21 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     passer('repos');
   };
 
+  // Lancée au clavier, la démo garde le focus : le bouton pressé disparaît, le suivant le reçoit.
+  let auClavier = false;
+  const focaliser = (action: string) => {
+    if (!auClavier) return;
+    // Le panneau apparaît par une transition de visibilité (0,32 s) : on attend qu'il soit là,
+    // et on ne reprend pas le focus si le visiteur est allé ailleurs entre-temps.
+    apres(calme ? 0 : 340, () => {
+      const ici = document.activeElement;
+      if (ici && ici !== document.body && !ps.contains(ici)) return;
+      ps.querySelector<HTMLElement>(`[data-action="${action}"]`)?.focus({ preventScroll: true });
+    });
+  };
   const pousser = () => {
     if (etat !== 'repos') return;
+    auClavier = !enAuto && ps.contains(document.activeElement) && document.activeElement !== document.body;
     passer('pousse');
     bilan.textContent = 'Déploiement reçu · Vercel';
     dire('Déploiement a1b2c3d reçu : feat: nouveau checkout.');
@@ -156,6 +169,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
 
   const alerte = () => {
     passer('alerte');
+    focaliser('retour');
     dire(ALERTE);
     if (enAuto) apres(1800, () => enAuto && retour());
   };
@@ -177,6 +191,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
       sante(true);
       poserScore(100, true);
       dire('Rétabli en 3,8 s. Ship Score 100 sur 100.');
+      focaliser('rejouer');
       enAuto = false;
     });
   };

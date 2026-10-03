@@ -37,3 +37,20 @@ test('redimensionner pendant la démo garde l’état', async ({ page }) => {
   await page.waitForTimeout(400);
   await expect(page.locator('#postship [data-etat-demo]')).not.toHaveAttribute('data-etat-demo', 'repos');
 });
+
+test('en descendant pas à pas, le contour de la fenêtre se dessine à son arrivée', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => !!window.__chef, null, { timeout: 15_000 });
+  const [cible, h] = await page.evaluate(() => {
+    const p = document.querySelector<HTMLElement>('#postship .piste')!;
+    const top = p.getBoundingClientRect().top + scrollY;
+    return [top + 0.05 * (p.offsetHeight - innerHeight), innerHeight];
+  });
+  // On part de deux écrans et demi plus haut (la scène se monte un écran à l'avance), puis on descend.
+  for (let y = cible - 2.5 * h; y < cible; y += h / 8) {
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), y);
+    await page.waitForTimeout(60);
+  }
+  await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), cible);
+  await page.waitForFunction(() => window.__chef?.forme === 'contour', null, { timeout: 3000 });
+});

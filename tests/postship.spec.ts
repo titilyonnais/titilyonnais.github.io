@@ -25,6 +25,20 @@ test('PostShip : se joue seul après inaction', async ({ page }) => {
   await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', 'retabli', { timeout: 15000 });
 });
 
+test('au clavier, le focus suit la démo jusqu’à « Remettre en ligne le précédent »', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'clavier : bureau');
+  await page.goto('/');
+  await allerA(page, 'postship', 0.7);
+  await montee(page, 'postship');
+  await allerA(page, 'postship', 0.7);
+  const s = page.locator('#postship');
+  await s.locator('[data-etat-demo]').dispatchEvent('pointerdown'); // la main est prise
+  await s.locator('[data-action="pousser"]').focus();
+  await page.keyboard.press('Enter');
+  await expect(s.locator('[data-etat-demo]')).toHaveAttribute('data-etat-demo', 'alerte', { timeout: 8000 });
+  await expect(s.locator('[data-action="retour"]')).toBeFocused();
+});
+
 test.describe('calme', () => {
   test.use({ reducedMotion: 'reduce' });
   test('PostShip calme : la fenêtre est posée de face, la démo marche', async ({ page }) => {

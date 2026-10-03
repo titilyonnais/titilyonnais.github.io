@@ -114,8 +114,15 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
     }
     const c = chef();
 
-    // Arrivée : le contour en particules, puis l'interface à 0,12.
-    if (c && t < 0.12 && !pose) {
+    // Arrivée : le contour en particules, puis l'interface à 0,12. Pas avant t > 0 : la scène
+    // se monte un écran à l'avance, quand la station d'avant tient encore la toile.
+    if (c && t <= 0) {
+      vue(false);
+      if (pose) {
+        pose = false;
+        c.liberer();
+      }
+    } else if (c && t < 0.12 && !pose) {
       pose = true;
       vue(false);
       c.poser(fen);

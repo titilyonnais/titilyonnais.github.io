@@ -40,6 +40,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   let collage = 0;
   let revele = false;
   let revelation = 0;
+  let envol = false; // des particules volent vers le Bloc-notes : il faudra rendre la toile
 
   const dire = (t: string) => (annonce.textContent = t);
   if (invite) invite.textContent = 'Tapez, ou essayez une suggestion';
@@ -125,13 +126,20 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   };
 
   const ecrire = async (texte: string, c: number) => {
-    const debut = notes.textContent ? notes.textContent + '\n' : '';
+    const avant = notes.textContent ?? '';
+    const debut = avant ? avant + '\n' : '';
     if (calme) return void (notes.textContent = debut + texte);
     for (let i = 1; i <= texte.length; i++) {
-      if (c !== collage) return;
+      // Collage annulé en cours de frappe : pas de ligne à moitié tapée.
+      if (c !== collage) return void (notes.textContent = avant);
       notes.textContent = debut + texte.slice(0, i);
       await pause(8);
     }
+  };
+  const rendreToile = () => {
+    if (!envol) return;
+    envol = false;
+    leChef()?.liberer();
   };
 
   /**
@@ -146,8 +154,9 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     const chef = leChef();
     if (chef && !calme) {
       const blanc = getComputedStyle(cl).getPropertyValue('--cl-foreground').trim();
+      envol = true;
       await chef.envoler(ligne.getBoundingClientRect(), fenNotes.getBoundingClientRect(), blanc);
-      setTimeout(() => c === collage && chef.liberer(), 1000);
+      setTimeout(() => c === collage && rendreToile(), 1000);
     }
     if (c !== collage) return;
     await ecrire(e.contenu, c);
@@ -177,7 +186,9 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
 
   const clavier = (e: KeyboardEvent) => {
     if (!fen.contains(document.activeElement)) return;
-    const n = e.ctrlKey && !e.shiftKey && !e.altKey ? Number(e.key) : NaN;
+    // La touche physique, comme Clipper (PopupApp.tsx) : en AZERTY, Ctrl+1 donne « & ».
+    const chiffre = /^(?:Digit|Numpad)([1-9])$/.exec(e.code)?.[1];
+    const n = e.ctrlKey && !e.shiftKey && !e.altKey && chiffre ? Number(chiffre) : NaN;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       deplacer(e.key === 'ArrowDown' ? 1 : -1);
@@ -259,6 +270,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     clearTimeout(auto);
     gen++;
     collage++; // le collage automatique en cours s'arrête là
+    rendreToile();
   };
   const present = () => {
     if (demo && !touche) armer();

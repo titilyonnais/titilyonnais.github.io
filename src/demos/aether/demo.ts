@@ -31,7 +31,6 @@ const PAS = 1.25;
 export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   const section = root.closest<HTMLElement>('section') ?? root;
   const scene = root.querySelector<HTMLElement>('.scene')!;
-  const fen = root.querySelector<HTMLElement>('[data-fenetre]')!;
   const ae = root.querySelector<HTMLElement>('.ae')!;
   const toile = ae.querySelector<HTMLElement>('.toile')!;
   const grille = ae.querySelector<HTMLElement>('[data-toile]')!;
@@ -52,16 +51,19 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
 
   const cartes = () => [...monde.querySelectorAll<HTMLElement>('[data-carte]')];
   const dire = (t: string) => (annonce.textContent = t);
-  if (invite) invite.textContent = opts.mobile ? 'Touchez la Barre d’Intention' : 'Ctrl K, ou cliquez la Barre d’Intention';
 
-  // Sur téléphone, les cartes prennent leurs places de téléphone.
-  if (opts.mobile) {
-    monde.querySelectorAll<HTMLElement>('[data-pos-mobile]').forEach((c) => {
-      const [x, y] = c.dataset.posMobile!.split(',').map(Number);
+  // Sur téléphone (la mise en page de la fenêtre change sous 768 px), les cartes prennent leurs places
+  // de téléphone. Elles en changent si l'écran tourne pendant la démo.
+  const etroit = matchMedia('(max-width: 767px)');
+  const placer = (mobile: boolean) => {
+    if (invite) invite.textContent = mobile ? 'Touchez la Barre d’Intention' : 'Ctrl K, ou cliquez la Barre d’Intention';
+    monde.querySelectorAll<HTMLElement>('[data-pos]').forEach((c) => {
+      const [x, y] = (mobile ? c.dataset.posMobile! : c.dataset.pos!).split(',').map(Number);
       c.style.left = `${x}px`;
       c.style.top = `${y}px`;
     });
-  }
+  };
+  placer(etroit.matches);
 
   // ——— La caméra de la Toile : translation puis échelle du calque monde. ———
   const cam = { x: 0, y: 0, zoom: 0.62 };
@@ -101,7 +103,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     const y1 = Math.max(...ps.map((p) => p.y + CH));
     const W = grille.clientWidth;
     const H = grille.clientHeight;
-    const m = opts.mobile ? 24 : 90;
+    const m = etroit.matches ? 24 : 90;
     const zoom = borne(Math.min((W - 2 * m) / (x1 - x0), (H - 2 * m) / (y1 - y0)), ZMIN, 1.15);
     const cible = { zoom, x: (W - (x1 - x0) * zoom) / 2 - x0 * zoom, y: (H - (y1 - y0) * zoom) / 2 - y0 * zoom };
     gsap.killTweensOf(cam);
@@ -300,7 +302,9 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     c.dataset.carte = `libre-${++libres}`;
     c.dataset.espaceDe = espace;
     const ps = cartes().map(position);
-    c.style.cssText = `--h: ${teinteDe(domaine)}; left: ${Math.max(...ps.map((p) => p.x)) + CW + 50}px; top: ${Math.min(...ps.map((p) => p.y))}px`;
+    const [x, y] = [Math.max(...ps.map((p) => p.x)) + CW + 50, Math.min(...ps.map((p) => p.y))];
+    c.style.cssText = `--h: ${teinteDe(domaine)}; left: ${x}px; top: ${y}px`;
+    c.dataset.pos = c.dataset.posMobile = `${x},${y}`; // sa place, quel que soit l'écran
     c.setAttribute('aria-label', `${titre} — ${domaine}`);
     c.querySelectorAll('.favicon').forEach((x) => (x.textContent = domaine.charAt(0)));
     c.querySelector('.c-dom')!.textContent = domaine;
@@ -336,7 +340,6 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   let touche = false;
   let auto = 0;
   let demo = false;
-  let survol = false;
 
   const lancerAuto = async () => {
     const g = ++gen;
@@ -404,16 +407,21 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   };
   const ctrlK = (e: KeyboardEvent) => {
     if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'k') return;
-    if (!root.contains(document.activeElement) && !(survol && demo)) return;
+    // Seulement quand le focus est dans la scène : ailleurs, Ctrl K reste au navigateur.
+    if (!root.contains(document.activeElement)) return;
     e.preventDefault();
     reprendre();
     ouvrir();
   };
-  const entre = () => {
-    survol = true;
-    present();
+  // Un clic dans la fenêtre y met le focus (la Toile n'est pas un champ) : Ctrl K s'adresse alors à ÆTHER.
+  const engager = () =>
+    setTimeout(() => {
+      if (!root.contains(document.activeElement)) ae.focus({ preventScroll: true });
+    });
+  const tourner = () => {
+    placer(etroit.matches);
+    requestAnimationFrame(() => cadrer(false));
   };
-  const sort = () => (survol = false);
   const sceneAe = ae.parentElement!;
 
   sceneAe.addEventListener('click', clic);
@@ -429,8 +437,8 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   document.addEventListener('keydown', ctrlK);
   for (const t of ['pointerdown', 'keydown', 'focusin'] as const) sceneAe.addEventListener(t, reprendre);
   sceneAe.addEventListener('pointermove', present);
-  fen.addEventListener('pointerenter', entre);
-  fen.addEventListener('pointerleave', sort);
+  sceneAe.addEventListener('pointerdown', engager);
+  etroit.addEventListener('change', tourner);
 
   CARTES.forEach((_, i) => prendre(cartes()[i]!));
   appliquerEspace();
@@ -478,8 +486,8 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
       document.removeEventListener('keydown', ctrlK);
       for (const t of ['pointerdown', 'keydown', 'focusin'] as const) sceneAe.removeEventListener(t, reprendre);
       sceneAe.removeEventListener('pointermove', present);
-      fen.removeEventListener('pointerenter', entre);
-      fen.removeEventListener('pointerleave', sort);
+      sceneAe.removeEventListener('pointerdown', engager);
+      etroit.removeEventListener('change', tourner);
       drags.forEach((d) => d.kill());
       drags.clear();
       document.documentElement.style.removeProperty('--ae-particules-1');

@@ -66,6 +66,42 @@ test('au doigt, la toile laisse défiler la page hors des cartes', async ({ page
   expect(carte).toBe('none');
 });
 
+test('Ctrl K : rien au simple survol, la Barre après un clic dans la fenêtre', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'clavier et souris : bureau');
+  await page.goto('/');
+  await allerA(page, 'aether', 0.7);
+  await montee(page, 'aether');
+  await allerA(page, 'aether', 0.7);
+  const s = page.locator('#aether');
+  await s.locator('[data-toile]').hover({ position: { x: 20, y: 20 } });
+  await page.keyboard.press('Control+k');
+  await page.waitForTimeout(200);
+  await expect(s.locator('[data-intention]')).toBeHidden();
+  await s.locator('[data-toile]').click({ position: { x: 20, y: 20 } });
+  await page.keyboard.press('Control+k');
+  await expect(s.locator('[data-intention]')).toBeVisible();
+});
+
+test('passer sous 768 px pendant la démo remet les cartes dans le cadre', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'part du bureau');
+  await page.goto('/');
+  await allerA(page, 'aether', 0.7);
+  await montee(page, 'aether');
+  await allerA(page, 'aether', 0.7);
+  const s = page.locator('#aether');
+  await s.locator('.ae').dispatchEvent('pointerdown'); // la main est prise : pas de démo automatique
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(800);
+  await allerA(page, 'aether', 0.7);
+  await page.waitForTimeout(500);
+  const t = (await s.locator('[data-toile]').boundingBox())!;
+  for (const c of await s.locator('[data-carte]').all()) {
+    const b = (await c.boundingBox())!;
+    const [cx, cy] = [b.x + b.width / 2, b.y + b.height / 2];
+    expect(cx > t.x && cx < t.x + t.width && cy > t.y && cy < t.y + t.height).toBe(true);
+  }
+});
+
 test.describe('calme', () => {
   test.use({ reducedMotion: 'reduce' });
   test('ÆTHER calme : la fenêtre est posée, la Barre d’Intention marche', async ({ page }) => {

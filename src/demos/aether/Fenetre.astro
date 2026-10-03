@@ -38,7 +38,7 @@ const proches: [string, string][] = [
 const futur = (id: string) => INTENTION.some((c) => c.id === id);
 ---
 <div class="ae-scene" data-3d>
-  <div class="ae" data-3d>
+  <div class="ae" data-3d tabindex="-1">
     <header class="titre" data-couche data-z="200" data-legende="Barre d’Intention">
       <div class="t-gauche">
         <span class="ae-logo">Æ</span>
@@ -228,6 +228,10 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
     border-radius: 12px;
     box-shadow: var(--ae-ombre-forte);
     text-align: left;
+  }
+  /* Focalisable au clic (Ctrl K), jamais au clavier : pas de contour. */
+  .ae:focus {
+    outline: none;
   }
   .ae :global(svg) {
     flex-shrink: 0;
