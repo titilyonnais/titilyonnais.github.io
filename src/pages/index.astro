@@ -4,7 +4,8 @@ import Hero from '../components/Hero.astro';
 import Methode from '../components/Methode.astro';
 import APropos from '../components/APropos.astro';
 import Contact from '../components/Contact.astro';
-import PostShip from '../components/scenes/PostShip.astro';
+import SceneProduit from '../components/scenes/SceneProduit.astro';
+import PostShipFenetre from '../demos/postship/Fenetre.astro';
 import Clipper from '../components/scenes/Clipper.astro';
 import Aether from '../components/scenes/Aether.astro';
 import { getEntry } from 'astro:content';
@@ -19,7 +20,9 @@ const aether = (await getEntry('projets', 'aether'))!;
 >
   <Hero />
   <Methode />
-  <PostShip projet={postship} />
+  <SceneProduit projet={postship} fond="ink" numero="01" pin={4} largeur={1200} hauteur={750} teinte="--teinte-postship">
+    <PostShipFenetre />
+  </SceneProduit>
   <Clipper projet={clipper} />
   <Aether projet={aether} />
   <APropos />

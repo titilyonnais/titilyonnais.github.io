@@ -1,0 +1,36 @@
+import { test, expect } from '@playwright/test';
+import { allerA, montee } from './aide';
+
+test('la fenêtre s’éclate puis se réassemble', async ({ page }) => {
+  await page.goto('/');
+  await allerA(page, 'postship', 0.3);
+  await montee(page, 'postship');
+  await allerA(page, 'postship', 0.3);
+  const z = await page.locator('#postship [data-couche]').nth(1).evaluate((e) => getComputedStyle(e).transform);
+  expect(z).not.toBe('none');
+  await allerA(page, 'postship', 0.7);
+  await expect(page.locator('#postship .scene')).toHaveAttribute('data-demo', 'on');
+});
+
+test('la fenêtre tient dans son théâtre', async ({ page }) => {
+  await page.goto('/');
+  await allerA(page, 'postship', 0.7);
+  await montee(page, 'postship');
+  await allerA(page, 'postship', 0.7);
+  const [f, t] = await Promise.all(
+    ['#postship [data-fenetre]', '#postship .theatre'].map((s) => page.locator(s).evaluate((e) => e.getBoundingClientRect().toJSON())),
+  );
+  expect(f.width).toBeLessThanOrEqual(t.width + 1);
+  expect(f.height).toBeLessThanOrEqual(t.height + 1);
+});
+
+// Passe après la démo PostShip (Task 7) : fixe le contrat dès maintenant.
+test.fixme('redimensionner pendant la démo garde l’état', async ({ page }) => {
+  await page.goto('/');
+  await allerA(page, 'postship', 0.7);
+  await page.click('#postship [data-action="pousser"]');
+  await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', /verifie|panne|alerte/);
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await page.waitForTimeout(400);
+  await expect(page.locator('#postship [data-etat-demo]')).not.toHaveAttribute('data-etat-demo', 'repos');
+});

@@ -1,0 +1,27 @@
+---
+/* Fenêtre PostShip : remplacée par l'interface réelle à la Task 7. */
+---
+<div class="ps" data-3d data-etat-demo="repos">
+  <div class="couche barre" data-couche data-z="60" data-legende="Projets"></div>
+  <div class="couche haut" data-couche data-z="140" data-legende="Espace de travail"></div>
+  <div class="couche corps" data-couche data-z="220" data-legende="Disponibilité"></div>
+</div>
+
+<style>
+  .ps {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 52px 1fr;
+    width: 100%;
+    height: 100%;
+    background: var(--ink);
+    outline: 1px solid var(--paper);
+  }
+  .barre {
+    grid-row: 1 / -1;
+    border-right: 1px solid var(--paper);
+  }
+  .haut {
+    border-bottom: 1px solid var(--paper);
+  }
+</style>

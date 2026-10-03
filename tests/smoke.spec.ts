@@ -5,6 +5,7 @@ const pages = ['/', '/projets/postship/', '/projets/clipper/', '/projets/aether/
 
 for (const url of pages) {
   test(`${url} se charge sans erreur`, async ({ page }) => {
+    test.setTimeout(120_000); // page entière parcourue écran par écran, toile comprise
     const errs = erreurs(page);
     const rep = await page.goto(url);
     expect(rep?.status()).toBe(200);

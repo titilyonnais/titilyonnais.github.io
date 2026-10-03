@@ -1,0 +1,241 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Fleche from '../Fleche.astro';
+
+interface Props {
+  projet: CollectionEntry<'projets'>;
+  fond: 'ink' | 'paper';
+  numero: string;
+  pin: number;
+  /** Taille native de la fenêtre, en px ; elle est mise à l'échelle de son théâtre. */
+  largeur: number;
+  hauteur: number;
+  /** Variables CSS de la teinte des particules, séparées par des virgules. */
+  teinte: string;
+}
+const { projet, fond, numero, pin, largeur, hauteur, teinte } = Astro.props;
+const { nom, phrase, faits, liens, stack } = projet.data;
+const id = projet.id;
+---
+<section id={id} class={`projet ${fond}`} aria-labelledby={`${id}-titre`} data-station={`${id}-fenetre`} data-fond={fond} data-teinte={teinte}>
+  <div class="piste" data-scene={id} style={`--pin: ${pin}`}>
+    <div class="scene" data-demo="off">
+      <header class="tete wrap">
+        <div class="etiquette mono"><span>{numero}</span><span>{projet.data.etat}</span></div>
+        <h2 id={`${id}-titre`} class="nom" data-etire>{nom}</h2>
+        <p class="phrase">{phrase}</p>
+      </header>
+      <div class="theatre" data-place>
+        <div class="fenetre" data-fenetre data-vue="1" style={`--w: ${largeur}px; --h: ${hauteur}px`}>
+          <slot />
+        </div>
+        <p class="invite mono" data-invite aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sortie wrap grid">
+    <dl class="faits">
+      {
+        faits.map((f) => (
+          <div>
+            <dt class="valeur">{f.valeur}</dt>
+            <dd class="mono">{f.libelle}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <div class="bas">
+      <p class="stack mono">{stack.join(' · ')}</p>
+      <ul class="liens mono">
+        {
+          liens.map((l) => (
+            <li>
+              <a href={l.href}>
+                {l.label} <Fleche sens="diag" />
+              </a>
+            </li>
+          ))
+        }
+        <li class="cas">
+          <a href={`/projets/${id}/`}>
+            Étude de cas <Fleche />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .scene {
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(var(--nav-h) + 1rem);
+  }
+  .tete {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: 0.4rem 2rem;
+    width: 100%;
+  }
+  .etiquette {
+    grid-column: 1 / -1;
+  }
+  .nom {
+    font-size: var(--t-xl);
+    line-height: 0.9;
+    hyphens: none;
+  }
+  .phrase {
+    font-size: var(--t-base);
+    max-width: 40ch;
+    justify-self: end;
+    text-align: right;
+  }
+
+  /* Le théâtre : la fenêtre y flotte en perspective, à l'échelle --k. */
+  .theatre {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 1.25rem var(--gutter) 2.75rem;
+    perspective: 1600px;
+    perspective-origin: 50% 40%;
+  }
+  .fenetre {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--w);
+    height: var(--h);
+    transform: translate(-50%, -50%) scale(var(--k, 1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform-style: preserve-3d;
+    transition:
+      opacity 0.3s var(--ease),
+      visibility 0.3s;
+  }
+  .fenetre[data-vue='0'] {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .fenetre :global([data-3d]) {
+    transform-style: preserve-3d;
+  }
+  .fenetre :global([data-couche]) {
+    position: relative;
+    transform: translateZ(var(--tz, 0px));
+  }
+  .fenetre :global(.legende) {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 0.5rem);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 0.3rem 0.45rem;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease);
+    pointer-events: none;
+  }
+  .fenetre[data-legendes='on'] :global(.legende) {
+    opacity: 1;
+  }
+  .invite {
+    position: absolute;
+    left: 50%;
+    bottom: -2rem;
+    transform: translateX(-50%);
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+  }
+  .scene[data-demo='on'] .invite {
+    opacity: 1;
+  }
+
+  .sortie {
+    position: relative;
+    padding-block: 4rem 6rem;
+    row-gap: 3rem;
+  }
+  .faits {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--col-gap);
+  }
+  .faits div {
+    border-top: 1px solid var(--fg);
+    padding-top: 0.75rem;
+  }
+  .valeur {
+    font-size: var(--t-l);
+    letter-spacing: var(--track-title);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .faits dd {
+    max-width: 26ch;
+  }
+  .bas {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: baseline;
+  }
+  .stack {
+    max-width: 60ch;
+  }
+  .liens {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+  }
+  .cas a {
+    background: var(--fg);
+    color: var(--bg);
+    padding: 0.55rem 0.9rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    display: inline-flex;
+    gap: 0.75em;
+    align-items: center;
+  }
+  .cas a:hover {
+    outline: 1px solid var(--fg);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 1023px) {
+    .tete {
+      grid-template-columns: 1fr;
+    }
+    .nom {
+      font-size: var(--t-l);
+    }
+    .phrase {
+      justify-self: start;
+      text-align: left;
+      font-size: var(--t-s);
+    }
+    .faits {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 2rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scene {
+      height: 100svh;
+    }
+  }
+</style>

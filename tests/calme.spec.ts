@@ -22,15 +22,6 @@ test.describe('version calme (réduire les animations)', () => {
     expect(errs).toEqual([]);
   });
 
-  test('PostShip : score final 100 et sept vérifications en clair', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('#postship').scrollIntoViewIfNeeded();
-    await expect(page.locator('#postship .score')).toHaveText('100');
-    await expect(page.locator('#postship .verif')).toHaveCount(7);
-    await expect(page.locator('#postship .verif .st').last()).toHaveText('rétabli');
-    await expect(page.locator('#postship .msg')).toContainText('71');
-  });
-
   test('Clipper : la clé est masquée et marquée comme secret', async ({ page }) => {
     await page.goto('/');
     await page.locator('#clipper').scrollIntoViewIfNeeded();
@@ -48,15 +39,6 @@ test.describe('version calme (réduire les animations)', () => {
 });
 
 test.describe('scènes au défilement', () => {
-  test('PostShip passe par 71 puis revient à 100', async ({ page }) => {
-    await page.goto('/');
-    await allerA(page, 'postship', 0.66);
-    await expect(page.locator('#postship .score')).toHaveText('71');
-    await expect(page.locator('#postship .verif').last()).toHaveClass(/echec/);
-    await allerA(page, 'postship', 0.95);
-    await expect(page.locator('#postship .score')).toHaveText('100');
-  });
-
   test('Clipper filtre sur « facture » : trois éléments', async ({ page }) => {
     await page.goto('/');
     await allerA(page, 'clipper', 0.58);
