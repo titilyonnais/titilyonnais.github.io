@@ -15,7 +15,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'bureau', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /smoke|aether/ },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /smoke|aether|particules|hero|chef|postship|clipper|fenetre|cas|secours/ },
   ],
   webServer: live
     ? undefined

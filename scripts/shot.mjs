@@ -1,8 +1,10 @@
-// Captures de contrôle : node scripts/shot.mjs <url> <sortie-sans-ext> [largeur] [hauteur] [y1,y2,…] [--calm]
+// Captures de contrôle : node scripts/shot.mjs <url> <sortie-sans-ext> [largeur] [hauteur] [y1,y2,…] [--calm] [--attente=ms] [--js=code]
+// Le GPU est activé : la toile de particules a besoin d'un vrai WebGL2 pour être jugée à l'œil.
 import { chromium } from '@playwright/test';
 
 const [url = 'http://localhost:4321/', out = 'shot', w = '1440', h = '900', ys = '0', ...flags] = process.argv.slice(2);
-const browser = await chromium.launch();
+const opt = (k, d) => (flags.find((f) => f.startsWith(`--${k}=`)) ?? `=${d}`).split('=').slice(1).join('=');
+const browser = await chromium.launch({ args: ['--enable-gpu', '--ignore-gpu-blocklist', '--use-angle=d3d11'] });
 const page = await browser.newPage({
   viewport: { width: +w, height: +h },
   deviceScaleFactor: 1,
@@ -12,7 +14,8 @@ const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.goto(url, { waitUntil: 'networkidle' });
-await page.waitForTimeout(1600);
+await page.waitForTimeout(+opt('attente', 1600));
+if (opt('js', '')) await page.evaluate(opt('js', ''));
 const list = ys.split(',');
 for (const y of list) {
   // Les y en « % » visent une fraction de la hauteur totale ; « #id » vise un élément.
