@@ -19,6 +19,9 @@ const image = () => new Promise((r) => requestAnimationFrame(() => requestAnimat
 export async function bootParticules(): Promise<Moteur | null> {
   const etat: Etat = { frames: 0, palier: 0, station: '', running: false };
   window.__particules = etat;
+  // Le passage se lit tout de suite : son âge compte depuis le clic, pas depuis la fin des imports.
+  const passage = lirePassage(location.pathname);
+  if (passage) document.documentElement.dataset.passage = 'lu';
   const pre = window.__pre;
   void document.fonts.ready.then(() => pre?.avancer('polices'));
 
@@ -44,9 +47,7 @@ export async function bootParticules(): Promise<Moteur | null> {
   const moteur = m;
 
   // Arrivée par un passage : la toile repart du nuage éclaté de la page d'avant.
-  const passage = lirePassage(location.pathname);
   if (passage) {
-    document.documentElement.dataset.passage = 'lu';
     if (!calme()) moteur.viser({ points: nuage(passage, moteur.n), teinte: [passage.teinte], eclat: 0.6 }, { bruit: 0, raideur: 0 }, 0, true);
   }
 

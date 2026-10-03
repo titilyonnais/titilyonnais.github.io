@@ -9,7 +9,7 @@ export default defineConfig({
   timeout: 90_000,
   fullyParallel: true,
   // Chaque page fait tourner une simulation WebGL (logicielle en test) : peu de navigateurs à la fois.
-  workers: process.env.CI ? 2 : 3,
+  workers: 2,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
