@@ -32,6 +32,7 @@ const id = projet.id;
         <div class="fenetre" data-fenetre data-vue="1" style={`--wd: ${largeur}px; --hd: ${hauteur}px; --wm: ${largeurMobile}px; --hm: ${hauteurMobile}px`}>
           <slot />
         </div>
+        <slot name="theatre" />
         <p class="invite mono" data-invite aria-live="polite"></p>
       </div>
     </div>
@@ -126,7 +127,12 @@ const id = projet.id;
     opacity: 0;
     visibility: hidden;
   }
-  .fenetre :global([data-3d]) {
+  /* À plat (hors vue éclatée), la fenêtre aplatit ses couches : dans un contexte 3D,
+     Chrome départage mal les éléments coplanaires, et un clic pouvait tomber à côté. */
+  .fenetre:not([data-eclate='on']) {
+    transform-style: flat;
+  }
+  .fenetre[data-eclate='on'] :global([data-3d]) {
     transform-style: preserve-3d;
   }
   .fenetre :global([data-couche]) {
@@ -151,6 +157,10 @@ const id = projet.id;
     opacity: 0;
     transition: opacity 0.25s var(--ease);
     pointer-events: none;
+  }
+  .fenetre :global(.legende.bas) {
+    bottom: auto;
+    top: calc(100% + 0.5rem);
   }
   .fenetre[data-legendes='on'] :global(.legende) {
     opacity: 1;

@@ -23,3 +23,8 @@ assert.equal(run('scripts/fixtures/fontface'), '');
 // L'utiliser hors démo reste refusé.
 assert.match(run('scripts/fixtures/fontface-ko'), /\[police\]/);
 console.log('audit.test (@font-face) : ok');
+// Dans une démo, donnees.ts porte le contenu copié (une couleur Figma) : permis.
+assert.equal(run('scripts/fixtures/demos/donnees-ok'), '');
+// Ailleurs dans la démo (demo.ts), la même chaîne reste refusée.
+assert.match(run('scripts/fixtures/demos/donnees-ko'), /\[couleur\]/);
+console.log('audit.test (données de démo) : ok');

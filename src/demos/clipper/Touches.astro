@@ -1,0 +1,90 @@
+---
+/** Ctrl + Maj + V : le raccourci de Clipper, en touches qui s'enfoncent avant que la fenêtre jaillisse. */
+import './tokens.css';
+---
+<div class="cl-touches" aria-hidden="true" data-touches="off">
+  <kbd class="touche3d large">Ctrl</kbd>
+  <span class="plus">+</span>
+  <kbd class="touche3d large">Maj</kbd>
+  <span class="plus">+</span>
+  <kbd class="touche3d">V</kbd>
+</div>
+
+<style>
+  .cl-touches {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transform: translate(-50%, -50%) rotateX(28deg);
+    transform-style: preserve-3d;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s var(--cl-ease);
+  }
+  .cl-touches[data-touches='on'],
+  .cl-touches[data-touches='presse'] {
+    opacity: 1;
+  }
+  .touche3d {
+    min-width: 88px;
+    height: 88px;
+    padding-inline: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Onest', system-ui, sans-serif;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--cl-foreground);
+    background: var(--cl-popover);
+    border: 1px solid var(--cl-border);
+    border-radius: 14px;
+    box-shadow:
+      0 10px 0 var(--cl-muted),
+      0 10px 0 1px var(--cl-border),
+      0 24px 40px var(--cl-background);
+    transform: translateZ(40px);
+    transition:
+      transform 0.16s var(--cl-ease),
+      box-shadow 0.16s var(--cl-ease);
+  }
+  .large {
+    min-width: 128px;
+  }
+  .plus {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--cl-subtle-foreground);
+  }
+  .cl-touches[data-touches='presse'] .touche3d {
+    transform: translateZ(40px) translateY(8px);
+    box-shadow:
+      0 2px 0 var(--cl-muted),
+      0 2px 0 1px var(--cl-border),
+      0 8px 16px var(--cl-background);
+  }
+  .cl-touches[data-touches='presse'] .touche3d:nth-of-type(2) {
+    transition-delay: 0.06s;
+  }
+  .cl-touches[data-touches='presse'] .touche3d:nth-of-type(3) {
+    transition-delay: 0.12s;
+  }
+  @media (max-width: 767px) {
+    .cl-touches {
+      gap: 8px;
+    }
+    .touche3d {
+      min-width: 56px;
+      height: 56px;
+      padding-inline: 12px;
+      font-size: 18px;
+      border-radius: 10px;
+    }
+    .large {
+      min-width: 76px;
+    }
+  }
+</style>

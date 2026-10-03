@@ -22,13 +22,6 @@ test.describe('version calme (réduire les animations)', () => {
     expect(errs).toEqual([]);
   });
 
-  test('Clipper : la clé est masquée et marquée comme secret', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('#clipper').scrollIntoViewIfNeeded();
-    await expect(page.locator('#clipper .cle')).toHaveText(/^•+$/);
-    await expect(page.locator('#clipper .secret .tag')).toHaveText('secret');
-  });
-
   test('Méthode : tous les mots sont pleins', async ({ page }) => {
     await page.goto('/');
     await page.locator('.methode').scrollIntoViewIfNeeded();
@@ -39,13 +32,6 @@ test.describe('version calme (réduire les animations)', () => {
 });
 
 test.describe('scènes au défilement', () => {
-  test('Clipper filtre sur « facture » : trois éléments', async ({ page }) => {
-    await page.goto('/');
-    await allerA(page, 'clipper', 0.58);
-    await expect(page.locator('#clipper .q')).toHaveText('facture');
-    await expect(page.locator('#clipper .compte')).toHaveText('3 éléments');
-  });
-
   test('redimensionner au milieu d’une scène ne casse rien', async ({ page }) => {
     const errs = erreurs(page);
     await page.goto('/');

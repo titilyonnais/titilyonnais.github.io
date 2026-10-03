@@ -6,7 +6,8 @@ import APropos from '../components/APropos.astro';
 import Contact from '../components/Contact.astro';
 import SceneProduit from '../components/scenes/SceneProduit.astro';
 import PostShipFenetre from '../demos/postship/Fenetre.astro';
-import Clipper from '../components/scenes/Clipper.astro';
+import ClipperFenetre from '../demos/clipper/Fenetre.astro';
+import ClipperTouches from '../demos/clipper/Touches.astro';
 import Aether from '../components/scenes/Aether.astro';
 import { getEntry } from 'astro:content';
 
@@ -23,7 +24,10 @@ const aether = (await getEntry('projets', 'aether'))!;
   <SceneProduit projet={postship} fond="ink" numero="01" pin={4} largeur={1200} hauteur={750} largeurMobile={400} hauteurMobile={760} teinte="--teinte-postship">
     <PostShipFenetre />
   </SceneProduit>
-  <Clipper projet={clipper} />
+  <SceneProduit projet={clipper} fond="ink" numero="02" pin={4} largeur={1112} hauteur={520} largeurMobile={400} hauteurMobile={780} teinte="--teinte-clipper">
+    <ClipperFenetre />
+    <ClipperTouches slot="theatre" />
+  </SceneProduit>
   <Aether projet={aether} />
   <APropos />
   <Contact />

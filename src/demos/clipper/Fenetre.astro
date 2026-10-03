@@ -1,0 +1,830 @@
+---
+/**
+ * La fenêtre de collage rapide de Clipper (src/popup/PopupApp.tsx), avec
+ * ses vrais jetons, ses vraies lignes (ClipRow, en compact) et ses vrais
+ * aperçus (ClipContent). À droite, le Bloc-notes où l'on colle.
+ */
+import '../../styles/polices-produits.css';
+import './tokens.css';
+import Lucide from '../../components/Lucide.astro';
+import { ELEMENTS, SUGGESTIONS } from './donnees';
+import type { Icone } from '../../lib/icones-lucide';
+
+const icone: Record<string, Icone> = {
+  texte: 'type',
+  code: 'code-xml',
+  lien: 'link-2',
+  image: 'image',
+  fichier: 'file-text',
+  secret: 'lock',
+  snippet: 'scissors',
+};
+const mono = (t: string) => t === 'code' || t === 'lien';
+---
+<div class="cl-scene" data-3d>
+  <div class="cl" data-3d>
+    <header class="tete" data-couche data-z="200" data-legende="Recherche">
+      <Lucide nom="search" />
+      <input type="search" aria-label="Rechercher" placeholder="Rechercher, ou tapez l'abréviation d'un snippet…" spellcheck="false" autocomplete="off" data-recherche />
+      <button type="button" class="effacer" aria-label="Effacer" data-action="effacer"><Lucide nom="x" taille={14} /></button>
+      <span class="segments" aria-hidden="true">
+        <span class="seg actif">Historique</span>
+        <span class="seg">Snippets</span>
+        <span class="seg">Collections</span>
+      </span>
+    </header>
+
+    <div class="corps" data-3d>
+      <div class="liste" role="listbox" aria-label="Historique" data-3d data-liste>
+        {
+          ELEMENTS.map((e, i) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={i === 0 ? 'true' : 'false'}
+              class="ligne"
+              data-item={e.id}
+              data-type={e.type}
+              data-couche
+              data-z={i * 18}
+              data-legende={i === 0 ? 'Historique · tout ce que vous copiez' : undefined}
+              tabindex={i === 0 ? 0 : -1}
+            >
+              <span class="barre-active" />
+              <span class:list={['tuile', { image: e.type === 'image' }]}>
+                {e.type === 'couleur' ? <span class="pastille" /> : e.type === 'image' ? <span class="vignette" /> : <Lucide nom={icone[e.type]!} />}
+              </span>
+              <span class:list={['titre', { mono: mono(e.type), sensible: e.type === 'secret' }]} data-titre>
+                {e.titre}
+              </span>
+              {e.abreviation && <span class="abrev mono">{e.abreviation}</span>}
+              <span class="num mono" data-num />
+            </button>
+          ))
+        }
+        <div class="vide" data-vide hidden>
+          <p class="v-titre">Aucun résultat</p>
+          <p class="v-texte">Essayez d'autres mots.</p>
+        </div>
+      </div>
+
+      <div class="apercu" data-couche data-z="100" data-legende="Aperçu" data-legende-pos="bas" data-apercu>
+        {
+          ELEMENTS.map((e, i) => (
+            <div class="vue" data-vue-de={e.id} hidden={i !== 0}>
+              <p class="meta">
+                Copié depuis {e.source} · {e.quand}
+              </p>
+              {e.type === 'secret' ? (
+                <div class="secret" data-secret>
+                  <span class="badge">Sensible</span>
+                  <div class="masque" data-masque>
+                    <Lucide nom="eye-off" taille={20} />
+                    <p class="s-titre">Contenu sensible masqué</p>
+                    <p class="s-texte">Mot de passe, clé ou jeton détecté. Il reste collable.</p>
+                    <button type="button" class="bouton" data-action="afficher">
+                      <Lucide nom="eye" taille={14} />
+                      Afficher
+                    </button>
+                  </div>
+                  <pre class="code mono" data-revele hidden />
+                </div>
+              ) : e.type === 'image' ? (
+                <div class="pile">
+                  <div class="carte image-carte">
+                    <div class="papier">
+                      <p class="p-tete mono">FACTURE N° 2026-031</p>
+                      <p class="p-ligne mono">Boutique Corail · agence-onze</p>
+                      <span class="p-filet" />
+                      <p class="p-ligne mono">Développement · 3 j</p>
+                      <p class="p-ligne mono">Maintenance · 1 an</p>
+                      <span class="p-filet" />
+                      <p class="p-total mono">Total 1 240,00 €</p>
+                    </div>
+                  </div>
+                  <div class="carte ocr">
+                    <p class="o-tete">
+                      <Lucide nom="scan-text" taille={14} />
+                      Texte reconnu
+                    </p>
+                    <p class="o-texte" data-surligne>{e.ocr}</p>
+                  </div>
+                </div>
+              ) : e.type === 'fichier' ? (
+                <div class="carte fichier">
+                  <span class="tuile grande"><Lucide nom="file-text" /></span>
+                  <span class="f-noms">
+                    <span class="f-nom" data-surligne>{e.titre}</span>
+                    <span class="f-chemin mono">{e.chemin}</span>
+                  </span>
+                </div>
+              ) : (
+                <div class="pile">
+                  {e.type === 'couleur' && (
+                    <div class="carte couleur">
+                      <span class="grande-pastille" />
+                      <span>
+                        <span class="mono c-val">{e.contenu}</span>
+                        <span class="c-lib">Couleur</span>
+                      </span>
+                    </div>
+                  )}
+                  {e.type === 'lien' && (
+                    <div class="carte lien">
+                      <span class="l-noms">
+                        <span class="l-hote">github.com</span>
+                        <span class="l-reste mono">/titilyonnais/Clipper</span>
+                      </span>
+                      <span class="bouton faux">Ouvrir</span>
+                    </div>
+                  )}
+                  {e.type === 'snippet' && <p class="meta">Snippet {e.abreviation}</p>}
+                  {e.html ? (
+                    <pre class="code mono" set:html={e.html} />
+                  ) : (
+                    <pre class:list={['code', { mono: e.type === 'lien' || e.type === 'couleur' }]} data-surligne>
+                      {e.contenu}
+                    </pre>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <footer class="pied" data-couche data-z="60" data-legende="Raccourcis" data-legende-pos="bas">
+      <span class="indice"><kbd>Entrée</kbd>Coller dans Bloc-notes</span>
+      <span class="indice maj"><kbd>Maj</kbd><kbd>Entrée</kbd>Texte brut</span>
+      <span class="indice droite"><Lucide nom="keyboard" taille={14} />Raccourcis <kbd>F1</kbd></span>
+    </footer>
+
+    <p class="suggestions">
+      <span class="s-lib">Essayez</span>
+      {SUGGESTIONS.map((s) => <button type="button" class="suggestion mono" data-suggestion={s}>{s}</button>)}
+    </p>
+  </div>
+
+  <div class="cl-notes" data-blocnotes-fenetre>
+    <p class="n-titre">Sans titre — Bloc-notes</p>
+    <p class="n-menu" aria-hidden="true"><span>Fichier</span><span>Modifier</span><span>Affichage</span></p>
+    <pre class="n-zone" data-blocnotes aria-live="polite"></pre>
+  </div>
+  <p class="sr-only" role="status" aria-live="polite" data-annonce></p>
+</div>
+
+<style>
+  .cl-scene {
+    position: relative;
+    display: grid;
+    grid-template-columns: 820px 260px;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    height: 100%;
+  }
+  .cl {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 820px;
+    height: 520px;
+    font-family: 'Onest', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--cl-foreground);
+    background: var(--cl-background);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-cadre);
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  /* La fenêtre jaillit de la profondeur (popup-in, poussée en Z dans la perspective du théâtre). */
+  :global(.fenetre[data-vue='1']:has(.cl)) {
+    animation: cl-jaillit 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes cl-jaillit {
+    from {
+      opacity: 0;
+      translate: 0 6px -320px;
+    }
+  }
+  .cl :global(svg) {
+    flex-shrink: 0;
+  }
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    min-width: 20px;
+    padding-inline: 6px;
+    border-radius: var(--cl-radius-sm);
+    background: var(--cl-secondary);
+    color: var(--cl-muted-foreground);
+    font-family: 'Onest', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* En-tête : la recherche et les segments. */
+  .tete {
+    height: 56px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px 0 16px;
+    border-bottom: 1px solid var(--cl-line);
+    background: var(--cl-background);
+    border-radius: 8px 8px 0 0;
+    color: var(--cl-subtle-foreground);
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--cl-foreground);
+    font: inherit;
+    font-size: 16px;
+  }
+  input::placeholder {
+    color: var(--cl-subtle-foreground);
+  }
+  input::-webkit-search-cancel-button {
+    display: none;
+  }
+  .effacer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: var(--cl-radius-sm);
+    background: transparent;
+    color: var(--cl-muted-foreground);
+    cursor: pointer;
+    visibility: hidden;
+  }
+  .cl[data-q] .effacer {
+    visibility: visible;
+  }
+  .effacer:hover {
+    background: var(--cl-secondary);
+    color: var(--cl-foreground);
+  }
+  .segments {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: var(--cl-radius-ctl);
+    background: var(--cl-muted);
+  }
+  .seg {
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cl-muted-foreground);
+  }
+  .seg.actif {
+    background: var(--cl-secondary);
+    color: var(--cl-foreground);
+    box-shadow: 0 1px 2px var(--cl-background);
+  }
+
+  /* La liste et l'aperçu. */
+  .corps {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+  }
+  .liste {
+    width: 360px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 6px 8px;
+    border-right: 1px solid var(--cl-line);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  /* En vue éclatée, la liste se déploie : plus de défilement, qui aplatirait la profondeur. */
+  :global([data-eclate='on']) .liste {
+    overflow: visible;
+  }
+  :global([data-eclate='on']) .ligne:nth-of-type(n + 11) {
+    opacity: 0;
+  }
+  .ligne {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: var(--cl-radius-ctl);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: default;
+    transition: background-color 0.15s;
+  }
+  .ligne:hover {
+    background: var(--cl-muted-survol);
+  }
+  .ligne[aria-selected='true'] {
+    background: var(--cl-selected);
+  }
+  :global([data-eclate='on']) .ligne {
+    background: var(--cl-popover);
+    box-shadow: inset 0 0 0 1px var(--cl-line);
+  }
+  .ligne:focus-visible {
+    outline: 1px solid var(--cl-muted-foreground);
+    outline-offset: -1px;
+  }
+  .ligne[hidden] {
+    display: none;
+  }
+  .ligne.monte {
+    animation: monte 0.28s var(--cl-ease) backwards;
+    animation-delay: calc(min(var(--rang, 0), 9) * 20ms);
+  }
+  @keyframes monte {
+    from {
+      opacity: 0;
+      translate: 0 6px;
+    }
+  }
+  .barre-active {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    border-radius: 999px;
+    background: var(--cl-foreground);
+    opacity: 0;
+    transform: scaleY(0);
+    transition:
+      opacity 0.2s var(--cl-ease),
+      transform 0.2s var(--cl-ease);
+  }
+  .ligne[aria-selected='true'] .barre-active {
+    opacity: 1;
+    transform: none;
+  }
+  .tuile {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--cl-radius-tuile);
+    background: var(--cl-muted);
+    color: var(--cl-muted-foreground);
+    transition: background-color 0.15s;
+  }
+  .ligne[aria-selected='true'] .tuile {
+    background: var(--cl-secondary);
+    color: var(--cl-foreground);
+  }
+  .tuile.image {
+    border: 1px solid var(--cl-line);
+    padding: 4px;
+  }
+  .vignette {
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--cl-papier);
+  }
+  .pastille {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--cl-border);
+    background: var(--cl-echantillon);
+  }
+  .titre {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .titre.mono {
+    font-size: 12.5px;
+  }
+  .titre.sensible {
+    color: var(--cl-muted-foreground);
+    font-style: italic;
+  }
+  .abrev {
+    font-size: 11px;
+    color: var(--cl-subtle-foreground);
+  }
+  .num {
+    width: 16px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--cl-subtle-foreground);
+  }
+  .ligne[aria-selected='true'] .num {
+    color: var(--cl-muted-foreground);
+  }
+  .cl :global(mark) {
+    background: var(--cl-marque);
+    color: var(--cl-foreground);
+    border-radius: 2px;
+  }
+  .vide {
+    padding: 48px 16px;
+    text-align: center;
+  }
+  .v-titre {
+    font-size: 14px;
+  }
+  .v-texte {
+    font-size: 13px;
+    color: var(--cl-muted-foreground);
+  }
+
+  .apercu {
+    flex: 1;
+    min-width: 0;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .vue {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    flex: 1;
+    animation: entre 0.2s var(--cl-ease);
+  }
+  .vue[hidden] {
+    display: none;
+  }
+  @keyframes entre {
+    from {
+      opacity: 0;
+      translate: 0 4px;
+    }
+  }
+  .meta {
+    font-size: 12px;
+    color: var(--cl-subtle-foreground);
+  }
+  .pile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .carte {
+    border: 1px solid var(--cl-line);
+    border-radius: var(--cl-radius-carte);
+    background: var(--cl-surface);
+    padding: 12px;
+  }
+  .code {
+    border: 1px solid var(--cl-line);
+    border-radius: var(--cl-radius-carte);
+    background: var(--cl-surface);
+    padding: 12px;
+    font-family: 'Onest', system-ui, sans-serif;
+    font-size: 12.5px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--cl-foreground);
+  }
+  .code.mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .code :global(.kw) {
+    color: var(--cl-kw);
+  }
+  .code :global(.str) {
+    color: var(--cl-str);
+  }
+  .code :global(.num) {
+    color: var(--cl-num);
+  }
+  .code :global(.fn) {
+    color: var(--cl-fn);
+  }
+  .code :global(.com) {
+    color: var(--cl-com);
+    font-style: italic;
+  }
+  .code :global(.var) {
+    color: var(--cl-var);
+  }
+  .couleur,
+  .lien,
+  .fichier {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .grande-pastille {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--cl-radius-ctl);
+    border: 1px solid var(--cl-border);
+    background: var(--cl-echantillon);
+  }
+  .c-val,
+  .c-lib {
+    display: block;
+  }
+  .c-lib {
+    color: var(--cl-muted-foreground);
+  }
+  .l-noms,
+  .f-noms {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .l-reste,
+  .f-chemin {
+    font-size: 11px;
+    color: var(--cl-muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tuile.grande {
+    width: 32px;
+    height: 32px;
+  }
+  .bouton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding-inline: 10px;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-ctl);
+    background: transparent;
+    color: var(--cl-foreground);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .bouton:hover {
+    background: var(--cl-secondary);
+  }
+  .bouton.faux {
+    cursor: default;
+  }
+  .image-carte {
+    display: flex;
+    justify-content: center;
+    padding: 14px;
+  }
+  .papier {
+    width: 250px;
+    padding: 16px 18px;
+    border-radius: var(--cl-radius-sm);
+    background: var(--cl-papier);
+    color: var(--cl-papier-encre);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .p-tete {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .p-ligne {
+    font-size: 10px;
+  }
+  .p-filet {
+    height: 1px;
+    background: var(--cl-papier-filet);
+    margin-block: 4px;
+  }
+  .p-total {
+    font-size: 11px;
+    font-weight: 500;
+    align-self: flex-end;
+  }
+  .o-tete {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--cl-subtle-foreground);
+    margin-bottom: 6px;
+  }
+  .o-texte {
+    font-size: 13px;
+    color: var(--cl-muted-foreground);
+  }
+  .secret {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .badge {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--cl-warn-fond);
+    color: var(--cl-warn);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .masque {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    color: var(--cl-subtle-foreground);
+  }
+  .masque[hidden],
+  .code[hidden] {
+    display: none;
+  }
+  .s-titre {
+    font-size: 14px;
+    color: var(--cl-foreground);
+  }
+  .s-texte {
+    font-size: 13px;
+    color: var(--cl-muted-foreground);
+    margin-bottom: 4px;
+  }
+
+  .pied {
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-inline: 16px;
+    border-top: 1px solid var(--cl-line);
+    background: var(--cl-background);
+    border-radius: 0 0 8px 8px;
+    font-size: 12px;
+    color: var(--cl-subtle-foreground);
+  }
+  .indice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .indice kbd + kbd {
+    margin-left: -4px;
+  }
+  .droite {
+    margin-left: auto;
+  }
+
+  .suggestions {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 16px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+  .suggestion {
+    font-family: var(--mono);
+    font-size: 13px;
+    text-transform: none;
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid var(--paper);
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .suggestion:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* Le Bloc-notes, où l'on colle. */
+  .cl-notes {
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-cadre);
+    background: var(--cl-popover);
+    color: var(--cl-foreground);
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    overflow: hidden;
+  }
+  .n-titre {
+    padding: 8px 12px;
+    color: var(--cl-muted-foreground);
+    border-bottom: 1px solid var(--cl-line);
+  }
+  .n-menu {
+    display: flex;
+    gap: 14px;
+    padding: 4px 12px;
+    color: var(--cl-subtle-foreground);
+    border-bottom: 1px solid var(--cl-line);
+  }
+  .n-zone {
+    flex: 1;
+    padding: 10px 12px;
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow: hidden;
+  }
+  .n-zone::after {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 1.1em;
+    vertical-align: text-bottom;
+    background: var(--cl-foreground);
+    animation: curseur 1s steps(1) infinite;
+  }
+  @keyframes curseur {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Téléphone : la liste au-dessus de l'aperçu, le Bloc-notes dessous. */
+  @media (max-width: 767px) {
+    .cl-scene {
+      grid-template-columns: 400px;
+      grid-template-rows: 560px auto;
+      align-content: start;
+      gap: 64px;
+    }
+    .cl {
+      width: 400px;
+      height: 560px;
+    }
+    .segments,
+    .maj,
+    .droite {
+      display: none;
+    }
+    .corps {
+      flex-direction: column;
+    }
+    .liste {
+      width: 100%;
+      height: 248px;
+      flex: none;
+      border-right: 0;
+      border-bottom: 1px solid var(--cl-line);
+    }
+    .apercu {
+      padding: 12px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .suggestions {
+      top: calc(100% + 14px);
+    }
+    .cl-notes {
+      height: 150px;
+    }
+  }
+</style>

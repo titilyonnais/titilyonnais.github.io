@@ -67,8 +67,10 @@ for (const dir of dirs) {
     const isTokens = basename(file) === 'tokens.css';
     // Fenêtres produits (DESIGN.md, règle 4) : la forme du vrai produit est permise, pas ses couleurs en dur.
     const demo = /[\\/]demos[\\/]/.test(file);
+    // Les données d'une démo sont du contenu (une couleur copiée depuis Figma), pas du style.
+    const donnees = demo && basename(file) === 'donnees.ts';
     for (const r of rules) {
-      if (r.skipTokens && isTokens) continue;
+      if (r.skipTokens && (isTokens || donnees)) continue;
       if (r.demoOk && demo) continue;
       for (const m of src.matchAll(r.re)) {
         if (r.css && !inZones(m.index, zones)) continue;

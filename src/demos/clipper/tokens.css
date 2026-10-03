@@ -1,0 +1,41 @@
+/* Source : claude-projects/clipper/loopy-clipboard/src/styles.css (thème sombre) */
+.cl,
+.cl-touches,
+.cl-notes {
+  --cl-background: #000000;
+  --cl-surface: #0f0f0f;
+  --cl-popover: #141414;
+  --cl-muted: #1c1c1c;
+  --cl-muted-survol: #1c1c1c99;
+  --cl-secondary: #242424;
+  --cl-line: #2a2a2a;
+  --cl-border: #333333;
+  --cl-input: #3d3d3d;
+  --cl-foreground: #ededed;
+  --cl-muted-foreground: #a1a1a1;
+  --cl-subtle-foreground: #868686;
+  --cl-selected: #1f1f1f;
+  --cl-danger: #d9635a;
+  --cl-ok: #4a9e70;
+  --cl-warn: #b09134;
+  --cl-warn-fond: #b0913426;
+  --cl-marque: #ededed33;
+  /* Coloration syntaxique (thème sombre). */
+  --cl-kw: #ff8a80;
+  --cl-str: #9ecbff;
+  --cl-num: #79b8ff;
+  --cl-fn: #d2a8ff;
+  --cl-com: #7d7d7d;
+  --cl-var: #ffab70;
+  /* La couleur copiée depuis Figma, et la capture de facture (papier, encre grise). */
+  --cl-echantillon: #ff6b5e;
+  --cl-papier: #fafafa;
+  --cl-papier-encre: #6b6b6b;
+  --cl-papier-filet: #dcdcde;
+  --cl-radius-ctl: 7px;
+  --cl-radius-sm: 4px;
+  --cl-radius-carte: 6px;
+  --cl-radius-cadre: 8px;
+  --cl-radius-tuile: 5px;
+  --cl-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}

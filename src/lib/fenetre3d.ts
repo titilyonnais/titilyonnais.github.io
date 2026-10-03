@@ -44,7 +44,8 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
   const legendes = couches.map((c) => {
     if (!c.legende) return null;
     const l = document.createElement('span');
-    l.className = 'legende mono';
+    // data-legende-pos="bas" : sous la couche, quand une couche plus proche cacherait le haut.
+    l.className = c.el.dataset.legendePos === 'bas' ? 'legende mono bas' : 'legende mono';
     l.setAttribute('aria-hidden', 'true');
     l.textContent = c.legende;
     c.el.append(l);
@@ -88,6 +89,8 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
 
   const incliner = (e: PointerEvent) => {
     if (!enDemo || opts.mobile) return;
+    // Sur la fenêtre, l'inclinaison se fige : ce qu'on vise ne glisse pas sous le curseur.
+    if (fen.contains(e.target as Node)) return;
     const r = theatre.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width - 0.5;
     const y = (e.clientY - r.top) / r.height - 0.5;

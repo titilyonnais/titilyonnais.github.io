@@ -18,7 +18,7 @@ export type SceneModule = {
 const loaders: Record<string, () => Promise<SceneModule>> = {
   methode: () => import('../../scenes/methode'),
   postship: () => import('../../demos/postship/demo'),
-  clipper: () => import('../../scenes/clipper'),
+  clipper: () => import('../../demos/clipper/demo'),
   aether: () => import('../../scenes/aether'),
   contact: () => import('../../scenes/contact'),
 };

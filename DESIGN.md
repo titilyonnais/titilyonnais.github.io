@@ -21,7 +21,9 @@ se tiennent à la relecture.
    reproduit le vrai produit : ses rayons, ombres, flous, dégradés, polices
    (Onest, Inter, Instrument Serif, JetBrains Mono) et couleurs. Les
    couleurs littérales ne vivent que dans `src/demos/<produit>/tokens.css`,
-   chacune avec son fichier source. Le nom du produit peut prendre sa
+   chacune avec son fichier source (seule exception : une couleur qui est
+   un contenu, dans `donnees.ts`, comme le `#ff6b5e` copié depuis Figma
+   dans Clipper). Le nom du produit peut prendre sa
    police hors de la fenêtre (hero, étude de cas).
 5. **La couleur est réservée aux produits** : les particules qui forment un
    logo produit, les fenêtres, le fond de la scène ÆTHER. Jamais ailleurs.
