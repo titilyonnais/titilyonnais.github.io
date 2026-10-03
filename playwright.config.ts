@@ -5,7 +5,8 @@ const live = process.env.BASE_URL;
 
 export default defineConfig({
   testDir: 'tests',
-  timeout: 60_000,
+  // 90 s : sous charge, fermer un contexte qui a fait tourner WebGL en logiciel (SwiftShader) dépasse parfois 60 s.
+  timeout: 90_000,
   fullyParallel: true,
   // Chaque page fait tourner une simulation WebGL (logicielle en test) : peu de navigateurs à la fois.
   workers: process.env.CI ? 2 : 3,
