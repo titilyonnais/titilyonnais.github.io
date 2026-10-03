@@ -147,7 +147,7 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
             }
           </div>
         </div>
-        <div class="zoom ae-glass" aria-label="Zoom de la Toile">
+        <div class="zoom ae-glass" aria-label="Zoom de la Toile" data-couche data-z="320">
           <button type="button" class="z-btn" data-zoom="-" aria-label="Zoom arrière"><Lucide nom="minus" taille={13} /></button>
           <span class="z-val" data-zoom-val>62%</span>
           <button type="button" class="z-btn" data-zoom="+" aria-label="Zoom avant"><Lucide nom="plus" taille={13} /></button>
@@ -708,8 +708,10 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
     animation: ae-pouls 2.4s ease-in-out infinite;
   }
 
+  /* Au-dessus des cartes, même quand elles se décollent en Z (une couche plus haute qu'elles). */
   .zoom {
     position: absolute;
+    z-index: 2;
     right: 16px;
     bottom: 16px;
     display: flex;

@@ -22,6 +22,9 @@ test('ÆTHER : intention, cartes, thème, zoom, glisser', async ({ page }) => {
   await s.locator('[data-zoom="+"]').click();
   const z1 = await s.locator('[data-toile]').evaluate((t) => getComputedStyle(t).getPropertyValue('--zoom'));
   expect(Number(z1)).toBeGreaterThan(Number(z0));
+  // Sur téléphone, atteindre « + » a pu faire défiler la page : on revient en pleine démo, fenêtre de face.
+  await allerA(page, 'aether', 0.7);
+  await page.waitForTimeout(300);
   const c = s.locator('[data-carte]').first();
   const a = await c.boundingBox();
   await c.focus();

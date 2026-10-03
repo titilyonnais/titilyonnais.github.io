@@ -6,8 +6,10 @@ test('la fenêtre s’éclate puis se réassemble', async ({ page }) => {
   await allerA(page, 'postship', 0.3);
   await montee(page, 'postship');
   await allerA(page, 'postship', 0.3);
-  const z = await page.locator('#postship [data-couche]').nth(1).evaluate((e) => getComputedStyle(e).transform);
-  expect(z).not.toBe('none');
+  // La profondeur passe par la propriété translate (une démo peut garder transform pour elle).
+  const z = await page.locator('#postship [data-couche]').nth(1).evaluate((e) => getComputedStyle(e).translate);
+  expect(z).toMatch(/px$/);
+  expect(z).not.toMatch(/ 0px$/);
   await allerA(page, 'postship', 0.7);
   await expect(page.locator('#postship .scene')).toHaveAttribute('data-demo', 'on');
 });
@@ -30,7 +32,7 @@ test('redimensionner pendant la démo garde l’état', async ({ page }) => {
   await montee(page, 'postship');
   await allerA(page, 'postship', 0.7);
   await prendreLaMain(page);
-  await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', /verifie|panne|alerte/);
+  await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', /verifie|panne|alerte|retabli/);
   await page.setViewportSize({ width: 1100, height: 800 });
   await page.waitForTimeout(400);
   await expect(page.locator('#postship [data-etat-demo]')).not.toHaveAttribute('data-etat-demo', 'repos');
