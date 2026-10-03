@@ -1,4 +1,4 @@
-/* Les deux seules valeurs du site. Les gris n'existent que dans la trame. */
+/* Les deux seules valeurs du site. Les gris n'existent que par densité de particules. */
 :root {
   --ink: #000000;
   --paper: #f4f4f2;
@@ -28,4 +28,15 @@
 
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Teintes des produits, pour les particules qui forment leurs logos (DESIGN.md, règle 5). */
+:root {
+  --teinte-postship: #8fb0dc;   /* postship/src/app/globals.css, --signal (sombre) */
+  --teinte-clipper: #ededed;    /* clipper/loopy-clipboard/src/styles.css, --foreground (sombre) */
+  --teinte-aether-1: #a9c9ec;   /* aether-browser/src/renderer/src/styles/global.css, --color-glacier */
+  --teinte-aether-2: #b3a4e6;   /* idem, --color-lavande */
+  /* La teinte des particules d'ÆTHER suit le thème choisi dans la démo (demo.ts). */
+  --ae-particules-1: var(--teinte-aether-1);
+  --ae-particules-2: var(--teinte-aether-2);
 }

@@ -56,6 +56,8 @@ const { figure } = Astro.props;
   .fig {
     border: 1px solid var(--fg);
     padding: 1.25rem;
+    min-width: 0;
+    overflow: hidden; /* un texte en cours d'animation ne doit jamais élargir la page */
     min-height: 11rem;
     display: flex;
     flex-direction: column;

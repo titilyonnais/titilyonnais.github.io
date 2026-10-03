@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 215" width="860" height="215" role="img" aria-label="Un commit part chez l'hébergeur ; le webhook prévient PostShip à la seconde, qui vérifie chaque page et rend un verdict.">
+<rect x="30" y="70" width="150" height="44" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<text x="50" y="88" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">git push · main</text>
+<text x="50" y="104" font-size="12" fill="#a1a1a1" text-anchor="start" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">un commit</text>
+<path d="M 180 92 C 220.0 92, 220.0 92, 260 92" fill="none" stroke="#868686" stroke-width="1.5" />
+<rect x="260" y="70" width="160" height="44" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<text x="280" y="88" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">Vercel</text>
+<text x="280" y="104" font-size="12" fill="#a1a1a1" text-anchor="start" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">déploiement prêt · webhook</text>
+<path d="M 420 92 C 460.0 92, 460.0 92, 500 92" fill="none" stroke="#8fb0dc" stroke-width="1.5" />
+<circle cx="540" cy="92" r="30" fill="none" stroke="#8fb0dc" stroke-width="1.5"/>
+<g transform="translate(524 79) scale(0.164)" fill="#8fb0dc"><path d="M 79.9 15.6 L 16 80 L 79.9 144.4 L 95.7 128 L 48.5 80 L 95.7 32 Z"/><path d="M 116.5 15.6 L 180.4 80 L 116.5 144.4 L 100.7 128 L 147.9 80 L 100.7 32 Z"/></g>
+<text x="540" y="140" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">PostShip · T+0</text>
+<path d="M 570 92 C 610.0 92, 610.0 40, 650 40" fill="none" stroke="#4a9e70" stroke-width="1.5" />
+<rect x="650" y="22" width="150" height="36" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<circle cx="668" cy="40" r="7" fill="#4a9e70"/><path d="M 665 40 L 667 42.2 L 671.2 37.6" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="684" y="44" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">/checkout</text>
+<path d="M 570 92 C 610.0 92, 610.0 82, 650 82" fill="none" stroke="#4a9e70" stroke-width="1.5" />
+<rect x="650" y="64" width="150" height="36" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<circle cx="668" cy="82" r="7" fill="#4a9e70"/><path d="M 665 82 L 667 84.2 L 671.2 79.6" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="684" y="86" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">/tarifs</text>
+<path d="M 570 92 C 610.0 92, 610.0 124, 650 124" fill="none" stroke="#d9635a" stroke-width="1.5" />
+<rect x="650" y="106" width="150" height="36" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<circle cx="668" cy="124" r="7" fill="#d9635a"/><path d="M 665.4 121.4 L 670.6 126.6 M 670.6 121.4 L 665.4 126.6" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round"/>
+<text x="684" y="128" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">sitemap.xml</text>
+<path d="M 570 92 C 610.0 92, 610.0 166, 650 166" fill="none" stroke="#4a9e70" stroke-width="1.5" />
+<rect x="650" y="148" width="150" height="36" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<circle cx="668" cy="166" r="7" fill="#4a9e70"/><path d="M 665 166 L 667 168.2 L 671.2 163.6" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="684" y="170" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">certificat</text>
+<text x="430" y="200" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">Puis T+2 et T+8, pour ce qui ne casse qu'une fois le cache chaud.</text>
+</svg>

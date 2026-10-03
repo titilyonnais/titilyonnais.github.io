@@ -36,3 +36,34 @@ export async function allerA(page: Page, scene: string, t: number): Promise<void
   );
   await page.waitForTimeout(700);
 }
+
+/** Attend que le défilement (doux) soit arrivé : scrollY ne bouge plus pendant 300 ms. */
+export async function stable(page: Page): Promise<void> {
+  // Trois lectures égales de suite : sous charge, le défilement doux peut marquer une pause de 300 ms.
+  let avant = -1;
+  let egales = 0;
+  for (let i = 0; i < 60; i++) {
+    const y = await page.evaluate(() => scrollY);
+    egales = y === avant ? egales + 1 : 0;
+    if (egales >= 3) return;
+    avant = y;
+    await page.waitForTimeout(300);
+  }
+}
+
+/** Attend qu'une scène paresseuse soit montée (son module chargé, data-state posé). */
+export async function montee(page: Page, scene: string): Promise<void> {
+  await page.waitForFunction((s) => !!document.querySelector<HTMLElement>(`[data-scene="${s}"]`)?.dataset.state, scene, {
+    timeout: 15_000,
+  });
+}
+
+/**
+ * Le visiteur prend la main sur la démo PostShip : un appui dans la fenêtre
+ * coupe la démo automatique, puis « git push » si elle n'était pas partie.
+ */
+export async function prendreLaMain(page: Page): Promise<void> {
+  const ps = page.locator('#postship [data-etat-demo]');
+  await ps.dispatchEvent('pointerdown');
+  if ((await ps.getAttribute('data-etat-demo')) === 'repos') await page.locator('#postship [data-action="pousser"]').click();
+}

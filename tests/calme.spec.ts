@@ -1,13 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { allerA, erreurs, parcourir } from './aide';
+import { allerA, erreurs, montee, parcourir } from './aide';
 
 test.describe('version calme (réduire les animations)', () => {
   test.use({ reducedMotion: 'reduce' });
 
-  test('toutes les scènes sont posées dans leur état final, sans piste de défilement', async ({ page }) => {
+  test('tout est posé : pas de préchargeur, pas de boucle, pas de piste collante', async ({ page }) => {
     const errs = erreurs(page);
     await page.goto('/');
+    await expect(page.locator('.pre')).toBeHidden();
     await parcourir(page);
+    expect(await page.evaluate(() => window.__particules?.running ?? false)).toBe(false);
     for (const s of await page.locator('[data-scene]').all()) {
       await expect(s).toHaveAttribute('data-state', 'final');
     }
@@ -22,20 +24,25 @@ test.describe('version calme (réduire les animations)', () => {
     expect(errs).toEqual([]);
   });
 
-  test('PostShip : score final 100 et sept vérifications en clair', async ({ page }) => {
+  test('les trois démos répondent sans délai', async ({ page }) => {
     await page.goto('/');
-    await page.locator('#postship').scrollIntoViewIfNeeded();
-    await expect(page.locator('#postship .score')).toHaveText('100');
-    await expect(page.locator('#postship .verif')).toHaveCount(7);
-    await expect(page.locator('#postship .verif .st').last()).toHaveText('rétabli');
-    await expect(page.locator('#postship .msg')).toContainText('71');
-  });
-
-  test('Clipper : la clé est masquée et marquée comme secret', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('#clipper').scrollIntoViewIfNeeded();
-    await expect(page.locator('#clipper .cle')).toHaveText(/^•+$/);
-    await expect(page.locator('#clipper .secret .tag')).toHaveText('secret');
+    // PostShip : pousser mène droit à l'alerte.
+    await page.locator('#postship [data-fenetre]').scrollIntoViewIfNeeded();
+    await montee(page, 'postship');
+    await page.locator('#postship [data-action="pousser"]').click();
+    await expect(page.locator('#postship [data-etat-demo]')).toHaveAttribute('data-etat-demo', 'alerte', { timeout: 500 });
+    // Clipper : « facture » ne garde que deux éléments.
+    await page.locator('#clipper [data-fenetre]').scrollIntoViewIfNeeded();
+    await montee(page, 'clipper');
+    await page.locator('#clipper input[type="search"]').fill('facture');
+    await expect(page.locator('#clipper [data-item]:visible')).toHaveCount(2, { timeout: 500 });
+    // ÆTHER : la pilule, Entrée, et dix cartes.
+    await page.locator('#aether [data-fenetre]').scrollIntoViewIfNeeded();
+    await montee(page, 'aether');
+    await page.locator('#aether [data-pilule]').click();
+    await page.keyboard.type('compare rust et zig');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#aether [data-carte]')).toHaveCount(10, { timeout: 500 });
   });
 
   test('Méthode : tous les mots sont pleins', async ({ page }) => {
@@ -48,22 +55,6 @@ test.describe('version calme (réduire les animations)', () => {
 });
 
 test.describe('scènes au défilement', () => {
-  test('PostShip passe par 71 puis revient à 100', async ({ page }) => {
-    await page.goto('/');
-    await allerA(page, 'postship', 0.66);
-    await expect(page.locator('#postship .score')).toHaveText('71');
-    await expect(page.locator('#postship .verif').last()).toHaveClass(/echec/);
-    await allerA(page, 'postship', 0.95);
-    await expect(page.locator('#postship .score')).toHaveText('100');
-  });
-
-  test('Clipper filtre sur « facture » : trois éléments', async ({ page }) => {
-    await page.goto('/');
-    await allerA(page, 'clipper', 0.58);
-    await expect(page.locator('#clipper .q')).toHaveText('facture');
-    await expect(page.locator('#clipper .compte')).toHaveText('3 éléments');
-  });
-
   test('redimensionner au milieu d’une scène ne casse rien', async ({ page }) => {
     const errs = erreurs(page);
     await page.goto('/');

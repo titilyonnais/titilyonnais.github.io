@@ -5,8 +5,11 @@ const live = process.env.BASE_URL;
 
 export default defineConfig({
   testDir: 'tests',
-  timeout: 60_000,
+  // 90 s : sous charge, fermer un contexte qui a fait tourner WebGL en logiciel (SwiftShader) dépasse parfois 60 s.
+  timeout: 90_000,
   fullyParallel: true,
+  // Chaque page fait tourner une simulation WebGL (logicielle en test) : peu de navigateurs à la fois.
+  workers: 2,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
@@ -15,7 +18,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'bureau', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /smoke|aether/ },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /smoke|aether|particules|hero|chef|postship|clipper|fenetre|cas|secours/ },
   ],
   webServer: live
     ? undefined

@@ -11,17 +11,13 @@ import '../styles/base.css';
     <title>og</title>
   </head>
   <body class="ink">
-    <div class="og" data-hero data-lignes="THIBAULT|MORRETTON">
-      <canvas></canvas>
+    <p class="qui mono">Thibault Morretton · créateur de logiciels</p>
+    <div class="logos">
+      <img src="/produits/postship/logo.svg" alt="" />
+      <img src="/produits/clipper/tuile.svg" alt="" />
+      <img src="/produits/aether/icone.png" alt="" />
     </div>
-    <div class="bas">
-      <p class="a">Je fabrique des logiciels.</p>
-      <p class="mono">PostShip · Clipper · ÆTHER</p>
-    </div>
-    <script>
-      import { bootHero } from '../lib/dither/hero';
-      bootHero();
-    </script>
+    <p class="phrase">Trois logiciels en service.<br />D’autres en route.</p>
   </body>
 </html>
 <style>
@@ -30,30 +26,28 @@ import '../styles/base.css';
     height: 630px;
     overflow: hidden;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    padding: 56px 64px;
   }
-  .og {
-    position: relative;
+  .qui {
+    text-transform: uppercase;
+    font-size: 18px;
   }
-  canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-  .bas {
+  .logos {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 22px 40px 30px;
-    border-top: 1px solid var(--fg);
+    gap: 64px;
+    align-items: center;
+    justify-content: flex-end;
   }
-  .a {
-    font-size: 44px;
-    letter-spacing: var(--track-title);
+  .logos img {
+    height: 150px;
+    width: auto;
+  }
+  .phrase {
+    font-size: 84px;
     font-weight: 450;
-  }
-  .mono {
-    font-size: 16px;
+    letter-spacing: var(--track-title);
+    line-height: 0.92;
+    max-width: none;
   }
 </style>

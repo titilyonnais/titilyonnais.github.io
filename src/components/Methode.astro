@@ -1,9 +1,10 @@
 ---
 const phrases = ["J’écris la spec.", 'Claude Code écrit le code.', 'Je relis, je teste, je publie.'];
 ---
-<section class="methode paper" aria-labelledby="methode-titre">
+<section class="methode paper" aria-labelledby="methode-titre" data-station="methode" data-fond="paper" data-formes="pied,accolades,fleche">
   <div class="piste" data-scene="methode" style="--pin: 1.4">
     <div class="scene wrap">
+      <div class="signe" data-place aria-hidden="true"></div>
       <div class="etiquette mono"><span>00</span><span id="methode-titre">Méthode</span></div>
       <p class="texte">
         {
@@ -38,8 +39,18 @@ const phrases = ["J’écris la spec.", 'Claude Code écrit le code.', 'Je relis
     position: absolute;
     top: calc(var(--nav-h) + 1.5rem);
   }
+  /* La toile dessine ici le signe de l'étape : ¶, { } puis ↗. */
+  .signe {
+    position: absolute;
+    right: var(--gutter);
+    top: 50%;
+    translate: 0 -50%;
+    width: min(30vw, 30rem);
+    height: min(46svh, 30rem);
+  }
   .texte {
-    max-width: none;
+    position: relative;
+    max-width: 64%;
     font-size: var(--t-xl);
     font-weight: 450;
     letter-spacing: var(--track-title);
@@ -62,6 +73,18 @@ const phrases = ["J’écris la spec.", 'Claude Code écrit le code.', 'Je relis
     max-width: 46ch;
     align-self: flex-end;
     font-size: var(--t-s);
+  }
+  /* Sur téléphone, le signe passe derrière les phrases. */
+  @media (max-width: 1023px) {
+    .texte {
+      max-width: none;
+    }
+    .signe {
+      inset: 20% var(--gutter);
+      translate: none;
+      width: auto;
+      height: auto;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .mot {

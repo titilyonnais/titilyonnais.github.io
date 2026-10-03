@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 165" width="860" height="165" role="img" aria-label="Trois déploiements sur une frise ; le dernier a cassé, la production repointe sur le précédent vérifié bon.">
+<line x1="60" y1="80" x2="800" y2="80" stroke="#868686" stroke-width="1.5"/>
+<circle cx="120" cy="80" r="9" fill="#4a9e70"/>
+<text x="120" y="52" font-size="12" fill="#ededed" text-anchor="middle" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">a1b2c3d</text>
+<text x="120" y="112" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">hier, 16:40</text>
+<circle cx="400" cy="80" r="9" fill="#4a9e70"/>
+<text x="400" y="52" font-size="12" fill="#ededed" text-anchor="middle" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">9f8e7d6</text>
+<text x="400" y="112" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">ce matin, 09:02</text>
+<circle cx="680" cy="80" r="9" fill="#d9635a"/>
+<text x="680" y="52" font-size="12" fill="#ededed" text-anchor="middle" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">4f2a9c1</text>
+<text x="680" y="112" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">09:11 · /checkout cassé</text>
+<path d="M 680 66 C 620 30, 470 30, 412 62" fill="none" stroke="#8fb0dc" stroke-width="2" stroke-dasharray="6 6"/><path d="M 408 52 L 411 64 L 423 60" fill="none" stroke="#8fb0dc" stroke-width="2"/>
+<text x="545" y="22" font-size="12" fill="#8fb0dc" text-anchor="middle" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">retour arrière : la production repointe sur 9f8e7d6</text>
+<text x="430" y="150" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">Vers le dernier déploiement que PostShip a vérifié bon — à la main, ou tout seul si une page qui fait vendre casse.</text>
+</svg>

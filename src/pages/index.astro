@@ -1,13 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Couture from '../components/Couture.astro';
 import Methode from '../components/Methode.astro';
 import APropos from '../components/APropos.astro';
 import Contact from '../components/Contact.astro';
-import PostShip from '../components/scenes/PostShip.astro';
-import Clipper from '../components/scenes/Clipper.astro';
-import Aether from '../components/scenes/Aether.astro';
+import SceneProduit from '../components/scenes/SceneProduit.astro';
+import PostShipFenetre from '../demos/postship/Fenetre.astro';
+import ClipperFenetre from '../demos/clipper/Fenetre.astro';
+import ClipperTouches from '../demos/clipper/Touches.astro';
+import AetherFenetre from '../demos/aether/Fenetre.astro';
+import AetherCiel from '../demos/aether/Ciel.astro';
 import { getEntry } from 'astro:content';
 
 const postship = (await getEntry('projets', 'postship'))!;
@@ -18,17 +20,19 @@ const aether = (await getEntry('projets', 'aether'))!;
   title="Thibault Morretton — créateur de logiciels"
   description="Je fabrique des logiciels : PostShip, la surveillance après mise en ligne ; Clipper, un presse-papiers pour Windows ; ÆTHER, un navigateur sans onglets."
 >
+  <AetherCiel slot="ciel" />
   <Hero />
-  <Couture de="ink" vers="paper" graine={1} />
   <Methode />
-  <Couture de="paper" vers="ink" graine={2} />
-  <PostShip projet={postship} />
-  <Couture de="ink" vers="paper" graine={3} />
-  <Clipper projet={clipper} />
-  <Couture de="paper" vers="ink" graine={4} />
-  <Aether projet={aether} />
-  <Couture de="ink" vers="paper" graine={5} />
+  <SceneProduit projet={postship} fond="ink" numero="01" pin={4} largeur={1200} hauteur={750} largeurMobile={400} hauteurMobile={760} teinte="--teinte-postship">
+    <PostShipFenetre />
+  </SceneProduit>
+  <SceneProduit projet={clipper} fond="ink" numero="02" pin={4} largeur={1112} hauteur={520} largeurMobile={400} hauteurMobile={780} teinte="--teinte-clipper">
+    <ClipperFenetre />
+    <ClipperTouches slot="theatre" />
+  </SceneProduit>
+  <SceneProduit projet={aether} fond="aucun" numero="03" pin={4} largeur={1180} hauteur={772} largeurMobile={400} hauteurMobile={840} teinte="--ae-particules-1,--ae-particules-2">
+    <AetherFenetre />
+  </SceneProduit>
   <APropos />
-  <Couture de="paper" vers="ink" graine={6} />
   <Contact />
 </Base>

@@ -1,10 +1,15 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import Couture from '../../components/Couture.astro';
 import Fleche from '../../components/Fleche.astro';
 import Figure from '../../components/cas/Figure.astro';
 import Schema from '../../components/cas/Schema.astro';
+import AetherCiel from '../../demos/aether/Ciel.astro';
+import '../../styles/polices-produits.css';
+import '../../demos/postship/tokens.css';
+import '../../demos/clipper/tokens.css';
+import '../../demos/aether/tokens.css';
+import '../../demos/univers.css';
 
 export async function getStaticPaths() {
   const projets = await getCollection('projets');
@@ -15,16 +20,50 @@ const { Content } = await render(projet);
 const d = projet.data;
 const suivant = (await getEntry('projets', d.suivant))!;
 const n = String(d.ordre).padStart(2, '0');
+const id = projet.id;
+
+// Le logo se forme en particules à l'ouverture, dans la teinte du produit.
+const TEINTES: Record<string, string> = {
+  postship: '--teinte-postship',
+  clipper: '--teinte-clipper',
+  aether: '--teinte-aether-1,--teinte-aether-2',
+};
+// Sans WebGL, le vrai logo du produit le remplace.
+const LOGOS: Record<string, string> = {
+  postship: '/produits/postship/logo.svg',
+  clipper: '/produits/clipper/logo.svg',
+  aether: '/produits/aether/icone.png',
+};
+// PostShip : ses vraies illustrations (le texte alternatif est celui des SVG).
+type Illus = { src: string; alt: string; w: number; h: number };
+const ILLUS: Record<string, { fonctions: Illus[]; construit: Illus[] }> = {
+  postship: {
+    fonctions: [
+      { src: '/produits/postship/deploiement.svg', w: 860, h: 215, alt: 'Un commit part chez l’hébergeur ; le webhook prévient PostShip à la seconde, qui vérifie chaque page et rend un verdict.' },
+      { src: '/produits/postship/parcours.svg', w: 860, h: 180, alt: 'Un parcours de paiement en trois étapes, jouées dans l’ordre ; la troisième a cassé.' },
+    ],
+    construit: [
+      { src: '/produits/postship/alerte.svg', w: 860, h: 200, alt: 'L’alerte arrive sur le téléphone et sur le salon, en un seul message ; quand tout passe, rien ne part.' },
+      { src: '/produits/postship/retour-arriere.svg', w: 860, h: 165, alt: 'Trois déploiements sur une frise ; le dernier a cassé, la production repointe sur le précédent vérifié bon.' },
+    ],
+  },
+};
+const illus = ILLUS[id];
 ---
-<Base title={`${d.nom}, étude de cas — Thibault Morretton`} description={d.phrase}>
-  <header class="tete ink">
-    <h1 class="titre">{d.nom}</h1>
-    <div class="plaque" data-hero data-lignes={d.nom.toUpperCase()} style={`view-transition-name: visuel-${projet.id}`} aria-hidden="true">
-      <canvas></canvas>
+<Base title={`${d.nom}, étude de cas — Thibault Morretton`} description={d.phrase} univers={id}>
+  {id === 'aether' && <AetherCiel slot="ciel" statique />}
+  <header class="ouverture ink" data-station="cas-logo" data-fond={id === 'aether' ? 'aucun' : 'ink'} data-forme={id} data-teinte={TEINTES[id]}>
+    <div class="logo" data-place>
+      <img class="logo-secours" src={LOGOS[id]} alt="" width="160" height="160" />
     </div>
-    <div class="wrap grid intro">
+    <div class="o-texte wrap">
       <div class="etiquette mono"><span>{n}</span><span>Étude de cas</span></div>
+      <h1 class="titre">{d.nom}</h1>
       <p class="phrase">{d.phrase}</p>
+    </div>
+  </header>
+  <section class="tete ink" aria-label="En bref">
+    <div class="wrap grid intro">
       <dl class="meta mono">
         <div><dt>État</dt><dd>{d.etat}</dd></div>
         <div><dt>Période</dt><dd>{d.periode}</dd></div>
@@ -37,9 +76,7 @@ const n = String(d.ordre).padStart(2, '0');
         </div>
       </dl>
     </div>
-  </header>
-
-  <Couture de="ink" vers="paper" graine={11} />
+  </section>
 
   <section class="bloc paper" aria-labelledby="probleme">
     <div class="wrap grid">
@@ -60,15 +97,23 @@ const n = String(d.ordre).padStart(2, '0');
           </article>
         ))
       }
+      {illus && (
+        <div class="illus">
+          {illus.fonctions.map((i) => <img src={i.src} alt={i.alt} width={i.w} height={i.h} loading="lazy" />)}
+        </div>
+      )}
     </div>
   </section>
-
-  <Couture de="paper" vers="ink" graine={12} />
 
   <section class="bloc ink" aria-labelledby="construit">
     <div class="wrap grid">
       <div class="etiquette mono"><span>03</span><span id="construit">Comment c’est construit</span></div>
       <div class="schema-zone"><Schema architecture={d.architecture} /></div>
+      {illus && (
+        <div class="illus">
+          {illus.construit.map((i) => <img src={i.src} alt={i.alt} width={i.w} height={i.h} loading="lazy" />)}
+        </div>
+      )}
       <div class="prose"><Content /></div>
     </div>
     <div class="wrap grid">
@@ -86,8 +131,6 @@ const n = String(d.ordre).padStart(2, '0');
     </div>
   </section>
 
-  <Couture de="ink" vers="paper" graine={13} />
-
   <section class="bloc paper fin" aria-labelledby="appris">
     <div class="wrap grid">
       <div class="etiquette mono"><span>05</span><span id="appris">Ce que j’en ai appris</span></div>
@@ -104,49 +147,68 @@ const n = String(d.ordre).padStart(2, '0');
 </Base>
 
 <style>
-  .tete {
+  /* L'ouverture : le logo du produit se forme en particules, le nom en dessous. */
+  .ouverture {
+    position: relative;
+    min-height: 90svh;
+    display: grid;
+    align-content: end;
+    padding-top: var(--nav-h);
+  }
+  .logo {
+    position: absolute;
+    top: calc(var(--nav-h) + 2rem);
+    right: calc(var(--gutter) * 2);
+    width: min(36vw, 48svh);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+  }
+  .logo-secours {
+    width: 50%;
+    height: auto;
+    visibility: hidden;
+  }
+  :global(html:not([data-particules='on'])) .logo-secours {
+    visibility: visible;
+  }
+  .o-texte {
     position: relative;
     display: grid;
+    gap: 1rem;
+    padding-bottom: 3rem;
   }
   .titre {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .plaque {
-    position: relative;
-    height: 62svh;
-    min-height: 340px;
-    margin-top: var(--nav-h);
-  }
-  .plaque canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
-  }
-  :global(html[data-dither='off']) .titre {
-    position: static;
-    width: auto;
-    height: auto;
-    clip-path: none;
-    padding: calc(var(--nav-h) + 2rem) var(--gutter) 1rem;
     font-size: var(--t-mega);
     font-stretch: 125%;
     font-weight: 500;
+    line-height: 0.9;
     text-transform: uppercase;
   }
-  :global(html[data-dither='off']) .plaque {
-    display: none;
+  .o-texte .phrase {
+    grid-column: auto;
+    font-size: var(--t-m);
+    line-height: 1.2;
+    max-width: 36ch;
+  }
+  .tete {
+    position: relative;
+    display: grid;
   }
   .intro {
     border-top: 1px solid var(--fg);
     padding-block: 1.5rem 4rem;
     row-gap: 2.5rem;
+  }
+  .illus {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 2rem;
+    padding-block: 3rem;
+  }
+  .illus img {
+    width: 100%;
+    height: auto;
   }
   .etiquette {
     grid-column: 1 / -1;
@@ -160,7 +222,8 @@ const n = String(d.ordre).padStart(2, '0');
     max-width: none;
   }
   .meta {
-    grid-column: 9 / -1;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     display: grid;
     gap: 1rem;
     align-content: start;
@@ -301,9 +364,15 @@ const n = String(d.ordre).padStart(2, '0');
       grid-template-columns: repeat(2, minmax(0, 1fr));
       row-gap: 2rem;
     }
-    .plaque {
-      height: 42svh;
-      min-height: 240px;
+    .meta {
+      grid-template-columns: 1fr;
+    }
+    .logo {
+      top: calc(var(--nav-h) + 1rem);
+      left: 50%;
+      right: auto;
+      width: min(70vw, 42svh);
+      translate: -50% 0;
     }
   }
 </style>

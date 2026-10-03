@@ -9,13 +9,17 @@ export type SceneHandle = {
 };
 
 export type SceneOpts = { mobile: boolean; calm: boolean };
-export type SceneModule = { mount(root: HTMLElement, opts: SceneOpts): SceneHandle };
+export type SceneModule = {
+  mount(root: HTMLElement, opts: SceneOpts): SceneHandle;
+  /** Vrai : la scène suit elle-même les changements de taille (une démo garde son état). */
+  garderAuResize?: boolean;
+};
 
 const loaders: Record<string, () => Promise<SceneModule>> = {
   methode: () => import('../../scenes/methode'),
-  postship: () => import('../../scenes/postship'),
-  clipper: () => import('../../scenes/clipper'),
-  aether: () => import('../../scenes/aether'),
+  postship: () => import('../../demos/postship/demo'),
+  clipper: () => import('../../demos/clipper/demo'),
+  aether: () => import('../../demos/aether/demo'),
   contact: () => import('../../scenes/contact'),
 };
 
@@ -31,6 +35,7 @@ function register(root: HTMLElement): void {
   if (!load) return;
 
   let handle: SceneHandle | null = null;
+  let mod: SceneModule | null = null;
   let trigger: ScrollTrigger | null = null;
   let width = innerWidth;
   let wasFinal = false;
@@ -49,7 +54,7 @@ function register(root: HTMLElement): void {
   };
 
   const mount = async () => {
-    const mod = await load();
+    mod = await load();
     handle = mod.mount(root, { mobile: mobile(), calm: calm() });
     if (calm()) {
       wasFinal = false;
@@ -85,7 +90,7 @@ function register(root: HTMLElement): void {
     width = innerWidth;
     clearTimeout(timer);
     timer = window.setTimeout(() => {
-      if (!handle) return;
+      if (!handle || mod?.garderAuResize) return;
       handle.destroy();
       handle = null;
       wasFinal = false;
