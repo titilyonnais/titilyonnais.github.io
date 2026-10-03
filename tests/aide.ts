@@ -39,10 +39,13 @@ export async function allerA(page: Page, scene: string, t: number): Promise<void
 
 /** Attend que le défilement (doux) soit arrivé : scrollY ne bouge plus pendant 300 ms. */
 export async function stable(page: Page): Promise<void> {
+  // Trois lectures égales de suite : sous charge, le défilement doux peut marquer une pause de 300 ms.
   let avant = -1;
-  for (let i = 0; i < 40; i++) {
+  let egales = 0;
+  for (let i = 0; i < 60; i++) {
     const y = await page.evaluate(() => scrollY);
-    if (y === avant) return;
+    egales = y === avant ? egales + 1 : 0;
+    if (egales >= 3) return;
     avant = y;
     await page.waitForTimeout(300);
   }
