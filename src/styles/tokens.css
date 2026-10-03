@@ -36,4 +36,7 @@
   --teinte-clipper: #ededed;    /* clipper/loopy-clipboard/src/styles.css, --foreground (sombre) */
   --teinte-aether-1: #a9c9ec;   /* aether-browser/src/renderer/src/styles/global.css, --color-glacier */
   --teinte-aether-2: #b3a4e6;   /* idem, --color-lavande */
+  /* La teinte des particules d'ÆTHER suit le thème choisi dans la démo (demo.ts). */
+  --ae-particules-1: var(--teinte-aether-1);
+  --ae-particules-2: var(--teinte-aether-2);
 }

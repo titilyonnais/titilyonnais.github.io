@@ -4,7 +4,8 @@ import Fleche from '../Fleche.astro';
 
 interface Props {
   projet: CollectionEntry<'projets'>;
-  fond: 'ink' | 'paper';
+  /** 'aucun' : une section sombre sans fond, qui laisse voir un ciel posé sous la toile de particules. */
+  fond: 'ink' | 'paper' | 'aucun';
   numero: string;
   pin: number;
   /** Taille native de la fenêtre, en px ; elle est mise à l'échelle de son théâtre. */
@@ -20,7 +21,7 @@ const { projet, fond, numero, pin, largeur, hauteur, largeurMobile = largeur, ha
 const { nom, phrase, faits, liens, stack } = projet.data;
 const id = projet.id;
 ---
-<section id={id} class={`projet ${fond}`} aria-labelledby={`${id}-titre`} data-station={`${id}-fenetre`} data-fond={fond} data-teinte={teinte}>
+<section id={id} class={`projet ${fond === 'paper' ? 'paper' : 'ink'}`} aria-labelledby={`${id}-titre`} data-station={`${id}-fenetre`} data-fond={fond} data-teinte={teinte}>
   <div class="piste" data-scene={id} style={`--pin: ${pin}`}>
     <div class="scene" data-demo="off">
       <header class="tete wrap">
@@ -135,8 +136,9 @@ const id = projet.id;
   .fenetre[data-eclate='on'] :global([data-3d]) {
     transform-style: preserve-3d;
   }
+  /* La propriété translate, pas transform : une démo peut déplacer une couche (Draggable) sans perdre sa profondeur. */
   .fenetre :global([data-couche]) {
-    transform: translateZ(var(--tz, 0px));
+    translate: 0 0 var(--tz, 0px);
   }
   /* Spécificité nulle : une couche placée en absolu par sa démo le reste. */
   :global(:where(.fenetre [data-couche])) {

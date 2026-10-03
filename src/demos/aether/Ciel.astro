@@ -1,0 +1,111 @@
+---
+/**
+ * Le ciel d'ÆTHER : le thème du navigateur (backgroundPresets.ts), fixé
+ * sous la toile de particules. La toile devient transparente sur la
+ * station ÆTHER (data-fond="aucun") et le laisse voir ; sans WebGL, la
+ * section ÆTHER est transparente et le montre aussi.
+ */
+import './tokens.css';
+import { THEMES } from './themes';
+---
+<div class="ae-ciel" data-ciel data-theme="aurore" aria-hidden="true">
+  <div class="halos"></div>
+  {
+    THEMES.map((t) => (
+      <div class="theme" data-t={t.id}>
+        <div class="couche base" style={`background: var(${t.base})`} />
+        {t.couches.map((c) => (
+          <div class={`couche vivante ${c.anim}`} style={`background: var(${c.fond})`} />
+        ))}
+      </div>
+    ))
+  }
+  <div class="grain"></div>
+</div>
+
+<style>
+  .ae-ciel {
+    position: fixed;
+    inset: 0;
+    /* z 0, avant la toile dans le DOM : au-dessus du fond du body, sous les particules et sous main (z 1). */
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--ae-void);
+  }
+  .halos,
+  .theme,
+  .couche,
+  .grain {
+    position: absolute;
+    inset: 0;
+  }
+  .halos {
+    background: var(--ae-halos);
+  }
+  .theme {
+    opacity: 0;
+    transition: opacity 0.9s var(--ae-ease);
+  }
+  .ae-ciel[data-theme='aurore'] [data-t='aurore'],
+  .ae-ciel[data-theme='nebuleuse'] [data-t='nebuleuse'],
+  .ae-ciel[data-theme='braise'] [data-t='braise'],
+  .ae-ciel[data-theme='pulsar'] [data-t='pulsar'] {
+    opacity: 1;
+  }
+  .vivante {
+    inset: -30%;
+    will-change: transform, opacity;
+  }
+  .drift {
+    animation: ae-drift 34s ease-in-out infinite;
+  }
+  .swirl {
+    animation: ae-swirl 72s linear infinite;
+  }
+  .pulse {
+    animation: ae-pulse 12s ease-in-out infinite;
+  }
+  @keyframes ae-drift {
+    0%,
+    100% {
+      transform: translate3d(-6%, -3%, 0) scale(1.15);
+    }
+    50% {
+      transform: translate3d(6%, 4%, 0) scale(1.3);
+    }
+  }
+  @keyframes ae-swirl {
+    from {
+      transform: rotate(0deg) scale(1.45);
+    }
+    to {
+      transform: rotate(360deg) scale(1.45);
+    }
+  }
+  @keyframes ae-pulse {
+    0%,
+    100% {
+      transform: scale(1.05);
+      opacity: 0.55;
+    }
+    50% {
+      transform: scale(1.35);
+      opacity: 1;
+    }
+  }
+  /* Le grain de l'app : feTurbulence à 1,6 %. */
+  .grain {
+    opacity: 0.016;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vivante {
+      animation: none;
+    }
+  }
+  /* Sans toile de particules, la section ÆTHER laisse voir le ciel. */
+  :global(html:not([data-particules='on']) #aether) {
+    background: transparent;
+  }
+</style>

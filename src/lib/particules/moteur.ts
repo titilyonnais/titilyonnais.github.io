@@ -16,6 +16,7 @@ import {
   UnsignedByteType,
   WebGLRenderer,
   type IUniform,
+  Vector4,
 } from 'three';
 import { GPUComputationRenderer, type Variable } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 import { SIM_POSITION, SIM_VITESSE, RENDU_FRAG, RENDU_VERT, FOND_FRAG, FOND_VERT } from './shaders';
@@ -40,7 +41,7 @@ const hex = (h: string): [number, number, number] => {
 
 /** Contexte WebGL2 capable de rendre dans des textures flottantes ; sinon, pas de simulation. */
 function contexte(canvas: HTMLCanvasElement): WebGL2RenderingContext | null {
-  const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+  const gl = canvas.getContext('webgl2', { antialias: false, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
   return gl && gl.getExtension('EXT_color_buffer_float') ? gl : null;
 }
 
@@ -55,7 +56,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   const gl = contexte(canvas);
   if (!gl) return null;
 
-  const renderer = new WebGLRenderer({ canvas, context: gl, antialias: false, alpha: false });
+  const renderer = new WebGLRenderer({ canvas, context: gl, antialias: false, alpha: true, premultipliedAlpha: true });
   const dpr = Math.min(devicePixelRatio || 1, 2);
   renderer.setPixelRatio(dpr);
   let W = innerWidth;
@@ -67,8 +68,9 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   const r: Reglages = { ...REGLAGES };
 
   // Fond : un quad plein écran, deux aplats séparés par un front qui balaie l'écran.
-  const fondDepart = new Color(0, 0, 0);
-  const fondCible = new Color(0, 0, 0);
+  // Un fond peut être transparent (alpha 0) : la toile laisse alors voir ce qui est dessous (le ciel d'ÆTHER).
+  const fondDepart = new Vector4(0, 0, 0, 1);
+  const fondCible = new Vector4(0, 0, 0, 1);
   let fondT0 = 0;
   let fondDuree = 1;
   const fondMat = new ShaderMaterial({
@@ -485,7 +487,8 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       crochets.push(f);
     },
     fond(couleur, duree = 650, sens = 1) {
-      const neuf = new Color(couleur);
+      const c = couleur === 'transparent' ? null : new Color(couleur);
+      const neuf = c ? new Vector4(c.r, c.g, c.b, 1) : new Vector4(0, 0, 0, 0);
       if (neuf.equals(fondCible)) return;
       // Si un balayage est en cours, il est fini d'un coup : l'ancien fond est celui qu'on voit.
       fondDepart.copy(fondCible);

@@ -8,7 +8,8 @@ import SceneProduit from '../components/scenes/SceneProduit.astro';
 import PostShipFenetre from '../demos/postship/Fenetre.astro';
 import ClipperFenetre from '../demos/clipper/Fenetre.astro';
 import ClipperTouches from '../demos/clipper/Touches.astro';
-import Aether from '../components/scenes/Aether.astro';
+import AetherFenetre from '../demos/aether/Fenetre.astro';
+import AetherCiel from '../demos/aether/Ciel.astro';
 import { getEntry } from 'astro:content';
 
 const postship = (await getEntry('projets', 'postship'))!;
@@ -19,6 +20,7 @@ const aether = (await getEntry('projets', 'aether'))!;
   title="Thibault Morretton — créateur de logiciels"
   description="Je fabrique des logiciels : PostShip, la surveillance après mise en ligne ; Clipper, un presse-papiers pour Windows ; ÆTHER, un navigateur sans onglets."
 >
+  <AetherCiel slot="ciel" />
   <Hero />
   <Methode />
   <SceneProduit projet={postship} fond="ink" numero="01" pin={4} largeur={1200} hauteur={750} largeurMobile={400} hauteurMobile={760} teinte="--teinte-postship">
@@ -28,7 +30,9 @@ const aether = (await getEntry('projets', 'aether'))!;
     <ClipperFenetre />
     <ClipperTouches slot="theatre" />
   </SceneProduit>
-  <Aether projet={aether} />
+  <SceneProduit projet={aether} fond="aucun" numero="03" pin={4} largeur={1180} hauteur={772} largeurMobile={400} hauteurMobile={840} teinte="--ae-particules-1,--ae-particules-2">
+    <AetherFenetre />
+  </SceneProduit>
   <APropos />
   <Contact />
 </Base>

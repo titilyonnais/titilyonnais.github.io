@@ -52,6 +52,7 @@ const og = new URL('/og.png', Astro.site);
   </head>
   <body>
     <Prechargeur />
+    <slot name="ciel" />
     <canvas id="particules" aria-hidden="true"></canvas>
     <a class="skip" href="#contenu">Aller au contenu</a>
     <Nav />

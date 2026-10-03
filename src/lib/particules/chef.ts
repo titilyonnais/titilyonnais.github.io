@@ -107,7 +107,8 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
     if (g !== gen) return;
     ancrer(el);
     const paper = st.fond === 'paper';
-    const base = { additif: !paper, taille: paper ? 1.5 : 1.3, souffle: 1 };
+    // Mélange additif sur le noir seulement : sur le papier et sur un ciel coloré, le mélange normal.
+    const base = { additif: st.fond === 'ink', taille: st.fond === 'ink' ? 1.3 : 1.5, souffle: 1 };
     const eclat = opts.eclat ?? (champ ? 0.2 : paper ? 0.6 : 0.5);
     if (fige) {
       m.viser({ points: pts, teinte: teinteDe(st), eclat }, { ...base, ...REPOS, ...opts.reglages }, 0, true);
@@ -131,7 +132,8 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
     etat.station = id;
 
     // Fond : le nouveau entre par le bas quand on descend, par le haut quand on remonte.
-    const vers = st.fond === 'paper' ? css('--paper') : css('--ink');
+    // « aucun » : la toile devient transparente et laisse voir le fond de la scène (le ciel d'ÆTHER).
+    const vers = st.fond === 'aucun' ? 'transparent' : st.fond === 'paper' ? css('--paper') : css('--ink');
     const sens = !precedente || st.rang >= precedente.rang ? 1 : -1;
     document.documentElement.dataset.fond = st.fond;
     m.fond(vers, 650, sens);
@@ -211,7 +213,7 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
         if (g !== gen) return;
         ancrer(el);
         forme = 'contour';
-        m.viser({ points: pts, teinte: teinte ? [teinte] : teinteDe(st), eclat: 0.7 }, { ...MORPHOSE, additif: st.fond !== 'paper' }, 0.25, fige);
+        m.viser({ points: pts, teinte: teinte ? [teinte] : teinteDe(st), eclat: 0.7 }, { ...MORPHOSE, additif: st.fond === 'ink' }, 0.25, fige);
         setTimeout(() => g === gen && m.reglages(REPOS), 500);
       });
     },

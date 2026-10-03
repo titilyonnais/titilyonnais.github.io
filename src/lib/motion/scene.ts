@@ -19,7 +19,7 @@ const loaders: Record<string, () => Promise<SceneModule>> = {
   methode: () => import('../../scenes/methode'),
   postship: () => import('../../demos/postship/demo'),
   clipper: () => import('../../demos/clipper/demo'),
-  aether: () => import('../../scenes/aether'),
+  aether: () => import('../../demos/aether/demo'),
   contact: () => import('../../scenes/contact'),
 };
 

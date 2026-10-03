@@ -186,8 +186,8 @@ void main(){
 `;
 
 export const FOND_FRAG = /* glsl */ `
-uniform vec3 uAncien;
-uniform vec3 uNouveau;
+uniform vec4 uAncien;   // rgb + alpha (0 : fond transparent)
+uniform vec4 uNouveau;
 uniform float uFront;   // 0 → 1 : avancée du front
 uniform float uSens;    // 1 : le nouveau monte du bas ; -1 : il descend du haut
 uniform float uTemps;
@@ -199,6 +199,7 @@ void main(){
   float onde = (sin(x * 0.011 + uTemps * 2.1) * 9.0 + sin(x * 0.027 - uTemps * 1.3) * 5.0) / uRes.y;
   float y = uSens > 0.0 ? vUv.y : 1.0 - vUv.y;
   float limite = uFront * 1.08 - 0.04 + onde;
-  gl_FragColor = vec4(y < limite ? uNouveau : uAncien, 1.0);
+  vec4 c = y < limite ? uNouveau : uAncien;
+  gl_FragColor = vec4(c.rgb * c.a, c.a); // prémultiplié, comme la toile
 }
 `;

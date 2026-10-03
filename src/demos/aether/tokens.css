@@ -1,0 +1,109 @@
+/* Source : aether-browser/src/renderer/src/styles/global.css (jetons, verre, animations des thèmes)
+   et src/renderer/src/lib/backgroundPresets.ts (les quatre thèmes de la démo). */
+.ae,
+.ae-ciel,
+.ae-themes,
+.ae-overlay {
+  --ae-void: #060608;
+  --ae-abyss: #0a0a10;
+  --ae-abyss-50: #0a0a1080;
+  --ae-mist: #101018;
+  --ae-veil: #16161f;
+  --ae-ink: #e9e9f2;
+  --ae-ink-dim: #9a9ab0;
+  --ae-ink-faint: #7c7c98;
+  --ae-glacier: #a9c9ec;
+  --ae-lavande: #b3a4e6;
+  --ae-blanc-2: #ffffff05;
+  --ae-blanc-3: #ffffff08;
+  --ae-blanc-4: #ffffff0a;
+  --ae-blanc-5: #ffffff0d;
+  --ae-blanc-6: #ffffff0f;
+  --ae-blanc-7: #ffffff12;
+  --ae-blanc-8: #ffffff14;
+  --ae-blanc-9: #ffffff17;
+  --ae-blanc-13: #ffffff21;
+  --ae-blanc-14: #ffffff24;
+  --ae-noir-40: #00000066;
+  --ae-noir-80: #000000cc;
+  --ae-noir-85: #000000d9;
+  --ae-noir-35: #00000059;
+  --ae-void-55: #0606088c;
+  --ae-void-60: #06060899;
+  --ae-glacier-16: #a9c9ec29;
+  --ae-glacier-40: #a9c9ec66;
+  --ae-glacier-50: #a9c9ec80;
+  --ae-glacier-80: #a9c9eccc;
+  --ae-glacier-90: #a9c9ece6;
+  --ae-lavande-25: #b3a4e640;
+  --ae-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* glass-strong : glacier 9 % dans rgb(14 14 22 / .86) */
+  --ae-verre-fort: color-mix(in srgb, #a9c9ec 9%, #0e0e16db);
+
+  /* Thèmes (backgroundPresets.ts) : base, puis couches vivantes. */
+  --ae-aurore-accent: #6ee7c8;
+  --ae-aurore-base: linear-gradient(178deg, #061210 0%, #050d12 48%, #04060a 100%);
+  --ae-aurore-drift: radial-gradient(ellipse 55% 32% at 30% 18%, rgba(110, 231, 200, 0.34), transparent 68%),
+    radial-gradient(ellipse 48% 28% at 62% 26%, rgba(88, 190, 230, 0.26), transparent 66%);
+  --ae-aurore-pulse: radial-gradient(ellipse 62% 34% at 48% 12%, rgba(150, 120, 235, 0.24), transparent 70%);
+
+  --ae-nebuleuse-accent: #c14fd6;
+  --ae-nebuleuse-base: radial-gradient(ellipse 65% 50% at 80% -10%, rgba(193, 79, 214, 0.3), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 5% 20%, rgba(74, 90, 224, 0.3), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 60% 100%, rgba(120, 70, 200, 0.2), transparent 60%),
+    linear-gradient(160deg, #120a1c 0%, #0b0a16 50%, #060608 100%);
+
+  --ae-braise-accent: #e6883d;
+  --ae-braise-base: radial-gradient(ellipse 70% 45% at 85% -5%, rgba(230, 136, 61, 0.32), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 10% 15%, rgba(193, 57, 79, 0.24), transparent 60%),
+    radial-gradient(ellipse 75% 55% at 40% 115%, rgba(120, 50, 30, 0.24), transparent 65%),
+    linear-gradient(170deg, #180e0a 0%, #12090a 50%, #060608 100%);
+
+  --ae-pulsar-accent: #8ab4f8;
+  --ae-pulsar-base: radial-gradient(ellipse 120% 90% at 50% 50%, #0b1020 0%, #06080f 55%, #030409 100%);
+  --ae-pulsar-pulse: radial-gradient(circle 34% at 50% 45%, rgba(138, 180, 248, 0.4), rgba(90, 120, 220, 0.12) 45%, transparent 70%);
+  --ae-pulsar-swirl: conic-gradient(
+    from 0deg at 50% 45%,
+    transparent 0deg,
+    rgba(138, 180, 248, 0.14) 40deg,
+    transparent 90deg,
+    transparent 180deg,
+    rgba(190, 150, 255, 0.12) 220deg,
+    transparent 270deg
+  );
+
+  /* Le fond ambiant de l'app (AmbientBackground) : deux halos, glacier et lavande. */
+  --ae-halos: radial-gradient(900px 600px at 12% -10%, rgba(169, 201, 236, 0.05), transparent 60%),
+    radial-gradient(900px 700px at 95% 110%, rgba(179, 164, 230, 0.045), transparent 60%);
+  --ae-grille: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  --ae-ombre-carte: 0 18px 70px -24px rgba(0, 0, 0, 0.85);
+  --ae-ombre-carte-choisie: 0 0 0 1px rgba(169, 201, 236, 0.16), 0 28px 90px -28px rgba(0, 0, 0, 0.9);
+  --ae-ombre-forte: 0 32px 80px -24px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(0 0 0 / 0.4);
+  --ae-voile-pied: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.35), transparent);
+}
+
+/* glass / glass-strong (global.css) */
+.ae-glass {
+  background: var(--ae-blanc-3);
+  border: 1px solid var(--ae-blanc-7);
+  backdrop-filter: blur(24px) saturate(1.25);
+}
+.ae-glass-fort {
+  background: var(--ae-verre-fort);
+  border: 1px solid var(--ae-blanc-9);
+  backdrop-filter: blur(36px) saturate(1.3);
+  box-shadow: var(--ae-ombre-forte);
+}
+
+/* Couleurs d'une teinte (hueColor, hueFromString) : l'élément porte style="--h: 210". */
+.ae-h {
+  --ae-c: hsl(var(--h) 45% 72%);
+  --ae-c-95: hsl(var(--h) 45% 72% / 0.95);
+  --ae-c-85: hsl(var(--h) 45% 72% / 0.85);
+  --ae-c-50: hsl(var(--h) 45% 72% / 0.5);
+  --ae-c-45: hsl(var(--h) 45% 72% / 0.45);
+  --ae-noeud: hsl(var(--h) 24% 14%);
+  --ae-carte-fond: linear-gradient(155deg, hsl(var(--h) 26% 13%) 0%, hsl(var(--h) 20% 7%) 100%);
+  --ae-favicon-fond: hsl(var(--h) 30% 22%);
+  --ae-favicon-texte: hsl(var(--h) 50% 78%);
+}

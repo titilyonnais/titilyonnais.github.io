@@ -1,0 +1,972 @@
+---
+/**
+ * La fenêtre d'ÆTHER : la barre de titre (TitleBar.tsx), la Constellation
+ * (ConstellationPanel.tsx), la Toile (SpatialCanvas.tsx) et ses cartes
+ * (PageCard.tsx), et la Barre d'Intention (IntentionOverlay.tsx), avec
+ * leurs vrais jetons. Le ciel, lui, est sous la toile de particules (Ciel.astro).
+ */
+import '../../styles/polices-produits.css';
+import './tokens.css';
+import Lucide from '../../components/Lucide.astro';
+import { CARTES, ESPACES, INTENTION, teinteDe, type Carte } from './donnees';
+import { THEMES } from './themes';
+
+const toutes = [...CARTES, ...INTENTION];
+const teinteEspace = Object.fromEntries(ESPACES.map((e) => [e.id, e.teinte]));
+const compte = (id: string) => CARTES.filter((c) => c.espace === id).length;
+
+// La carte de la Constellation : le monde des 10 pages, ramené dans 288 × 300.
+const xs = toutes.map((c) => c.pos[0] + 180);
+const ys = toutes.map((c) => c.pos[1] + 130);
+const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+const k = Math.min(232 / (x1 - x0), 240 / (y1 - y0));
+const pt = (c: Carte) => [28 + (c.pos[0] + 180 - x0) * k, 30 + (c.pos[1] + 130 - y0) * k] as const;
+const noeuds = Object.fromEntries(toutes.map((c) => [c.id, pt(c)]));
+const parents: [string, string][] = [
+  ['visitlisboa', 'tap'],
+  ['impots', 'pennylane'],
+  ['rustdoc', 'crates'],
+  ['rustdoc', 'rustlang'],
+  ['rustlang', 'zig'],
+  ['zig', 'ziggit'],
+];
+const proches: [string, string][] = [
+  ['crates', 'bevy'],
+  ['rustlang', 'ziggit'],
+  ['tap', 'impots'],
+];
+const futur = (id: string) => INTENTION.some((c) => c.id === id);
+---
+<div class="ae-scene" data-3d>
+  <div class="ae" data-3d>
+    <header class="titre" data-couche data-z="200" data-legende="Barre d’Intention">
+      <div class="t-gauche">
+        <span class="ae-logo">Æ</span>
+        <span class="ib actif" aria-hidden="true"><Lucide nom="panel-left" taille={15} /></span>
+        <span class="t-espace" data-nom-espace>Rust</span>
+      </div>
+      <button type="button" class="pilule" data-pilule aria-label="Ouvrir la Barre d’Intention (Ctrl K)">
+        <span class="p-texte">Exprimez une intention — naviguer, chercher, penser…</span>
+        <span class="p-touches"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+      </button>
+      <div class="t-droite" aria-hidden="true">
+        <span class="bascule">
+          <span class="b-opt"><Lucide nom="columns-2" taille={12} />Focus</span>
+          <span class="b-opt on"><Lucide nom="orbit" taille={12} />Toile</span>
+        </span>
+        <span class="ib"><Lucide nom="circle-help" taille={15} /></span>
+        <span class="ib muse"><Lucide nom="sparkles" taille={15} /></span>
+        <span class="sep"></span>
+        <span class="ib"><Lucide nom="minus" taille={15} /></span>
+        <span class="ib"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="3.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2" /></svg></span>
+        <span class="ib"><Lucide nom="x" taille={15} /></span>
+      </div>
+    </header>
+
+    <div class="corps" data-3d>
+      <aside class="constellation" data-couche data-z="120" data-legende="Espaces">
+        <div class="c-tete">
+          <p class="k-titre">Espaces</p>
+          {
+            ESPACES.map((e) => (
+              <button type="button" class:list={['espace', 'ae-h', { actif: e.id === 'rust' }]} data-espace={e.id} style={`--h: ${e.teinte}`}>
+                <span class="point" />
+                <span class="e-nom">{e.nom}</span>
+                <span class="e-compte" data-compte={e.id}>{compte(e.id)}</span>
+              </button>
+            ))
+          }
+          <span class="nouvel"><Lucide nom="plus" taille={12} />Nouvel espace</span>
+        </div>
+        <span class="c-filet"></span>
+        <div class="carte-svg">
+          <svg viewBox="0 0 288 300" aria-hidden="true">
+            {parents.map(([a, b]) => (
+              <line x1={noeuds[a]![0]} y1={noeuds[a]![1]} x2={noeuds[b]![0]} y2={noeuds[b]![1]} class="lien" data-futur={futur(a) || futur(b) ? '' : undefined} />
+            ))}
+            {proches.map(([a, b]) => (
+              <line x1={noeuds[a]![0]} y1={noeuds[a]![1]} x2={noeuds[b]![0]} y2={noeuds[b]![1]} class="proche" data-futur={futur(a) || futur(b) ? '' : undefined} />
+            ))}
+            {toutes.map((c) => (
+              <g class="etoile ae-h" style={`--h: ${teinteEspace[c.espace]}`} transform={`translate(${noeuds[c.id]![0]} ${noeuds[c.id]![1]})`} data-etoile={c.id} data-futur={futur(c.id) ? '' : undefined}>
+                {futur(c.id) && <circle r="11" class="anneau" />}
+                <circle r="9" class="corps-etoile" />
+                <text y="3">{c.domaine.charAt(0).toUpperCase()}</text>
+                {c.vivante && <circle cx="7" cy="-7" r="2" class="vive" />}
+              </g>
+            ))}
+          </svg>
+          <p class="legende-carte">
+            <span><i class="trait" />ouverte depuis</span>
+            <span><i class="trait pointille" />proches par le sens</span>
+          </p>
+        </div>
+        <footer class="k-pied">
+          <span data-compte-pages>6 pages · 2 notes</span>
+          <span class="ib petit" aria-hidden="true"><Lucide nom="settings-2" taille={13} /></span>
+        </footer>
+      </aside>
+
+      <div class="toile" data-couche data-z="40" data-legende="Toile" data-3d>
+        <div class="grille" data-toile style="--zoom: 0.62" data-3d>
+          <div class="monde" data-monde data-3d>
+            {
+              toutes.map((c, i) => (
+                <div
+                  class="carte ae-h"
+                  data-carte={futur(c.id) ? undefined : c.id}
+                  data-a-venir={futur(c.id) ? c.id : undefined}
+                  hidden={futur(c.id)}
+                  data-espace-de={c.espace}
+                  data-pos={c.pos.join(',')}
+                  data-pos-mobile={c.posMobile.join(',')}
+                  data-couche
+                  data-z={60 + i * 24}
+                  data-legende={i === 0 ? 'Pages vivantes' : undefined}
+                  role="button"
+                  tabindex="0"
+                  aria-roledescription="carte déplaçable"
+                  aria-label={`${c.titre} — ${c.domaine}`}
+                  style={`--h: ${teinteDe(c.domaine)}; left: ${c.pos[0]}px; top: ${c.pos[1]}px`}
+                >
+                  <div class="c-fond">
+                    <span class="favicon f30">{c.domaine.charAt(0)}</span>
+                    <span class="c-dom">{c.domaine}</span>
+                  </div>
+                  <div class="c-voile" />
+                  <div class="c-pied">
+                    <span class="favicon f15">{c.domaine.charAt(0)}</span>
+                    <span class="c-txt">
+                      <span class="c-titre">{c.titre}</span>
+                      <span class="c-dom2">{c.domaine}</span>
+                    </span>
+                    {c.vivante && <span class="vivante" title="Page chargée en mémoire" />}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+        <div class="zoom ae-glass" aria-label="Zoom de la Toile">
+          <button type="button" class="z-btn" data-zoom="-" aria-label="Zoom arrière"><Lucide nom="minus" taille={13} /></button>
+          <span class="z-val" data-zoom-val>62%</span>
+          <button type="button" class="z-btn" data-zoom="+" aria-label="Zoom avant"><Lucide nom="plus" taille={13} /></button>
+          <span class="z-sep"></span>
+          <button type="button" class="z-btn" data-zoom="cadrer" aria-label="Tout cadrer" title="Tout cadrer"><Lucide nom="maximize-2" taille={12} /></button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="ae-overlay" data-intention hidden>
+      <div class="o-fond" data-fermer></div>
+      <div class="o-panneau ae-glass-fort" role="dialog" aria-label="Barre d’Intention">
+        <div class="o-ligne">
+          <span class="o-etincelle"><Lucide nom="sparkles" taille={17} /></span>
+          <input type="text" class="o-champ" placeholder="Une adresse, une recherche, une intention…" aria-label="Intention" spellcheck="false" autocomplete="off" data-champ-intention />
+          <kbd>Échap</kbd>
+        </div>
+        <button type="button" class="o-interp" data-interpretation hidden>
+          <span class="o-icone" data-genre="comparer">
+            <span class="i-comparer"><Lucide nom="wand-sparkles" taille={14} /></span>
+            <span class="i-url"><Lucide nom="globe" taille={14} /></span>
+            <span class="i-recherche"><Lucide nom="search" taille={14} /></span>
+          </span>
+          <span class="o-textes">
+            <span class="o-libelle" data-libelle></span>
+            <span class="o-detail" data-detail></span>
+          </span>
+          <kbd>⏎</kbd>
+        </button>
+        <div class="o-pied">
+          <span><kbd>⏎</kbd> ouvrir</span>
+          <span><kbd>⇧⏎</kbd> carte sur la toile</span>
+          <span><kbd>Ctrl⏎</kbd> forcer la recherche</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ae-themes" role="group" aria-label="Thème d’ÆTHER">
+    {
+      THEMES.map((t) => (
+        <button type="button" class="t-choix" data-theme-choix={t.id} aria-pressed={t.id === 'aurore' ? 'true' : 'false'}>
+          <span class="t-pastille" style={`background: var(${t.accent})`} />
+          {t.nom}
+        </button>
+      ))
+    }
+  </div>
+  <p class="sr-only" role="status" aria-live="polite" data-annonce></p>
+</div>
+
+<style>
+  /* La fenêtre du produit, puis la rangée des thèmes : les deux à l'échelle du théâtre. */
+  .ae-scene {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    height: 100%;
+  }
+  .ae {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    letter-spacing: -0.008em;
+    line-height: 1.4;
+    color: var(--ae-ink);
+    /* Dans ÆTHER, le thème est le fond de l'app : la fenêtre laisse voir le ciel, à peine voilé. */
+    background: var(--ae-noir-35);
+    border: 1px solid var(--ae-blanc-8);
+    border-radius: 12px;
+    box-shadow: var(--ae-ombre-forte);
+    text-align: left;
+  }
+  .ae :global(svg) {
+    flex-shrink: 0;
+  }
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 5px;
+    border: 1px solid var(--ae-blanc-9);
+    background: var(--ae-blanc-4);
+    padding: 2px 6px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--ae-ink-faint);
+  }
+  .ib {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--ae-ink-faint);
+    flex-shrink: 0;
+  }
+  .ib.actif {
+    background: var(--ae-blanc-6);
+    color: var(--ae-glacier);
+  }
+  .ib.muse {
+    color: var(--ae-lavande);
+  }
+  .ib.petit {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  /* Barre de titre : 44 px. */
+  .titre {
+    height: 44px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 4px;
+    padding-inline: 8px;
+    border-bottom: 1px solid var(--ae-blanc-7);
+    background: var(--ae-void-60);
+    border-radius: 12px 12px 0 0;
+  }
+  .t-gauche {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .ae-logo {
+    padding: 0 4px 0 6px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--ae-ink-faint);
+  }
+  .t-espace {
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-inline: 6px;
+    font-size: 12px;
+    color: var(--ae-ink-faint);
+  }
+  .pilule {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 28rem;
+    height: 32px;
+    padding-inline: 16px;
+    border-radius: 999px;
+    border: 1px solid var(--ae-blanc-7);
+    background: var(--ae-blanc-3);
+    color: var(--ae-ink-faint);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background-color 0.2s,
+      color 0.2s;
+  }
+  .pilule:hover {
+    border-color: var(--ae-blanc-13);
+    background: var(--ae-blanc-5);
+    color: var(--ae-ink-dim);
+  }
+  .pilule:focus-visible {
+    outline: 1px solid var(--ae-glacier-50);
+    outline-offset: 2px;
+  }
+  .p-texte {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .p-touches {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .t-droite {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bascule {
+    display: flex;
+    padding: 2px;
+    border-radius: 8px;
+    border: 1px solid var(--ae-blanc-6);
+    background: var(--ae-blanc-2);
+  }
+  .b-opt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding-inline: 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--ae-ink-faint);
+  }
+  .b-opt.on {
+    background: var(--ae-blanc-8);
+    color: var(--ae-glacier);
+  }
+  .sep {
+    width: 1px;
+    height: 16px;
+    margin-inline: 4px;
+    background: var(--ae-blanc-8);
+  }
+
+  .corps {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+  }
+
+  /* Constellation : 288 px. */
+  .constellation {
+    width: 288px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--ae-blanc-7);
+    background: var(--ae-abyss-50);
+    border-radius: 0 0 0 12px;
+  }
+  .c-tete {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 8px 8px;
+  }
+  .k-titre {
+    padding: 0 12px 6px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ae-ink-faint);
+  }
+  .espace {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 36px;
+    padding-inline: 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ae-ink-dim);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+  .espace:hover {
+    background: var(--ae-blanc-3);
+    color: var(--ae-ink);
+  }
+  .espace.actif {
+    background: var(--ae-blanc-5);
+    color: var(--ae-ink);
+  }
+  .espace:focus-visible {
+    outline: 1px solid var(--ae-glacier-50);
+  }
+  .point {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--ae-c-95);
+    box-shadow: 0 0 10px var(--ae-c-45);
+  }
+  .e-nom {
+    flex: 1;
+    min-width: 0;
+  }
+  .e-compte {
+    font-size: 10px;
+    color: var(--ae-ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .nouvel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 32px;
+    padding-inline: 12px;
+    font-size: 12.5px;
+    color: var(--ae-ink-faint);
+  }
+  .c-filet {
+    height: 1px;
+    margin-inline: 16px;
+    background: var(--ae-blanc-5);
+  }
+  .carte-svg {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+  .carte-svg svg {
+    width: 100%;
+    height: 100%;
+  }
+  .lien {
+    stroke: var(--ae-blanc-8);
+    stroke-width: 1;
+  }
+  .proche {
+    stroke: var(--ae-glacier-40);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+  }
+  [data-futur] {
+    display: none;
+  }
+  .corps-etoile {
+    fill: var(--ae-noeud);
+    stroke: var(--ae-blanc-14);
+    stroke-width: 1;
+  }
+  .etoile text {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 8px;
+    font-weight: 500;
+    text-anchor: middle;
+    fill: var(--ae-c-85);
+  }
+  .vive {
+    fill: var(--ae-glacier-90);
+    animation: ae-pouls 2.4s ease-in-out infinite;
+  }
+  .anneau {
+    fill: none;
+    stroke: var(--ae-c-50);
+    stroke-width: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ae-anneau 2.8s var(--ae-ease) infinite;
+  }
+  @keyframes ae-anneau {
+    from {
+      transform: scale(0.85);
+      opacity: 0.55;
+    }
+    to {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+  @keyframes ae-pouls {
+    50% {
+      opacity: 0.3;
+    }
+  }
+  .legende-carte {
+    position: absolute;
+    left: 12px;
+    bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 9px;
+    color: var(--ae-ink-faint);
+  }
+  .legende-carte span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .trait {
+    width: 16px;
+    height: 0;
+    border-top: 1px solid var(--ae-blanc-14);
+  }
+  .trait.pointille {
+    border-top: 1px dashed var(--ae-glacier-50);
+  }
+  .k-pied {
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 16px;
+    border-top: 1px solid var(--ae-blanc-7);
+    font-size: 10.5px;
+    color: var(--ae-ink-faint);
+  }
+
+  /* La Toile. */
+  .toile {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    touch-action: pan-y;
+    border-radius: 0 0 12px 0;
+    user-select: none;
+  }
+  :global([data-eclate='on']) .toile {
+    overflow: visible;
+  }
+  .grille {
+    position: absolute;
+    inset: 0;
+    background-image: var(--ae-grille);
+    background-size: calc(26px * var(--zoom)) calc(26px * var(--zoom));
+    background-position: var(--gx, 0) var(--gy, 0);
+    cursor: grab;
+  }
+  .grille.panne {
+    cursor: grabbing;
+  }
+  .monde {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    transform-origin: 0 0;
+    transform: translate3d(var(--cx, 0px), var(--cy, 0px), 0) scale(var(--zoom));
+  }
+  .carte {
+    position: absolute;
+    width: 360px;
+    height: 260px;
+    border-radius: 16px;
+    border: 1px solid var(--ae-blanc-8);
+    background: var(--ae-mist);
+    box-shadow: var(--ae-ombre-carte);
+    touch-action: none;
+    cursor: grab;
+    transition:
+      border-color 0.3s,
+      box-shadow 0.3s,
+      opacity 0.3s;
+  }
+  .carte:hover {
+    border-color: var(--ae-blanc-13);
+  }
+  .carte[aria-pressed='true'],
+  .carte:focus-visible {
+    outline: 0;
+    border-color: var(--ae-glacier-40);
+    box-shadow: var(--ae-ombre-carte-choisie);
+  }
+  .carte[data-attenue] {
+    opacity: 0.35;
+  }
+  .c-fond {
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-bottom: 24px;
+    background: var(--ae-carte-fond);
+    pointer-events: none;
+  }
+  .favicon {
+    display: grid;
+    place-items: center;
+    border-radius: 3px;
+    font-weight: 500;
+    text-transform: uppercase;
+    background: var(--ae-favicon-fond);
+    color: var(--ae-favicon-texte);
+    flex-shrink: 0;
+  }
+  .f30 {
+    width: 30px;
+    height: 30px;
+    font-size: 16.5px;
+  }
+  .f15 {
+    width: 15px;
+    height: 15px;
+    font-size: 8.25px;
+  }
+  .c-dom {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--ae-ink-faint);
+  }
+  .c-voile {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 96px;
+    border-radius: 0 0 15px 15px;
+    background: var(--ae-voile-pied);
+    pointer-events: none;
+  }
+  .c-pied {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    pointer-events: none;
+  }
+  .c-txt {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .c-titre,
+  .c-dom2 {
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, black calc(100% - 16px), transparent 100%);
+  }
+  .c-titre {
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+  .c-dom2 {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.25;
+    color: var(--ae-ink-dim);
+    opacity: 0.7;
+  }
+  .vivante {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--ae-glacier);
+    animation: ae-pouls 2.4s ease-in-out infinite;
+  }
+
+  .zoom {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+  .z-btn {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ae-ink-faint);
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+  .z-btn:hover {
+    background: var(--ae-blanc-6);
+    color: var(--ae-ink-dim);
+  }
+  .z-val {
+    width: 44px;
+    text-align: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ae-ink-faint);
+  }
+  .z-sep {
+    width: 1px;
+    height: 14px;
+    margin-inline: 2px;
+    background: var(--ae-blanc-8);
+  }
+
+  /* La Barre d'Intention. */
+  .ae-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: 12px;
+  }
+  .ae-overlay[hidden] {
+    display: none;
+  }
+  .o-fond {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: var(--ae-void-55);
+    backdrop-filter: blur(7px);
+    animation: ae-apparait 0.18s ease-out;
+  }
+  .o-panneau {
+    position: absolute;
+    left: 50%;
+    top: 16%;
+    width: min(660px, 92%);
+    translate: -50% 0;
+    border-radius: 16px;
+    overflow: hidden;
+    animation: ae-ressort 0.42s cubic-bezier(0.2, 1.25, 0.35, 1);
+  }
+  @keyframes ae-apparait {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes ae-ressort {
+    from {
+      opacity: 0;
+      transform: translateY(-14px) scale(0.985);
+    }
+  }
+  .o-ligne {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 62px;
+    padding-inline: 20px;
+  }
+  .o-etincelle {
+    color: var(--ae-glacier-80);
+    display: flex;
+  }
+  .o-champ {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ae-ink);
+    font: inherit;
+    font-size: 17px;
+    font-weight: 300;
+  }
+  .o-champ::placeholder {
+    color: var(--ae-ink-faint);
+  }
+  .o-interp {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 20px;
+    border: 0;
+    border-top: 1px solid var(--ae-blanc-6);
+    background: var(--ae-blanc-4);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .o-interp[hidden] {
+    display: none;
+  }
+  .o-icone {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1px solid var(--ae-blanc-8);
+    background: var(--ae-blanc-4);
+  }
+  .o-icone > span {
+    display: none;
+  }
+  .o-icone[data-genre='comparer'] .i-comparer {
+    display: flex;
+    color: var(--ae-lavande);
+  }
+  .o-icone[data-genre='url'] .i-url {
+    display: flex;
+    color: var(--ae-glacier);
+  }
+  .o-icone[data-genre='recherche'] .i-recherche {
+    display: flex;
+    color: var(--ae-ink-dim);
+  }
+  .o-textes {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .o-libelle {
+    font-size: 13.5px;
+    color: var(--ae-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .o-detail {
+    font-size: 11px;
+    color: var(--ae-ink-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .o-pied {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    border-top: 1px solid var(--ae-blanc-6);
+    font-size: 10.5px;
+    color: var(--ae-ink-faint);
+  }
+  .o-pied span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Le sélecteur de thème : hors de l'interface produit, dans le style du site. */
+  .ae-themes {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .t-choix {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--paper);
+    background: transparent;
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .t-choix[aria-pressed='true'] {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .t-pastille {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Téléphone : la Constellation devient une rangée d'Espaces au-dessus de la Toile. */
+  @media (max-width: 767px) {
+    .t-droite,
+    .t-gauche .ib,
+    .p-touches,
+    .k-titre,
+    .nouvel,
+    .c-filet,
+    .carte-svg,
+    .k-pied,
+    .o-pied,
+    .o-ligne kbd {
+      display: none;
+    }
+    .titre {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    .pilule {
+      width: auto;
+      min-width: 0;
+    }
+    .corps {
+      flex-direction: column;
+    }
+    .constellation {
+      width: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--ae-blanc-7);
+      border-radius: 0;
+    }
+    .c-tete {
+      flex-direction: row;
+      padding: 6px;
+    }
+    .espace {
+      flex: 1;
+      gap: 6px;
+      padding-inline: 8px;
+      font-size: 12px;
+    }
+    .toile {
+      border-radius: 0 0 12px 12px;
+    }
+    .o-panneau {
+      top: 10%;
+    }
+  }
+</style>
