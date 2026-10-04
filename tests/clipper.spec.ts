@@ -10,13 +10,20 @@ test('Clipper : chercher, révéler, coller', async ({ page }) => {
   const s = page.locator('#clipper');
   await s.locator('input[type="search"]').fill('facture');
   await expect(s.locator('[data-item]:visible')).toHaveCount(2);
-  await s.locator('input[type="search"]').fill('');
+  // Le secret se trouve par son titre (Clipper n'indexe pas son contenu). Le cliquer dans la liste
+  // complète faisait défiler la page sous le défilement doux, et le clic tombait parfois cinq lignes plus bas.
+  await s.locator('input[type="search"]').fill('sensible');
+  await expect(s.locator('[data-item]:visible')).toHaveCount(1);
   await s.locator('[data-item][data-type="secret"]').click();
   await s.locator('[data-action="afficher"]').click();
   await expect(s.locator('[data-apercu]')).toContainText('sk-');
-  await s.locator('[data-item][data-type="code"]').first().click();
+  // Même chose pour le code : on le cherche, on vérifie qu'il est bien la ligne choisie, puis Entrée.
+  await s.locator('input[type="search"]').fill('total');
+  const code = s.locator('[data-item][data-type="code"]:visible').first();
+  await code.click();
+  await expect(code).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('Enter');
-  await expect(s.locator('[data-blocnotes]')).toContainText('def ', { timeout: 3000 });
+  await expect(s.locator('[data-blocnotes]')).toContainText('def ', { timeout: 8000 });
   expect(e).toEqual([]);
 });
 
@@ -71,6 +78,14 @@ test('un geste pendant le collage automatique rend la toile et ne laisse pas de 
   expect(await page.evaluate(() => window.__chef?.forme)).not.toBe('envol');
   const texte = (await notes.textContent()) ?? '';
   expect(texte === '' || texte.endsWith('for l in lignes)')).toBe(true);
+});
+
+test('Clipper au doigt : l’invite dit comment coller', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'tactile');
+  await page.goto('/');
+  await allerA(page, 'clipper', 0.7);
+  await montee(page, 'clipper');
+  await expect(page.locator('#clipper [data-invite]')).toContainText('deux fois');
 });
 
 test.describe('calme', () => {

@@ -615,11 +615,14 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
   .carte:hover {
     border-color: var(--ae-blanc-13);
   }
-  .carte[aria-pressed='true'],
-  .carte:focus-visible {
-    outline: 0;
+  .carte[aria-pressed='true'] {
     border-color: var(--ae-glacier-40);
     box-shadow: var(--ae-ombre-carte-choisie);
+  }
+  /* Le focus clavier n'est pas le choix : un anneau franc, à l'épaisseur constante malgré le zoom. */
+  .carte:focus-visible {
+    outline: calc(2px / var(--zoom, 1)) solid var(--ae-glacier);
+    outline-offset: calc(4px / var(--zoom, 1));
   }
   .carte[data-attenue] {
     opacity: 0.35;

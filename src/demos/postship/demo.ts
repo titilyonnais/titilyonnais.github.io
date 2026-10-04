@@ -9,7 +9,7 @@ export const garderAuResize = true;
 type Etat = 'repos' | 'pousse' | 'verifie' | 'panne' | 'alerte' | 'retour' | 'retabli';
 
 const INVITES: Record<Etat, string> = {
-  repos: 'Cliquez sur « git push »',
+  repos: 'Cliquez sur « git push »',
   pousse: 'Déploiement reçu',
   verifie: 'PostShip ouvre les pages comme un visiteur',
   panne: 'Le paiement ne passe plus',

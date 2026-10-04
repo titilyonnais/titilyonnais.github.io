@@ -43,7 +43,9 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   let envol = false; // des particules volent vers le Bloc-notes : il faudra rendre la toile
 
   const dire = (t: string) => (annonce.textContent = t);
-  if (invite) invite.textContent = 'Tapez, ou essayez une suggestion';
+  // Au doigt, pas d'Entrée ni de Ctrl+chiffre : on colle en touchant deux fois une ligne.
+  const doigt = matchMedia('(pointer: coarse)').matches;
+  if (invite) invite.textContent = doigt ? 'Tapez, puis touchez deux fois pour coller' : 'Tapez, ou essayez une suggestion';
   const visibles = () => lignes.filter((l) => !l.hidden);
 
   /** Surligne `q` dans un texte, sans HTML injecté : les morceaux sont des nœuds. */
@@ -162,7 +164,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     await ecrire(e.contenu, c);
     if (c !== collage) return;
     dire(`Collé dans Bloc-notes : ${e.type === 'secret' ? 'contenu sensible' : e.titre}`);
-    if (invite) invite.textContent = 'Entrée colle, Ctrl+1…9 aussi';
+    if (invite) invite.textContent = doigt ? 'Touchez deux fois une ligne pour coller' : 'Entrée colle, Ctrl+1…9 aussi';
   };
 
   // Les suggestions se tapent lettre par lettre.

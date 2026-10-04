@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { erreurs } from './aide';
+import { allerA, erreurs, montee } from './aide';
 
 test('la toile tourne puis se met en pause quand l’onglet est caché', async ({ page }) => {
   const e = erreurs(page);
@@ -54,4 +54,20 @@ test('les cibles des trois logos tombent dans leur boîte', async ({ page }) => 
     return out;
   });
   expect(r).toEqual({ postship: true, clipper: true, aether: true, arobase: true, fleche: true });
+});
+
+test('perte du contexte WebGL : plus de chef, les fenêtres ne l’attendent plus', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => !!window.__chef, null, { timeout: 15_000 });
+  await page.evaluate(() => {
+    const gl = document.querySelector<HTMLCanvasElement>('#particules')!.getContext('webgl2')!;
+    gl.getExtension('WEBGL_lose_context')!.loseContext();
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-particules', 'off');
+  await expect.poll(() => page.evaluate(() => !!window.__chef)).toBe(false);
+  // À l'arrivée (t = 0,05), sans toile, la fenêtre est là tout de suite.
+  await allerA(page, 'postship', 0.05);
+  await montee(page, 'postship');
+  await allerA(page, 'postship', 0.05);
+  await expect(page.locator('#postship [data-fenetre]')).toHaveAttribute('data-vue', '1');
 });
