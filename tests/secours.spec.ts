@@ -21,5 +21,6 @@ test('sans JavaScript : contenu lisible', async ({ browser }) => {
   await page.goto('/');
   await expect(page.locator('.pre')).toBeHidden();
   await expect(page.locator('#postship [data-check]').first()).toBeVisible();
+  await expect(page.locator('.hero .repli').first()).toBeVisible();
   await ctx.close();
 });

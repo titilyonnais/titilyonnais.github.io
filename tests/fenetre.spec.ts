@@ -54,3 +54,45 @@ test('en descendant pas à pas, le contour de la fenêtre se dessine à son arri
   await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), cible);
   await page.waitForFunction(() => window.__chef?.forme === 'contour', null, { timeout: 3000 });
 });
+
+test('redimensionner pendant l’arrivée garde le contour de la fenêtre', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'un redimensionnement de bureau');
+  await page.goto('/');
+  await page.waitForFunction(() => !!window.__chef, null, { timeout: 15_000 });
+  await allerA(page, 'postship', 0.05);
+  await montee(page, 'postship');
+  await allerA(page, 'postship', 0.05);
+  await page.waitForFunction(() => window.__chef?.forme === 'contour', null, { timeout: 5000 });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.waitForTimeout(800);
+  expect(await page.evaluate(() => window.__chef?.forme)).toBe('contour');
+});
+
+test('un changement de zoom du navigateur est suivi par la toile', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'émulation CDP de bureau');
+  await page.goto('/');
+  await page.waitForFunction(() => (window.__particules?.frames ?? 0) > 2, null, { timeout: 15_000 });
+  const cdp = await page.context().newCDPSession(page);
+  // Un zoom à 200 % : la page voit deux fois moins de pixels CSS, chacun fait deux pixels d'écran.
+  await cdp.send('Emulation.setDeviceMetricsOverride', { width: 720, height: 450, deviceScaleFactor: 2, mobile: false });
+  await page.waitForTimeout(500);
+  const [w, iw] = await page.evaluate(() => [document.querySelector<HTMLCanvasElement>('#particules')!.width, innerWidth]);
+  expect(w).toBe(iw * 2);
+});
+
+test('l’invite de chaque scène n’est pas une seconde annonce pour les lecteurs d’écran', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-invite]')).toHaveCount(3);
+  await expect(page.locator('[data-invite][aria-live]')).toHaveCount(0);
+});
+
+test('les invites suivent la typographie française', async ({ page }) => {
+  await page.goto('/');
+  for (const id of ['postship', 'clipper', 'aether']) {
+    await allerA(page, id, 0.7);
+    await montee(page, id);
+    const t = (await page.locator(`#${id} [data-invite]`).textContent()) ?? '';
+    // Avant ; : ! ? » et après « : une espace fine insécable (U+202F), jamais une espace ordinaire.
+    expect(t, t).not.toMatch(/[^\u202f][;:!?»]|«[^\u202f]/);
+  }
+});

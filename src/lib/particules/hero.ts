@@ -47,6 +47,7 @@ export function preparerHero(m: Moteur, section: HTMLElement): Hero {
   let i = 0;
   let timer = 0;
   let actif = false;
+  let gen = 0; // un arrêt puis un départ pendant que les formes se calculent : une seule boucle survit
   let dernierSouffle = 0;
   section.addEventListener('pointermove', () => (dernierSouffle = performance.now()), { passive: true });
 
@@ -98,11 +99,14 @@ export function preparerHero(m: Moteur, section: HTMLElement): Hero {
     async demarrer() {
       if (actif) return;
       actif = true;
+      const g = ++gen;
       await montrer(i, true);
+      if (g !== gen || !actif) return;
       suivant();
     },
     arreter() {
       actif = false;
+      gen++;
       clearTimeout(timer);
     },
     async figer() {

@@ -178,6 +178,8 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
     m.reglages({ bruit: 120 + Math.min(agitation, 2400) });
   });
 
+  let posee: Element | null = null; // l'élément dont on dessine le contour (poser)
+
   // Nouvelle largeur : les boîtes ont changé, on redessine la station courante.
   let largeur = innerWidth;
   let t = 0;
@@ -186,7 +188,10 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
     largeur = innerWidth;
     clearTimeout(t);
     t = window.setTimeout(() => {
-      if (courante && courante.id !== 'hero') void dessiner(courante, courante.formes[sous] ?? 'champ');
+      if (!courante || courante.id === 'hero') return;
+      // Une fenêtre en train d'arriver garde son contour, redessiné à sa nouvelle taille.
+      if (forme === 'contour' && posee?.isConnected) chef.poser(posee);
+      else void dessiner(courante, courante.formes[sous] ?? 'champ');
     }, 150);
   });
 
@@ -205,6 +210,7 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
       retour = window.setTimeout(() => courante === st && void dessiner(st, st.formes[sous] ?? 'champ'), ms);
     },
     poser(el, teinte) {
+      posee = el;
       const st = courante;
       if (!st) return;
       const g = ++gen;
@@ -258,6 +264,12 @@ export function bootChef(m: Moteur, etat: Etat, hero: Hero | null): Chef {
   };
   instance = chef;
   window.__chef = chef;
+  // Contexte WebGL perdu : plus de toile, donc plus de chef. Fenêtres, collages et liens
+  // n'attendent plus des particules qu'on ne verrait pas.
+  document.getElementById('particules')?.addEventListener('webglcontextlost', () => {
+    if (instance === chef) instance = null;
+    if (window.__chef === chef) window.__chef = undefined;
+  });
 
   // Station de départ : celle qui couvre le milieu de l'écran maintenant (retour arrière, ancre d'URL).
   const milieu = innerHeight / 2;

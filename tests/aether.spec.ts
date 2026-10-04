@@ -102,6 +102,35 @@ test('passer sous 768 px pendant la démo remet les cartes dans le cadre', async
   }
 });
 
+test('ÆTHER : le focus clavier d’une carte se voit, distinct du choix', async ({ page }) => {
+  await page.goto('/');
+  await allerA(page, 'aether', 0.7);
+  await montee(page, 'aether');
+  await allerA(page, 'aether', 0.7);
+  const c = page.locator('#aether [data-carte]').first();
+  await c.focus();
+  const [style, presse] = await c.evaluate((e) => [getComputedStyle(e).outlineStyle, e.getAttribute('aria-pressed')]);
+  expect(style).not.toBe('none');
+  expect(presse).not.toBe('true');
+});
+
+test('ÆTHER : un thème repeint les surfaces et l’accent de l’app', async ({ page }) => {
+  await page.goto('/');
+  await allerA(page, 'aether', 0.7);
+  await montee(page, 'aether');
+  await allerA(page, 'aether', 0.7);
+  const s = page.locator('#aether');
+  await s.locator('.ae').dispatchEvent('pointerdown');
+  await s.locator('[data-theme-choix="braise"]').click();
+  // backgroundPresets.ts, « ember » : surface mist #1d120c, accent #e6883d.
+  const [mist, glacier] = await s.locator('.ae').evaluate((e) => {
+    const c = getComputedStyle(e);
+    return [c.getPropertyValue('--ae-mist').trim(), c.getPropertyValue('--ae-glacier').trim()];
+  });
+  expect(mist.toLowerCase()).toBe('#1d120c');
+  expect(glacier.toLowerCase()).toBe('#e6883d');
+});
+
 test.describe('calme', () => {
   test.use({ reducedMotion: 'reduce' });
   test('ÆTHER calme : la fenêtre est posée, la Barre d’Intention marche', async ({ page }) => {

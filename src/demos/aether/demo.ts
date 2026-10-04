@@ -50,6 +50,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
   const f = fenetre3d(root, { calme, mobile: opts.mobile, chef: null });
 
   const cartes = () => [...monde.querySelectorAll<HTMLElement>('[data-carte]')];
+  const glacierApp = getComputedStyle(ae).getPropertyValue('--ae-glacier').trim(); // l'accent d'origine, avant tout thème
   const dire = (t: string) => (annonce.textContent = t);
 
   // Sur téléphone (la mise en page de la fenêtre change sous 768 px), les cartes prennent leurs places
@@ -219,10 +220,13 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     section.dataset.theme = t.id;
     if (ciel) ciel.dataset.theme = t.id;
     root.querySelectorAll<HTMLElement>('[data-theme-choix]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeChoix === t.id)));
-    const accent = getComputedStyle(ae).getPropertyValue(t.accent).trim();
-    const glacier = getComputedStyle(ae).getPropertyValue('--ae-glacier').trim();
+    // Comme applyTheme (theme.ts) : le thème repeint les surfaces de l'app et en fait son accent.
+    const cs = getComputedStyle(ae);
+    const accent = cs.getPropertyValue(t.accent).trim();
+    for (const s of ['void', 'abyss', 'mist', 'veil']) ae.style.setProperty(`--ae-${s}`, cs.getPropertyValue(`--ae-${t.id}-${s}`).trim());
+    ae.style.setProperty('--ae-glacier', accent);
     document.documentElement.style.setProperty('--ae-particules-1', accent);
-    document.documentElement.style.setProperty('--ae-particules-2', glacier);
+    document.documentElement.style.setProperty('--ae-particules-2', glacierApp);
     if (particules && !calme) leChef()?.liberer();
   };
 

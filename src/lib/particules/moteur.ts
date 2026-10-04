@@ -57,7 +57,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   if (!gl) return null;
 
   const renderer = new WebGLRenderer({ canvas, context: gl, antialias: false, alpha: true, premultipliedAlpha: true });
-  const dpr = Math.min(devicePixelRatio || 1, 2);
+  let dpr = Math.min(devicePixelRatio || 1, 2);
   renderer.setPixelRatio(dpr);
   let W = innerWidth;
   let H = innerHeight;
@@ -442,17 +442,31 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
   addEventListener('pointermove', onMove, { passive: true });
   addEventListener('pointerdown', onDown, { passive: true });
 
-  let largeur = W;
   const onResize = () => {
     W = innerWidth;
     H = innerHeight;
+    // Le zoom du navigateur change devicePixelRatio : la toile suit, sinon elle devient floue.
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    renderer.setPixelRatio(dpr);
+    materiau.uniforms.uDpr!.value = dpr;
     renderer.setSize(W, H, false);
     materiau.uniforms.uRes!.value = [W, H];
     fondMat.uniforms.uRes!.value = [W, H];
     if (fige) dessiner(temps(), 0);
-    if (W !== largeur) largeur = W;
   };
   addEventListener('resize', onResize);
+  // Passer d'un écran à l'autre change devicePixelRatio sans redimensionner : on l'écoute aussi.
+  let densite: MediaQueryList | null = null;
+  const suivreDensite = () => {
+    densite?.removeEventListener('change', auChangement);
+    densite = matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+    densite.addEventListener('change', auChangement);
+  };
+  function auChangement() {
+    onResize();
+    suivreDensite();
+  }
+  suivreDensite();
 
   function impulsion(x: number, y: number, force: number, rayon: number) {
     if (rayon > 0) explosion = [x, y, force, rayon];
@@ -513,6 +527,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       removeEventListener('pointermove', onMove);
       removeEventListener('pointerdown', onDown);
       removeEventListener('resize', onResize);
+      densite?.removeEventListener('change', auChangement);
       demonter();
       fondQuad.geometry.dispose();
       fondMat.dispose();
