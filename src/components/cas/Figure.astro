@@ -122,10 +122,9 @@ const { figure } = Astro.props;
     padding: 0.6rem 0.75rem;
     border: 1px solid var(--fg);
     align-self: flex-start;
-    white-space: nowrap;
     max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* Trop longue pour la figure, elle passe à la ligne ; le brouillage, sans espaces, se coupe où il faut. */
+    overflow-wrap: anywhere;
   }
   .bascule:global(.inverse) {
     background: var(--fg);

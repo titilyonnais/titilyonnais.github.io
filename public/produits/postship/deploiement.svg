@@ -2,11 +2,11 @@
 <rect x="30" y="70" width="150" height="44" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
 <text x="50" y="88" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">git push · main</text>
 <text x="50" y="104" font-size="12" fill="#a1a1a1" text-anchor="start" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">un commit</text>
-<path d="M 180 92 C 220.0 92, 220.0 92, 260 92" fill="none" stroke="#868686" stroke-width="1.5" />
-<rect x="260" y="70" width="160" height="44" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
-<text x="280" y="88" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">Vercel</text>
-<text x="280" y="104" font-size="12" fill="#a1a1a1" text-anchor="start" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">déploiement prêt · webhook</text>
-<path d="M 420 92 C 460.0 92, 460.0 92, 500 92" fill="none" stroke="#8fb0dc" stroke-width="1.5" />
+<path d="M 180 92 C 216.0 92, 216.0 92, 252 92" fill="none" stroke="#868686" stroke-width="1.5" />
+<rect x="252" y="70" width="192" height="44" rx="6" fill="none" stroke="#868686" stroke-width="1.5"/>
+<text x="270" y="88" font-size="12" fill="#ededed" text-anchor="start" font-weight="normal" style="font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace">Vercel</text>
+<text x="270" y="104" font-size="12" fill="#a1a1a1" text-anchor="start" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">déploiement prêt · webhook</text>
+<path d="M 444 92 C 472.0 92, 472.0 92, 500 92" fill="none" stroke="#8fb0dc" stroke-width="1.5" />
 <circle cx="540" cy="92" r="30" fill="none" stroke="#8fb0dc" stroke-width="1.5"/>
 <g transform="translate(524 79) scale(0.164)" fill="#8fb0dc"><path d="M 79.9 15.6 L 16 80 L 79.9 144.4 L 95.7 128 L 48.5 80 L 95.7 32 Z"/><path d="M 116.5 15.6 L 180.4 80 L 116.5 144.4 L 100.7 128 L 147.9 80 L 100.7 32 Z"/></g>
 <text x="540" y="140" font-size="12" fill="#a1a1a1" text-anchor="middle" font-weight="normal" style="font-family:Onest,system-ui,sans-serif">PostShip · T+0</text>

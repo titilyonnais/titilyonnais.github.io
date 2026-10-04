@@ -49,6 +49,10 @@ const ILLUS: Record<string, { fonctions: Illus[]; construit: Illus[] }> = {
   },
 };
 const illus = ILLUS[id];
+// Posées dans la page plutôt qu'en <img> : une image SVG n'a pas accès aux polices du document,
+// et Onest ou JetBrains Mono remplacées par une police plus large faisaient déborder les textes.
+const SVG = import.meta.glob<string>('/public/produits/postship/*.svg', { query: '?raw', import: 'default', eager: true });
+const brut = (src: string) => SVG[`/public${src}`] ?? '';
 ---
 <Base title={`${d.nom}, étude de cas — Thibault Morretton`} description={d.phrase} univers={id}>
   {id === 'aether' && <AetherCiel slot="ciel" statique />}
@@ -99,7 +103,7 @@ const illus = ILLUS[id];
       }
       {illus && (
         <div class="illus">
-          {illus.fonctions.map((i) => <img src={i.src} alt={i.alt} width={i.w} height={i.h} loading="lazy" />)}
+          {illus.fonctions.map((i) => <Fragment set:html={brut(i.src)} />)}
         </div>
       )}
     </div>
@@ -111,7 +115,7 @@ const illus = ILLUS[id];
       <div class="schema-zone"><Schema architecture={d.architecture} /></div>
       {illus && (
         <div class="illus">
-          {illus.construit.map((i) => <img src={i.src} alt={i.alt} width={i.w} height={i.h} loading="lazy" />)}
+          {illus.construit.map((i) => <Fragment set:html={brut(i.src)} />)}
         </div>
       )}
       <div class="prose"><Content /></div>
@@ -122,7 +126,7 @@ const illus = ILLUS[id];
         {
           d.faits.map((f) => (
             <div>
-              <dt>{f.valeur}</dt>
+              <dt style={`--n: ${Math.max(4, f.valeur.length)}`}>{f.valeur}</dt>
               <dd class="mono">{f.libelle}</dd>
             </div>
           ))
@@ -206,7 +210,7 @@ const illus = ILLUS[id];
     gap: 2rem;
     padding-block: 3rem;
   }
-  .illus img {
+  .illus :global(svg) {
     width: 100%;
     height: auto;
   }
@@ -311,10 +315,17 @@ const illus = ILLUS[id];
   .faits div {
     border-top: 1px solid var(--fg);
     padding-top: 0.75rem;
+    container-type: inline-size;
   }
   .faits dt {
     text-transform: none;
-    font-size: var(--t-xl);
+    /* Une valeur longue rapetisse pour tenir sur une ligne dans sa colonne. */
+    font-size: min(var(--t-xl), calc(170cqi / var(--n)));
+    white-space: nowrap;
+    /* La même hauteur pour toutes : les légendes restent alignées, même sous une valeur rapetissée. */
+    block-size: var(--t-xl);
+    display: flex;
+    align-items: flex-end;
     letter-spacing: var(--track-title);
     line-height: 1;
     margin-bottom: 0.75rem;

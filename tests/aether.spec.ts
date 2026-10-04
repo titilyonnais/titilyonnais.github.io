@@ -161,6 +161,42 @@ test('ÆTHER : une carte sortie de la Toile ne déborde pas de la fenêtre en vu
   expect(touches).toEqual([]);
 });
 
+test('ÆTHER : en vue éclatée, une légende ne couvre pas le texte d’une autre couche', async ({ page }) => {
+  await page.goto('/');
+  await allerA(page, 'aether', 0.4);
+  await montee(page, 'aether');
+  await allerA(page, 'aether', 0.4);
+  await expect(page.locator('#aether [data-fenetre]')).toHaveAttribute('data-legendes', 'on');
+  await page.waitForTimeout(400);
+  const couverts = await page.evaluate(() => {
+    const out: string[] = [];
+    const couches = ['.titre', '.constellation', '.toile'].map((c) => document.querySelector<HTMLElement>(`#aether ${c}`)!);
+    // Les textes visibles de chaque couche (hors légendes et hors cartes, qui ont leur propre plan).
+    const textes = (c: HTMLElement) =>
+      [...c.querySelectorAll<HTMLElement>('*')].filter(
+        (e) =>
+          !e.closest('.legende, [data-carte]') &&
+          [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()) &&
+          e.getClientRects().length > 0 &&
+          getComputedStyle(e).visibility !== 'hidden',
+      );
+    for (const c of couches) {
+      const l = c.querySelector<HTMLElement>(':scope > .legende');
+      if (!l) continue;
+      const a = l.getBoundingClientRect();
+      for (const autre of couches) {
+        if (autre === c) continue;
+        for (const t of textes(autre)) {
+          const b = t.getBoundingClientRect();
+          if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) out.push(`${l.textContent} couvre « ${t.textContent!.trim().slice(0, 30)} »`);
+        }
+      }
+    }
+    return out;
+  });
+  expect(couverts).toEqual([]);
+});
+
 test.describe('calme', () => {
   test.use({ reducedMotion: 'reduce' });
   test('ÆTHER calme : la fenêtre est posée, la Barre d’Intention marche', async ({ page }) => {

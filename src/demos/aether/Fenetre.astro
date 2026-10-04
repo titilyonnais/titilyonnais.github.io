@@ -933,6 +933,18 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
 
   /* Téléphone : la Constellation devient une rangée d'Espaces au-dessus de la Toile. */
   @media (max-width: 767px) {
+    /* Les couches s'empilent en hauteur : une légende au-dessus de la sienne tomberait sur celle
+       d'avant. Celle des Espaces passe dessous, celle de la Toile dans son coin vide. */
+    .constellation > :global(.legende) {
+      bottom: auto;
+      top: calc(100% + 0.5rem);
+    }
+    .toile > :global(.legende) {
+      bottom: auto;
+      left: auto;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
     .t-droite,
     .t-gauche .ib,
     .p-touches,
