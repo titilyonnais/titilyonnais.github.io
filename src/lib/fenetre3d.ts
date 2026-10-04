@@ -69,6 +69,8 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
   let parti = false;
 
   const vue = (on: boolean) => (fen.dataset.vue = on ? '1' : '0');
+  // L'inclinaison de la vue éclatée (degrés, x puis y) : une fenêtre large peut demander moins.
+  const [IX, IY] = (fen.querySelector<HTMLElement>('[data-incline]')?.dataset.incline ?? '14,-18').split(',').map(Number) as [number, number];
   const centre = () => {
     const r = fen.getBoundingClientRect();
     return [r.left + r.width / 2, r.top + r.height / 2] as const;
@@ -145,10 +147,10 @@ export function fenetre3d(scene: HTMLElement, opts: { calme: boolean; mobile: bo
     if (t < 0.15) Object.assign(etat, { rx: 0, ry: 0, z: 0 });
     else if (t < 0.45) {
       const e = lisse((t - 0.15) / 0.3);
-      Object.assign(etat, { rx: lerp(0, 14, e), ry: lerp(0, -18, e), z: e });
+      Object.assign(etat, { rx: lerp(0, IX, e), ry: lerp(0, IY, e), z: e });
     } else if (t < 0.55) {
       const e = lisse((t - 0.45) / 0.1);
-      Object.assign(etat, { rx: lerp(14, 4, e), ry: lerp(-18, 0, e), z: 1 - e });
+      Object.assign(etat, { rx: lerp(IX, 4, e), ry: lerp(IY, 0, e), z: 1 - e });
     } else Object.assign(etat, { rx: 4, ry: 0, z: 0 });
     fen.dataset.legendes = t > 0.3 && t < 0.5 ? 'on' : 'off';
     fen.dataset.eclate = etat.z > 0.05 ? 'on' : 'off';

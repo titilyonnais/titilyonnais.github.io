@@ -16,6 +16,74 @@ export function alea(graine: number): () => number {
 
 const MAX = 1024;
 
+/** Bruit de valeur 2D lissé, à graine, sommé sur quatre octaves : des amas et des vides, pas une grille. */
+function fbm(graine: number): (x: number, y: number) => number {
+  const val = (ix: number, iy: number) => {
+    const s = Math.sin(ix * 127.1 + iy * 311.7 + graine * 74.7) * 43758.5453;
+    return s - Math.floor(s);
+  };
+  const doux = (t: number) => t * t * (3 - 2 * t);
+  const bruit = (x: number, y: number) => {
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = doux(x - ix);
+    const fy = doux(y - iy);
+    const a = val(ix, iy) + (val(ix + 1, iy) - val(ix, iy)) * fx;
+    const b = val(ix, iy + 1) + (val(ix + 1, iy + 1) - val(ix, iy + 1)) * fx;
+    return a + (b - a) * fy;
+  };
+  return (x, y) => {
+    let v = 0;
+    let amp = 0.5;
+    let f = 1;
+    for (let o = 0; o < 4; o++) {
+      v += amp * bruit(x * f + o * 17.3, y * f - o * 9.1);
+      f *= 2.03;
+      amp *= 0.5;
+    }
+    return v / 0.9375;
+  };
+}
+
+const marche = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
+/**
+ * Le champ : un nuage de poussière, pas un rectangle. La densité suit un bruit fractal
+ * (amas, filaments, trous) et s'éteint vers les bords par une ellipse arrondie dont le
+ * contour est lui-même bruité : aucun bord droit, aucun coin.
+ */
+function champ(w: number, h: number, n: number, rnd: () => number, out: Float32Array): Float32Array {
+  const b = fbm(rnd() * 1000);
+  const e = 3.2 / Math.max(w, h); // quelques amas par largeur, quelle que soit la boîte
+  let i = 0;
+  for (let essais = 0; i < n && essais < n * 60; essais++) {
+    const u = rnd();
+    const v = rnd();
+    const x = u * w;
+    const y = v * h;
+    const dx = Math.abs(2 * u - 1);
+    const dy = Math.abs(2 * v - 1);
+    const d = Math.cbrt(dx ** 3 + dy ** 3) + (b(x * e + 31, y * e + 7) - 0.5) * 0.55;
+    const bord = 1 - marche(0.45, 1.02, d);
+    const amas = 0.12 + 0.88 * marche(0.28, 0.78, b(x * e, y * e));
+    if (rnd() >= bord * amas) continue;
+    out[i * 3] = x;
+    out[i * 3 + 1] = y;
+    out[i * 3 + 2] = (rnd() - 0.5) * 300;
+    i++;
+  }
+  // Filet de sûreté : ce qui manque se pose près du centre.
+  for (; i < n; i++) {
+    out[i * 3] = w * (0.3 + 0.4 * rnd());
+    out[i * 3 + 1] = h * (0.3 + 0.4 * rnd());
+    out[i * 3 + 2] = (rnd() - 0.5) * 300;
+  }
+  return out;
+}
+
 /**
  * Dessine la forme dans une boîte w × h (ajustée sans déformation, centrée),
  * puis tire n points parmi les pixels pleins, en favorisant les bords pour que
@@ -35,14 +103,7 @@ export function echantillonner(
   const rnd = alea(Math.round(w * 7 + h * 13 + n));
   const out = new Float32Array(n * 3);
 
-  if (forme.type === 'champ') {
-    for (let i = 0; i < n; i++) {
-      out[i * 3] = rnd() * w;
-      out[i * 3 + 1] = rnd() * h;
-      out[i * 3 + 2] = (rnd() - 0.5) * 300;
-    }
-    return out;
-  }
+  if (forme.type === 'champ') return champ(w, h, n, rnd, out);
 
   const { ctx } = fabrique(cw, ch);
   ctx.clearRect(0, 0, cw, ch);
@@ -105,6 +166,7 @@ export function echantillonner(
     }
     return out;
   }
+  const flou = Math.max(w, h) * 0.008;
   for (let i = 0; i < n; i++) {
     const r = rnd() * total;
     let lo = 0;
@@ -115,8 +177,17 @@ export function echantillonner(
       else hi = mid;
     }
     const p = idx[lo]!;
-    out[i * 3] = Math.min(w, ((p % cw) + rnd()) / k);
-    out[i * 3 + 1] = Math.min(h, (Math.floor(p / cw) + rnd()) / k);
+    let x = ((p % cw) + rnd()) / k;
+    let y = (Math.floor(p / cw) + rnd()) / k;
+    // Un grain sur cinq s'écarte un peu du trait (loi normale) : le bord s'effiloche au lieu d'être découpé.
+    if (rnd() < 0.2) {
+      const r = Math.sqrt(-2 * Math.log(1 - rnd())) * flou;
+      const a = rnd() * Math.PI * 2;
+      x += Math.cos(a) * r;
+      y += Math.sin(a) * r;
+    }
+    out[i * 3] = Math.min(w, Math.max(0, x));
+    out[i * 3 + 1] = Math.min(h, Math.max(0, y));
     out[i * 3 + 2] = (rnd() - 0.5) * 24;
   }
   return out;

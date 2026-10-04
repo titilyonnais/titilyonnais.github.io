@@ -15,7 +15,8 @@ let lenis: Lenis | null = null;
 /** Défilement lissé (sauf en mode calme et au doigt, où le natif est meilleur). */
 export function startScroll(): void {
   if (calm() || lenis) return;
-  lenis = new Lenis({ lerp: 0.11, anchors: { offset: 0 }, autoRaf: false });
+  // Pas d'ancres lissées : un lien interne saute droit à sa cible (lib/navigation.ts).
+  lenis = new Lenis({ lerp: 0.11, autoRaf: false });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis?.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
@@ -24,4 +25,11 @@ export function startScroll(): void {
 /** Les polices changent les hauteurs : on recalcule une fois qu'elles sont là. */
 export function refreshWhenFontsReady(): void {
   document.fonts.ready.then(() => ScrollTrigger.refresh());
+}
+
+/** Saute à `y` sans défiler : ni le défilement doux ni les scènes intermédiaires ne s'y jouent. */
+export function sauterA(y: number): void {
+  if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo({ top: y, behavior: 'instant' });
+  ScrollTrigger.update();
 }

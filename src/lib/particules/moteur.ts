@@ -276,9 +276,13 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
       let x = m ? cible.points[j]! : Math.random() * W;
       let y = m ? cible.points[j + 1]! : Math.random() * H;
       let z = m ? cible.points[j + 2]! : 0;
+      // Le surplus fait un halo autour de la forme : un rayon à décroissance exponentielle,
+      // dense près du trait et qui s'efface au loin, sans couronne au bord net.
+      let halo = 0;
       if (surplus && m) {
         const ang = Math.random() * Math.PI * 2;
-        const ray = 20 + Math.random() * 120;
+        halo = -Math.log(1 - Math.random() * 0.995);
+        const ray = 6 + halo * 34;
         x += Math.cos(ang) * ray;
         y += Math.sin(ang) * ray;
         z += (Math.random() - 0.5) * 200;
@@ -297,7 +301,7 @@ export function creerMoteur(canvas: HTMLCanvasElement, etat: Etat): Moteur | nul
         col[i * 4 + 1] = Math.round((a[1] + (b[1] - a[1]) * k) * 255);
         col[i * 4 + 2] = Math.round((a[2] + (b[2] - a[2]) * k) * 255);
       }
-      col[i * 4 + 3] = Math.round((surplus ? 0.15 : eclat) * 255);
+      col[i * 4 + 3] = Math.round((surplus ? 0.2 * Math.exp(-halo * 0.6) : eclat) * 255);
     }
     tCible.needsUpdate = true;
     tCouleur.needsUpdate = true;

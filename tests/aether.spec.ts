@@ -131,6 +131,36 @@ test('ÆTHER : un thème repeint les surfaces et l’accent de l’app', async (
   expect(glacier.toLowerCase()).toBe('#e6883d');
 });
 
+test('ÆTHER : une carte sortie de la Toile ne déborde pas de la fenêtre en vue éclatée', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'flèches du clavier');
+  await page.goto('/');
+  await allerA(page, 'aether', 0.7);
+  await montee(page, 'aether');
+  await allerA(page, 'aether', 0.7);
+  const s = page.locator('#aether');
+  // La carte de droite part loin à droite, hors de la Toile.
+  const c = s.locator('[data-carte]').nth(2);
+  await c.focus();
+  for (let i = 0; i < 30; i++) await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(500);
+  await allerA(page, 'aether', 0.3);
+  await page.waitForTimeout(600);
+  // Des points nettement hors de la Toile, sur la surface de la carte : la carte n'y est pas.
+  const touches = await c.evaluate((carte) => {
+    const t = carte.closest('.toile')!.getBoundingClientRect();
+    const r = carte.getBoundingClientRect();
+    const hors: string[] = [];
+    for (let x = r.left + 4; x < r.right - 4; x += 12)
+      for (let y = r.top + 4; y < r.bottom - 4; y += 12) {
+        if (x > t.left - 60 && x < t.right + 60 && y > t.top - 60 && y < t.bottom + 60) continue;
+        const el = document.elementFromPoint(x, y);
+        if (el && carte.contains(el)) hors.push(`${Math.round(x)},${Math.round(y)}`);
+      }
+    return hors;
+  });
+  expect(touches).toEqual([]);
+});
+
 test.describe('calme', () => {
   test.use({ reducedMotion: 'reduce' });
   test('ÆTHER calme : la fenêtre est posée, la Barre d’Intention marche', async ({ page }) => {

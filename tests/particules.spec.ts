@@ -56,6 +56,33 @@ test('les cibles des trois logos tombent dans leur boîte', async ({ page }) => 
   expect(r).toEqual({ postship: true, clipper: true, aether: true, arobase: true, fleche: true });
 });
 
+test('le champ est un nuage organique : ni rectangle plein, ni densité uniforme', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => !!window.__particulesApi, null, { timeout: 15_000 });
+  const r = await page.evaluate(async () => {
+    const w = 800;
+    const h = 600;
+    const p = await window.__particulesApi!.cible('champ', { x: 0, y: 0, w, h }, 30000);
+    // Grille 20 × 15 : comptes par case.
+    const g = new Array(300).fill(0);
+    let coins = 0;
+    let centre = 0;
+    for (let i = 0; i < p.length; i += 3) {
+      const x = p[i]! / w;
+      const y = p[i + 1]! / h;
+      if (x >= 0 && x < 1 && y >= 0 && y < 1) g[Math.floor(y * 15) * 20 + Math.floor(x * 20)]++;
+      if ((x < 0.1 || x > 0.9) && (y < 0.1 || y > 0.9)) coins++;
+      if (Math.abs(x - 0.5) < 0.1 && Math.abs(y - 0.5) < 0.1) centre++;
+    }
+    const moy = g.reduce((a, b) => a + b, 0) / g.length;
+    const ecart = Math.sqrt(g.reduce((a, b) => a + (b - moy) ** 2, 0) / g.length);
+    // Les quatre coins (4 × 1 %) contre le centre (4 %) : surface égale.
+    return { coins, centre, cv: ecart / moy };
+  });
+  expect(r.coins).toBeLessThan(r.centre * 0.25);
+  expect(r.cv).toBeGreaterThan(0.35);
+});
+
 test('perte du contexte WebGL : plus de chef, les fenêtres ne l’attendent plus', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => !!window.__chef, null, { timeout: 15_000 });
