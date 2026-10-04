@@ -116,6 +116,10 @@ button {
   outline: 2px solid var(--fg);
   outline-offset: 3px;
 }
+/* Une section atteinte par un lien interne reçoit le focus, sans cadre autour d'elle. */
+section[tabindex='-1']:focus {
+  outline: none;
+}
 
 ::selection {
   background: var(--fg);

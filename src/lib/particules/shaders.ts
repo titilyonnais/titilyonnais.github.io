@@ -158,7 +158,9 @@ void main(){
   vec4 col = mix(texture2D(tCouleurAvant, ref), texture2D(tCouleur, ref), a);
   float vitesse = min(length(v) / 900.0, 0.6);
   vCouleur = col.rgb;
-  vEclat = clamp(col.a + vitesse, 0.0, 1.0);
+  // Chaque grain a son propre éclat : la poussière scintille au lieu de former un aplat.
+  float grain = 0.55 + 0.9 * hash(ref + 0.37);
+  vEclat = clamp(col.a * grain + vitesse, 0.0, 1.0);
   gl_PointSize = uTaille * uDpr * (0.8 + 0.4 * hash(ref)) * s;
 }
 `;
@@ -169,7 +171,7 @@ varying vec3 vCouleur;
 varying float vEclat;
 void main(){
   float r = length(gl_PointCoord - 0.5);
-  float a = 1.0 - smoothstep(0.32, 0.5, r);
+  float a = 1.0 - smoothstep(0.18, 0.5, r); // un grain rond et doux, jamais un pixel carré
   if (a <= 0.0) discard;
   // Sur noir, l'éclat éclaircit (mélange additif) ; sur papier, il rend l'encre plus légère.
   gl_FragColor = uAdditif > 0.5 ? vec4(vCouleur * vEclat, a) : vec4(vCouleur, a * vEclat);

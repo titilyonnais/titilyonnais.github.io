@@ -15,6 +15,21 @@ const byId = new Map(noeuds.map((n) => [n.id, n]));
 const rangs = Math.max(...noeuds.map((n) => n.rang)) + 1;
 const VH = 20 + (rangs - 1) * 150 + H + 20;
 
+// Un détail trop long pour le nœud (mono 12,5 px : ~26 signes) passe sur deux lignes.
+const MAX = 26;
+const lignes = (t: string): string[] => {
+  if (t.length <= MAX) return [t];
+  const mots = t.split(' ');
+  let a = '';
+  while (mots.length && (a + ' ' + mots[0]).trim().length <= MAX) a = (a + ' ' + mots.shift()).trim();
+  return [a, mots.join(' ')];
+};
+const vers = (id: string) =>
+  liens
+    .filter(([a]) => a === id)
+    .map(([, b]) => byId.get(b)!.label)
+    .join(', ');
+
 const chemins = liens.map(([a, b]) => {
   const A = pos(byId.get(a)!);
   const B = pos(byId.get(b)!);
@@ -38,8 +53,19 @@ const chemins = liens.map(([a, b]) => {
         return (
           <g class="noeud" style={`--i:${i}`}>
             <rect x={p.x} y={p.y} width={W} height={H} />
-            <text class="lab" x={p.x + 14} y={p.y + 32}>{n.label}</text>
-            {n.detail && <text class="det" x={p.x + 14} y={p.y + 58}>{n.detail}</text>}
+            {n.detail && lignes(n.detail).length > 1 ? (
+              <>
+                <text class="lab" x={p.x + 14} y={p.y + 28}>{n.label}</text>
+                <text class="det" x={p.x + 14} y={p.y + 50}>
+                  {lignes(n.detail).map((l, k) => <tspan x={p.x + 14} dy={k ? 15 : 0}>{l}</tspan>)}
+                </text>
+              </>
+            ) : (
+              <>
+                <text class="lab" x={p.x + 14} y={p.y + 32}>{n.label}</text>
+                {n.detail && <text class="det" x={p.x + 14} y={p.y + 58}>{n.detail}</text>}
+              </>
+            )}
           </g>
         );
       })
@@ -51,12 +77,7 @@ const chemins = liens.map(([a, b]) => {
         <li>
           <strong>{n.label}</strong>
           {n.detail && <span>{n.detail}</span>}
-          <span class="vers">
-            {liens
-              .filter(([a]) => a === n.id)
-              .map(([, b]) => byId.get(b)!.label)
-              .join(', ') || ''}
-          </span>
+          {vers(n.id) && <span class="vers">{vers(n.id)}</span>}
         </li>
       ))
     }
@@ -127,7 +148,7 @@ const chemins = liens.map(([a, b]) => {
     font-weight: 500;
     font-size: var(--t-base);
   }
-  .vers:not(:empty)::before {
+  .vers::before {
     content: 'relié à : ';
   }
   @media (max-width: 700px) {

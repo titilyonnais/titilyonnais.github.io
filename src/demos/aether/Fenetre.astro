@@ -37,9 +37,9 @@ const proches: [string, string][] = [
 ];
 const futur = (id: string) => INTENTION.some((c) => c.id === id);
 ---
-<div class="ae-scene" data-3d>
+<div class="ae-scene" data-3d data-incline="9,-12">
   <div class="ae" data-3d tabindex="-1">
-    <header class="titre" data-couche data-z="200" data-legende="Barre d’Intention">
+    <header class="titre" data-couche data-z="150" data-legende="Barre d’Intention">
       <div class="t-gauche">
         <span class="ae-logo">Æ</span>
         <span class="ib actif" aria-hidden="true"><Lucide nom="panel-left" taille={15} /></span>
@@ -64,7 +64,7 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
     </header>
 
     <div class="corps" data-3d>
-      <aside class="constellation" data-couche data-z="120" data-legende="Espaces">
+      <aside class="constellation" data-couche data-z="90" data-legende="Espaces">
         <div class="c-tete">
           <p class="k-titre">Espaces</p>
           {
@@ -107,7 +107,7 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
         </footer>
       </aside>
 
-      <div class="toile" data-couche data-z="40" data-legende="Toile" data-3d>
+      <div class="toile" data-couche data-z="24" data-legende="Toile" data-3d>
         <div class="grille" data-toile style="--zoom: 0.62" data-3d>
           <div class="monde" data-monde data-3d>
             {
@@ -121,7 +121,7 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
                   data-pos={c.pos.join(',')}
                   data-pos-mobile={c.posMobile.join(',')}
                   data-couche
-                  data-z={60 + i * 24}
+                  data-z={64 + (i % 3) * 14}
                   data-legende={i === 0 ? 'Pages vivantes' : undefined}
                   role="button"
                   tabindex="0"
@@ -147,7 +147,7 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
             }
           </div>
         </div>
-        <div class="zoom ae-glass" aria-label="Zoom de la Toile" data-couche data-z="320">
+        <div class="zoom ae-glass" aria-label="Zoom de la Toile" data-couche data-z="190">
           <button type="button" class="z-btn" data-zoom="-" aria-label="Zoom arrière"><Lucide nom="minus" taille={13} /></button>
           <span class="z-val" data-zoom-val>62%</span>
           <button type="button" class="z-btn" data-zoom="+" aria-label="Zoom avant"><Lucide nom="plus" taille={13} /></button>
@@ -933,6 +933,18 @@ const futur = (id: string) => INTENTION.some((c) => c.id === id);
 
   /* Téléphone : la Constellation devient une rangée d'Espaces au-dessus de la Toile. */
   @media (max-width: 767px) {
+    /* Les couches s'empilent en hauteur : une légende au-dessus de la sienne tomberait sur celle
+       d'avant. Celle des Espaces passe dessous, celle de la Toile dans son coin vide. */
+    .constellation > :global(.legende) {
+      bottom: auto;
+      top: calc(100% + 0.5rem);
+    }
+    .toile > :global(.legende) {
+      bottom: auto;
+      left: auto;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
     .t-droite,
     .t-gauche .ib,
     .p-touches,

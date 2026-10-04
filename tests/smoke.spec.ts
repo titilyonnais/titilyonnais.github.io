@@ -60,3 +60,44 @@ test('retour depuis une étude de cas : la scène revient sans erreur', async ({
   await expect(page.locator('#clipper .sortie')).toBeInViewport({ ratio: 0.1 });
   expect(errs).toEqual([]);
 });
+
+/** Où en est la piste d'une scène (t ∈ [0, 1]). */
+const tDe = (page: import('@playwright/test').Page, id: string) =>
+  page.evaluate((id) => {
+    const p = document.querySelector<HTMLElement>(`#${id} .piste`)!;
+    const haut = p.getBoundingClientRect().top + scrollY;
+    return (scrollY - haut) / (p.offsetHeight - innerHeight);
+  }, id);
+
+test('un lien de la nav saute droit à la démo, sans traverser les scènes', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    const ys: number[] = [];
+    (window as unknown as { __ys: number[] }).__ys = ys;
+    const f = () => {
+      ys.push(scrollY);
+      requestAnimationFrame(f);
+    };
+    f();
+  });
+  await page.getByRole('navigation', { name: 'Principale' }).getByRole('link', { name: 'Clipper' }).click();
+  await page.waitForTimeout(1200);
+  const ys = await page.evaluate(() => (window as unknown as { __ys: number[] }).__ys);
+  const fin = ys.at(-1)!;
+  expect(ys.filter((y) => y > 1 && Math.abs(y - fin) > 1)).toEqual([]);
+  const t = await tDe(page, 'clipper');
+  expect(t).toBeGreaterThan(0.55);
+  expect(t).toBeLessThan(0.9);
+  await expect(page.locator('#clipper [data-fenetre]')).toHaveAttribute('data-vue', '1');
+});
+
+test('depuis une étude de cas, la nav ouvre la scène sur sa démo', async ({ page }) => {
+  await page.goto('/projets/postship/');
+  await page.getByRole('navigation', { name: 'Principale' }).getByRole('link', { name: 'ÆTHER' }).click();
+  await expect(page).toHaveURL(/\/#aether$/);
+  await page.waitForTimeout(1500);
+  const t = await tDe(page, 'aether');
+  expect(t).toBeGreaterThan(0.55);
+  expect(t).toBeLessThan(0.9);
+});

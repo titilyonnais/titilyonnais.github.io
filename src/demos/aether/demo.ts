@@ -51,6 +51,37 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
 
   const cartes = () => [...monde.querySelectorAll<HTMLElement>('[data-carte]')];
   const glacierApp = getComputedStyle(ae).getPropertyValue('--ae-glacier').trim(); // l'accent d'origine, avant tout thème
+
+  // ——— Chaque carte est découpée à la Toile. En vue éclatée, la Toile ne peut pas couper ses
+  // cartes (overflow: hidden aplatirait la 3D) : une carte sortie du cadre y flotterait hors de la
+  // fenêtre. Le découpage se fait donc carte par carte, dans son propre plan. ———
+  let image = 0;
+  function decouper() {
+    if (image) return;
+    image = requestAnimationFrame(() => {
+      image = 0;
+      const W = grille.clientWidth;
+      const H = grille.clientHeight;
+      if (!W) return;
+      // La partie visible de la Toile, en coordonnées du monde.
+      const x0 = -cam.x / cam.zoom;
+      const y0 = -cam.y / cam.zoom;
+      const x1 = (W - cam.x) / cam.zoom;
+      const y1 = (H - cam.y) / cam.zoom;
+      cartes().forEach((c) => {
+        const p = position(c);
+        const w = c.offsetWidth;
+        const h = c.offsetHeight;
+        // Un bord dans le cadre garde de la place pour l'ombre ; un bord dehors est coupé net.
+        const bord = (dedans: number) => (dedans < 0 ? -dedans : -Math.min(90, dedans));
+        const haut = bord(p.y - y0);
+        const droite = bord(x1 - (p.x + w));
+        const bas = bord(y1 - (p.y + h));
+        const gauche = bord(p.x - x0);
+        c.style.clipPath = haut > 0 || droite > 0 || bas > 0 || gauche > 0 ? `inset(${haut}px ${droite}px ${bas}px ${gauche}px)` : '';
+      });
+    });
+  }
   const dire = (t: string) => (annonce.textContent = t);
 
   // Sur téléphone (la mise en page de la fenêtre change sous 768 px), les cartes prennent leurs places
@@ -63,6 +94,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
       c.style.left = `${x}px`;
       c.style.top = `${y}px`;
     });
+    decouper();
   };
   placer(etroit.matches);
 
@@ -75,6 +107,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     grille.style.setProperty('--gx', `${cam.x.toFixed(2)}px`);
     grille.style.setProperty('--gy', `${cam.y.toFixed(2)}px`);
     zoomVal.textContent = `${Math.round(cam.zoom * 100)}%`;
+    decouper();
   };
   /** Écran → pixels natifs de la Toile (la fenêtre est mise à l'échelle par son théâtre). */
   const local = (cx: number, cy: number) => {
@@ -164,6 +197,8 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
       onClick(this: Draggable) {
         choisirCarte(this.target as HTMLElement);
       },
+      onDrag: decouper,
+      onThrowUpdate: decouper,
     });
     drags.set(c, d!);
   };
@@ -187,7 +222,7 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     const avant = cibles.get(c) ?? { x: Number(gsap.getProperty(c, 'x')), y: Number(gsap.getProperty(c, 'y')) };
     const cible = { x: avant.x + d[0] / cam.zoom, y: avant.y + d[1] / cam.zoom };
     cibles.set(c, cible);
-    gsap.to(c, { ...cible, duration: calme ? 0 : 0.18, ease: 'power2.out', overwrite: true, onComplete: () => cibles.delete(c) });
+    gsap.to(c, { ...cible, duration: calme ? 0 : 0.18, ease: 'power2.out', overwrite: true, onUpdate: decouper, onComplete: () => cibles.delete(c) });
   };
 
   // ——— Les Espaces : celui qu'on choisit garde ses pages, les autres s'estompent. ———
@@ -283,9 +318,11 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
       delete c.dataset.aVenir;
       c.hidden = false;
       prendre(c);
-      if (!calme) gsap.from(c, { scale: 0.55, opacity: 0, y: -60, rotation: (i % 2 ? 1 : -1) * 6, duration: 1.1, delay: i * 0.09, ease: 'elastic.out(1, 0.55)', clearProps: 'scale,opacity,rotation' });
+      // L'apparition de PageCard.tsx : opacité 0 → 1, échelle 0,965 → 1, ressort amorti, 25 ms d'écart.
+      if (!calme) gsap.from(c, { scale: 0.965, opacity: 0, duration: 0.55, delay: Math.min(i * 0.025, 0.25), ease: 'power3.out', clearProps: 'scale,opacity' });
     });
     ae.querySelectorAll<SVGElement>('[data-futur]').forEach((el) => el.removeAttribute('data-futur'));
+    decouper();
     appliquerEspace();
     compter();
     cadrer();
@@ -316,7 +353,8 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     c.querySelector('.c-titre')!.textContent = titre;
     monde.append(c);
     prendre(c);
-    if (!calme) gsap.from(c, { scale: 0.965, opacity: 0, duration: 0.5, ease: 'back.out(1.6)', clearProps: 'scale,opacity' });
+    decouper();
+    if (!calme) gsap.from(c, { scale: 0.965, opacity: 0, duration: 0.55, ease: 'power3.out', clearProps: 'scale,opacity' });
     appliquerEspace();
     compter();
     cadrer();
@@ -456,6 +494,9 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
     cadrer(false);
   });
   ro.observe(grille);
+  // La Toile change de taille (fenêtre, téléphone) : le cadre des cartes suit.
+  const roCadre = new ResizeObserver(decouper);
+  roCadre.observe(grille);
 
   return {
     progress(t) {
@@ -476,6 +517,8 @@ export function mount(root: HTMLElement, opts: SceneOpts): SceneHandle {
       gen++;
       clearTimeout(auto);
       ro.disconnect();
+      roCadre.disconnect();
+      cancelAnimationFrame(image);
       gsap.killTweensOf(cam);
       sceneAe.removeEventListener('click', clic);
       sceneAe.removeEventListener('keydown', clavierCarte);
